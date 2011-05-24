@@ -1,0 +1,247 @@
+<html>
+	<head>
+		<style>
+			.jarvis-test {
+				border: 1px solid black;
+				color: black;
+				font-family: "Trebuchet MS", "Droid sans Mono", Calibri, Verdana, sans-serif;
+				padding: 5px;
+				margin-bottom: 2px;
+				margin-top: 2px;
+				font-size: 14px;
+			}
+			.jarvis-test .jarvis-test {
+				margin-left: 10px;
+			}
+			
+			.jarvis-test p {
+				font-weight: bold;
+				padding: 0;
+				margin: 0;
+			}
+			
+			.jarvis-test pre {
+				font-family: Consolas, Inconsolata, "Courier New", monospace;
+				background-color: white;
+			}
+			
+			.jarvis-test-result-running, .jarvis-test-result-pass, .jarvis-test-result-ignore, .jarvis-test-result-error, .jarvis-test-result-fail {
+				background-position: 2px 7px;
+				background-repeat: no-repeat;
+				padding-left: 20px;
+			}
+			
+			.jarvis-test-result-running {
+				background-image: url(running.gif);
+				background-color: #CCCCCC;
+			}
+			.jarvis-test-result-pass {
+				background-image: url(pass.png);
+				background-color: #BBEEBA;
+			}
+			.jarvis-test-result-ignore {
+				background-image: url(ignore.png);
+				background-color: #CCCCFF;
+			}
+			.jarvis-test-result-error {
+				background-image: url(error.png);
+				background-color: #FFCC99;
+			}
+			.jarvis-test-result-fail {
+				background-image: url(fail.png);
+				background-color: #FFCCCC;
+			}
+		</style>
+		<script type="text/javascript" src="jarvis.js"></script>
+		<script type="text/javascript" src="diff_match_patch.js"></script>
+	</head>
+	<body>
+		
+		<script type="text/javascript">
+			Jarvis.reporter = new Jarvis.HtmlReporter();
+			
+			function Constraint_tests() {
+				return [
+					function EqualToConstraint_should_work_correctly() {
+						return [
+							function Strings_are_equal_to_strings() {
+								Assert.that("foo", Is.equalTo("foo"));
+								Assert.that("", Is.equalTo(""));
+								Assert.that("foo", Is.not.equalTo("bar"));
+							},
+							
+							function Integers_are_equal_to_integers() {
+								Assert.that(5, Is.equalTo(5));
+								Assert.that(4, Is.not.equalTo(2));
+							},
+							
+							function Floats_are_equal_to_floats() {
+								Assert.that(4.7, Is.equalTo(4.7));
+								Assert.that(4.9, Is.equalTo(4.9000));
+							},
+							
+							function Integers_are_equal_to_floats() {
+								Assert.that(5, Is.equalTo(5.0000));
+							},
+							
+							function Undefined_is_equal_to_undefined() {
+								Assert.that(undefined, Is.equalTo(undefined));
+								Assert.that(this["foo"], Is.equalTo(undefined));
+							},
+							
+							function Null_is_equal_to_null() {
+								Assert.that(null, Is.equalTo(null));
+							},
+							
+							function Null_is_equal_to_undefined() {
+								Assert.that(null, Is.equalTo(undefined));
+							},
+							
+							function True_is_equal_to_true() {
+								Assert.that(true, Is.equalTo(true));
+							},
+							
+							function True_is_equal_to_1() {
+								Assert.that(true, Is.equalTo(1));
+							},
+							
+							function False_is_equal_to_false() {
+								Assert.that(false, Is.equalTo(false));
+							},
+							
+							function False_is_equal_to_0() {
+								Assert.that(false, Is.equalTo(0));
+							},
+							
+							function Object_references_are_equal() {
+								var obj = {};
+								Assert.that(obj, Is.equalTo(obj));
+							},
+							
+							function Objects_are_equal_if_all_properties_are_equal() {
+								function f() {}
+								var expected = {
+									foo: "bar",
+									baz: 125,
+									beff: {
+										bat: "lol"
+									},
+									func: f
+								};
+								
+								var actual = {
+									foo: "bar",
+									baz: 125,
+									beff: {
+										bat: "lol"
+									},
+									func: f
+								};
+								
+								Assert.that(actual, Is.equalTo(expected));
+								Assert.that(/foo/, Is.equalTo(/foo/), "regex objects must be equal");
+								Assert.that({ foo: "bar" }, Is.not.equalTo({ foo: "baz" }));
+							},
+							
+							function Empty_objects_are_equal() {
+								Assert.that({}, Is.equalTo({}));
+							},
+							
+							function Empty_objects_are_not_equal_to_nonempty_objects() {
+								Assert.that({}, Is.not.equalTo({ foo: "bar" }));
+							},
+							
+							function Nonempty_objects_are_not_equal_to_empty_objects() {
+								Assert.that({ foo: "bar" }, Is.not.equalTo({}));
+							},
+							
+							function Array_references_are_equal() {
+								var arr = [];
+								Assert.that(arr, Is.equalTo(arr));
+							},
+							
+							function Empty_arrays_are_equal() {
+								Assert.that([], Is.equalTo([]));
+							},
+							
+							function Arrays_are_equal_if_all_elements_are_equal() {
+								function f() {}
+								var expected = [1, null, f, "foo", { foo: "bar", obj: {} }];
+								var actual = [1, null, f, "foo", { foo: "bar", obj: {} }];
+								Assert.that(actual, Is.equalTo(expected));
+							},
+							
+							function Function_references_are_equal() {
+								function f() {}
+								function g() {}
+								
+								Assert.that(f, Is.equalTo(f));
+								Assert.that(f, Is.not.equalTo(g));
+								
+								var u = function() {};
+								var v = function() {};
+								Assert.that(u, Is.equalTo(u));
+								Assert.that(u, Is.not.equalTo(v));
+							}
+						];
+					},
+					
+					function EqualToConstraint_failure_messages() {
+						return [
+							function Should_show_function_names_in_failure_message() {
+								function func1() {}
+								function func2() {}
+								
+								Assert.willThrow(new Jarvis.Error("Failed asserting that [Function(func1)] is equal to [Function(func2)]", "fail"));
+								Assert.that("lol", Is.equalTo(func2));
+							},
+							
+							function String_failure_messages_should_be_pretty_printed() {
+								var expected = "this is a story all about how my life got flipped turned upside down";
+								var actual =   "this is a storey all about how my life got twisted turned Upside down";
+								
+								Assert.willThrow(new Jarvis.Error("Failed asserting that [Function(func1)] is equal to [Function(func2)]", "fail"));
+								//Assert.that(actual, Is.equalTo(expected));
+							}
+						];
+					},
+					
+					function IdenticalToConstraint_should_work_correctly() {
+						Assert.that("foo", Is.identicalTo("foo"));
+						Assert.that("", Is.identicalTo(""));
+						
+						Assert.that(5, Is.identicalTo(5));
+						Assert.that(5, Is.identicalTo(5.0));
+						Assert.that(4.7, Is.identicalTo(4.7));
+						
+						Assert.that(undefined, Is.identicalTo(undefined));
+						Assert.that(this["foo"], Is.identicalTo(undefined));
+						
+						Assert.that(null, Is.identicalTo(null));
+						
+						Assert.that(true, Is.identicalTo(true));
+						Assert.that(false, Is.identicalTo(false));
+						
+						var obj = {};
+						Assert.that(obj, Is.identicalTo(obj));
+						
+						var arr = [];
+						Assert.that(arr, Is.identicalTo(arr));
+					}
+				];
+			};
+			
+			function Should_ignore_test() {
+				Assert.ignore("I'm ignoring you");
+			}
+			function Should_fail() {
+				Assert.fail("Epic fail");
+			}
+			
+			Jarvis.run(Constraint_tests);
+			//Jarvis.run(Should_correctly_evaluate_identical_asserts);
+			Jarvis.run(Should_ignore_test);
+			Jarvis.run(Should_fail);
+		</script>
+	</body>
+</html>
