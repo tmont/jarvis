@@ -144,5 +144,7 @@
 			return false;
 		}
 	};
+	
+	global.Jarvis.reporter = new Jarvis.HtmlReporter();
 
 }(this))

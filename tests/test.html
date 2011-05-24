@@ -53,15 +53,13 @@
 				background-color: #FFCCCC;
 			}
 		</style>
-		<script type="text/javascript" src="../src/jarvis.js"></script>
-		<script type="text/javascript" src="../src/reporters/HtmlReporter.js"></script>
-		<script type="text/javascript" src="../src/diff_match_patch.js"></script>
 	</head>
 	<body>
 		
+		<script type="text/javascript" src="../src/jarvis.js"></script>
+		<script type="text/javascript" src="../src/reporters/HtmlReporter.js"></script>
+		<script type="text/javascript" src="../src/diff_match_patch.js"></script>
 		<script type="text/javascript">
-			Jarvis.reporter = new Jarvis.HtmlReporter();
-			
 			function Constraint_tests() {
 				return [
 					function EqualToConstraint_should_work_correctly() {
@@ -194,16 +192,22 @@
 								function func1() {}
 								function func2() {}
 								
-								Assert.willThrow(new Jarvis.Error("Failed asserting that [Function(func1)] is equal to [Function(func2)]", "fail"));
-								Assert.that("lol", Is.equalTo(func2));
+								try {
+									Assert.that(func1, Is.equalTo(func2));
+								} catch (error) {
+									Assert.that(error.message, Is.equalTo("Failed asserting that [Function(func1)] is equal to"));
+								}
 							},
 							
 							function String_failure_messages_should_be_pretty_printed() {
 								var expected = "this is a story all about how my life got flipped turned upside down";
 								var actual =   "this is a storey all about how my life got twisted turned Upside down";
 								
-								Assert.willThrow(new Jarvis.Error("Failed asserting that [Function(func1)] is equal to [Function(func2)]", "fail"));
-								//Assert.that(actual, Is.equalTo(expected));
+								try {
+									Assert.that(expected, Is.equalTo(actual));
+								} catch (error) {
+									Assert.that(error.message, Is.equalTo("an awesome looking diff"));
+								}
 							}
 						];
 					},

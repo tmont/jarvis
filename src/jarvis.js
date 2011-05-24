@@ -12,6 +12,11 @@
 	
 	function getFunctionName(func) {
 		var match = /function\s([\w$]+)\(\)\s\{/.exec(func.toString());
+		if (!match && func.constructor) {
+			console.log(func.constructor.toString());
+			return getFunctionName(func.constructor);
+		}
+		
 		return match !== null ? match[1] : "<unnamed function>";
 	}
 	
@@ -294,40 +299,6 @@
 		};
 	}();
 	
-	function ConsoleReporter() {
-		var tests = {};
-		
-		this.startTest = function(name, id) {
-			var test = { 
-				name: name,
-				startTime: new Date().getTime()
-			};
-			
-			tests[id] = test;
-			
-			console.group(test.name);
-		};
-		
-		this.endTest = function(result, id) {
-			var endTime = new Date().getTime();
-			var test = tests[id];
-			
-			switch (result.status) {
-				case "fail":
-				case "error":
-					console.error(result.message);
-					break;
-				case "ignore":
-					console.warn(result.message);
-					break;
-			}
-			
-			console.log("    %dms, %d assertion%s", endTime - test.startTime, result.assertions, result.assertions !== 1 ? "s" : "");
-			console.groupEnd();
-			tests[id] = undefined;
-		};
-	}
-	
 	var testId = 1;
 	
 	global.Assert = Assert;
@@ -335,7 +306,7 @@
 	global.Has = Has;
 	global.Has = Has;
 	global.Jarvis = {
-		reporter: new ConsoleReporter(),
+		reporter: null,
 		
 		Error: JarvisError,
 		
@@ -368,23 +339,32 @@
 					expectedError = globalExpectedError;
 				}
 				
-				if (expectedError) {
-					//expectedError was set, so check to see if the thrown error matches what was expected
-					var equalTo = new EqualToConstraint(expectedError);
-					if (expectedError !== true && !equalTo.isValidFor(error)) {
-						caughtError = new JarvisError(
-							"Expected error, " + toString(expectedError) + ", did not match actual error, " + toString(error),
-							"fail"
-						);
-					}
-				} else {
-					if (typeof(error["!!jarvis"]) === "undefined") {
-						//not a jarvis error
+				if (typeof(error["!!jarvis"]) === "undefined") {
+					//not a jarvis error
+					
+					//verify that it wasn't expected
+					if (expectedError) {
+						//expectedError was set, so check to see if the thrown error matches what was expected
+						var equalTo = new EqualToConstraint(expectedError);
+						if (expectedError !== true && !equalTo.isValidFor(error)) {
+							// console.group();
+							// console.dir(expectedError);
+							// console.dir(error);
+							// console.groupEnd();
+							
+							caughtError = new JarvisError(
+								"Expected error, " + toString(expectedError) + ", did not match actual error, " + toString(error),
+								"fail"
+							);
+						} else {
+							error = undefined;
+						}
+					} else {
 						error = new JarvisError("An error occurred while running the test: " + (error.toString ? error.toString() : error), "error");
 					}
-					
-					caughtError = error;
 				}
+				
+				caughtError = error;
 			}
 			
 			result = {
