@@ -304,7 +304,6 @@
 	global.Assert = Assert;
 	global.Is = Is;
 	global.Has = Has;
-	global.Has = Has;
 	global.Jarvis = {
 		reporter: null,
 		
