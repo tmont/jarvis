@@ -347,11 +347,6 @@
 						//expectedError was set, so check to see if the thrown error matches what was expected
 						var equalTo = new EqualToConstraint(expectedError);
 						if (expectedError !== true && !equalTo.isValidFor(error)) {
-							// console.group();
-							// console.dir(expectedError);
-							// console.dir(error);
-							// console.groupEnd();
-							
 							caughtError = new JarvisError(
 								"Expected error, " + toString(expectedError) + ", did not match actual error, " + toString(error),
 								"fail"
