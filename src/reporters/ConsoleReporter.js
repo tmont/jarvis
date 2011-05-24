@@ -1,0 +1,37 @@
+(function(global, undefined){
+	
+	global.ConsoleReporter = function() {
+		var tests = {};
+		
+		this.startTest = function(name, id) {
+			var test = { 
+				name: name,
+				startTime: new Date().getTime()
+			};
+			
+			tests[id] = test;
+			
+			console.group(test.name);
+		};
+		
+		this.endTest = function(result, id) {
+			var endTime = new Date().getTime();
+			var test = tests[id];
+			
+			switch (result.status) {
+				case "fail":
+				case "error":
+					console.error(result.message);
+					break;
+				case "ignore":
+					console.warn(result.message);
+					break;
+			}
+			
+			console.log("    %dms, %d assertion%s", endTime - test.startTime, result.assertions, result.assertions !== 1 ? "s" : "");
+			console.groupEnd();
+			tests[id] = undefined;
+		};
+	};
+	
+}(this));

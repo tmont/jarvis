@@ -9,6 +9,7 @@
 				margin-bottom: 2px;
 				margin-top: 2px;
 				font-size: 14px;
+				position: relative;
 			}
 			.jarvis-test .jarvis-test {
 				margin-left: 10px;
@@ -26,34 +27,35 @@
 			}
 			
 			.jarvis-test-result-running, .jarvis-test-result-pass, .jarvis-test-result-ignore, .jarvis-test-result-error, .jarvis-test-result-fail {
-				background-position: 2px 7px;
-				background-repeat: no-repeat;
 				padding-left: 20px;
 			}
 			
+			.jarvis-icon {
+				width: 16px;
+				height: 16px;
+				position: absolute;
+				left: 2px;
+			}
+			
 			.jarvis-test-result-running {
-				background-image: url(running.gif);
 				background-color: #CCCCCC;
 			}
 			.jarvis-test-result-pass {
-				background-image: url(pass.png);
 				background-color: #BBEEBA;
 			}
 			.jarvis-test-result-ignore {
-				background-image: url(ignore.png);
 				background-color: #CCCCFF;
 			}
 			.jarvis-test-result-error {
-				background-image: url(error.png);
 				background-color: #FFCC99;
 			}
 			.jarvis-test-result-fail {
-				background-image: url(fail.png);
 				background-color: #FFCCCC;
 			}
 		</style>
-		<script type="text/javascript" src="jarvis.js"></script>
-		<script type="text/javascript" src="diff_match_patch.js"></script>
+		<script type="text/javascript" src="../src/jarvis.js"></script>
+		<script type="text/javascript" src="../src/reporters/HtmlReporter.js"></script>
+		<script type="text/javascript" src="../src/diff_match_patch.js"></script>
 	</head>
 	<body>
 		
