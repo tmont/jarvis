@@ -97,6 +97,10 @@ function Constraint_tests() {
 					Assert.that({ foo: "bar" }, Is.not.equalTo({}));
 				},
 				
+				function Object_types_are_not_equal_if_constructor_types_do_not_match() {
+					Assert.that(1, Is.not.equalTo({}));
+				},
+				
 				function Array_references_are_equal() {
 					var arr = [];
 					Assert.that(arr, Is.equalTo(arr));
@@ -137,7 +141,7 @@ function Constraint_tests() {
 					try {
 						Assert.that(func1, Is.equalTo(func2));
 					} catch (error) {
-						Assert.that(error.message, Is.equalTo("Expected: [Function(func1)]\nActual:   [Function(func2)]"));
+						Assert.that(error.message, Is.equalTo("Failed asserting that two functions are equal\n\nExpected: [Function(func2)]\nActual:   [Function(func1)]"));
 					}
 				},
 				
@@ -335,6 +339,50 @@ function Constraint_tests() {
 					Assert.that(f, Is.identicalTo(f));
 				}
 			];
+		},
+		
+		function Collection_tests() {
+			return [
+				function Collection_member_tests() {
+					return [
+						function Array_contains_value() {
+							function f() {}
+							var collection = [1, "foo", f, { foo: "bar" }];
+							
+							Assert.that(collection, Has.value(1));
+							Assert.that(collection, Has.value("foo"));
+							Assert.that(collection, Has.value(f));
+							Assert.that(collection, Has.value({ foo: "bar" }));
+						},
+						
+						function Object_contains_value() {
+							function f() {}
+							var collection = {
+								a: 1, 
+								b: "foo", 
+								c: f, 
+								d: { foo: "bar" }
+							};
+							
+							Assert.that(collection, Has.value(1));
+							Assert.that(collection, Has.value("foo"));
+							Assert.that(collection, Has.value(f));
+							Assert.that(collection, Has.value({ foo: "bar" }));
+						},
+						
+						function Collection_does_not_contain_value() {
+							function f() {}
+							var collection = [1, "foo",  { foo: "bar" }];
+							
+							Assert.that(collection, Has.not.value(4));
+							Assert.that(collection, Has.not.value("bar"));
+							Assert.that(collection, Has.not.value({}));
+							Assert.that(collection, Has.not.value(null));
+							Assert.that(collection, Has.not.value(undefined));
+						}
+					];
+				}
+			];
 		}
 	];
 };
@@ -343,7 +391,7 @@ function Sample_tests_showcasing_the_other_test_result_statuses() {
 	return [
 		function Should_ignore_this_test() {
 			Assert.ignore("Ignoring a test with Assert.ignore()");
-			Assert.fail("tommy is a total idiot"); //never gets here
+			Assert.fail("tommy is a total idiot if this gets executed"); //never gets here
 		},
 		
 		function Fail_using_assertion() {

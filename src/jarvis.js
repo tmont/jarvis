@@ -71,7 +71,7 @@
 		return actualNodes;
 	}
 	
-	function getBinaryFailureMessage(actual, expected) {
+	function getBinaryFailureMessage(expected, actual) {
 		return "Expected: " + expected + "\nActual:   " + actual;
 	}
 	
@@ -121,7 +121,7 @@
 			case "undefined":
 				return "<undefined>";
 			case "object":
-				return "[Object(" + getFunctionName(object.constructor.toString()) + ")]: " + object.toString();
+				return "[Object(" + getObjectType(object.constructor) + ")]";
 			case "array":
 				return "[Array(length=" + object.length + ")]";
 			case "function":
@@ -163,14 +163,17 @@
 				return getDiffNodes(expected, actual);
 			}
 			
-			return getBinaryFailureMessage(toString(expected), toString(actual));
+			var message = "Failed asserting that two " + getType(expected) + "s are identical\n\n";
+			return message + getBinaryFailureMessage(toString(expected), toString(actual));
 		}
 	}
 	
 	function EqualToConstraint(expected) {
 		this.isValidFor = function(actual) {
 			if (expected !== null && typeof(expected) === "object") {
-				return compareIterables(actual, expected);
+				return typeof(actual) === "object" &&
+					getFunctionName(actual.constructor) === getFunctionName(expected.constructor) && 
+					compareIterables(actual, expected);
 			}
 			
 			return actual == expected;
@@ -181,7 +184,8 @@
 				return getDiffNodes(expected, actual);
 			}
 			
-			return getBinaryFailureMessage(toString(expected), toString(actual));
+			var message = "Failed asserting that two " + getType(expected) + "s are equal\n\n";
+			return message + getBinaryFailureMessage(toString(expected), toString(actual));
 		}
 	}
 	
@@ -236,7 +240,7 @@
 		};
 		
 		this.getFailureMessage = function(actual) {
-			return constraint.getFailureMessage(actual).replace(/\bto\b/g, "to not");
+			return constraint.getFailureMessage(actual).replace(/\bto\b/g, "to not").replace(/\bare\b/g, "are not");
 		};
 	}
 	
@@ -341,7 +345,7 @@
 	};
 	
 	function CollectionAssertionInterface(factory) {
-		this.member = function(value) {
+		this.value = function(value) {
 			return factory(new ContainsMemberConstraint(value));
 		};
 		
