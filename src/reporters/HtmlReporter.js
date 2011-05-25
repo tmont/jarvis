@@ -112,7 +112,7 @@
 				if (!tests[parentId].childContainer) {
 					childContainer = doc.createElement("div");
 					childContainer.className = "jarvis-child-test-container";
-					childContainer.style.display = "none";
+					childContainer.style.display = global.Jarvis.collapsedByDefault ? "none" : "block";
 					tests[parentId].element.appendChild(childContainer);
 					tests[parentId].childContainer = childContainer;
 				}
@@ -188,7 +188,7 @@
 					messageContainer.appendChild(doc.createTextNode(result.message));
 				}
 				
-				messageContainer.style.display = "none";
+				messageContainer.style.display = global.Jarvis.collapsedByDefault ? "none" : "block";
 				test.element.appendChild(messageContainer);
 			}
 			if (result.message || test.childResults.total > 0) {
@@ -208,6 +208,7 @@
 	
 	global.Jarvis.reporter = new Jarvis.HtmlReporter();
 	global.Jarvis.htmlDiffs = true;
+	global.Jarvis.collapsedByDefault = false;
 	
 	//add stylesheet
 	var style = doc.createElement("style");
