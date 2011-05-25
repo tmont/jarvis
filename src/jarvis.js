@@ -414,7 +414,11 @@
 		},
 		
 		willThrow: function(expectedError) {
-			globalExpectedError = expectedError || true;
+			if (expectedError === true) {
+				throw new JarvisError("Cannot set expected error to true", "error");
+			}
+			
+			globalExpectedError = expectedError !== undefined ? expectedError : true;
 		},
 		
 		fail: function(message) {
@@ -458,23 +462,22 @@
 					}
 				}
 				
-				if (expectedError) {
-					throw new JarvisError("Expected error to be thrown", "fail");
+				if (expectedError !== undefined) {
+					throw new JarvisError("Expected " + toString(expectedError) + " to be thrown", "fail");
 				}
 			} catch (error) {
-				if (!expectedError) {
-					expectedError = globalExpectedError;
-				}
-				
 				if (typeof(error["!!jarvis"]) === "undefined") {
 					//not a jarvis error
+					if (!expectedError) {
+						expectedError = globalExpectedError;
+					}
 					
 					//verify that it wasn't expected
-					if (expectedError) {
+					if (expectedError !== undefined) {
 						//expectedError was set, so check to see if the thrown error matches what was expected
 						var equalTo = new EqualToConstraint(expectedError);
 						if (expectedError !== true && !equalTo.isValidFor(error)) {
-							caughtError = new JarvisError(
+							error = new JarvisError(
 								"Expected error, " + toString(expectedError) + ", did not match actual error, " + toString(error),
 								"fail"
 							);
@@ -489,7 +492,7 @@
 				caughtError = error;
 			}
 			
-			
+			console.dir(caughtError);
 			
 			result = {
 				status: caughtError === undefined ? "pass" : caughtError.type,
