@@ -230,22 +230,21 @@
 			ignoreColor = "#CCCCFF";
 		
 			if (failPercent > 0) {
-				gradients.push(failColor + " " + failPercent + "%");
+				gradients.push(failColor + " 0%");
 			}
 			if (errorPercent > 0) {
-				gradients.push(errorColor + " " + (failPercent + errorPercent) + "%");
+				gradients.push(errorColor + " " + failPercent + "%");
 			}
 			if (ignorePercent > 0) {
-				gradients.push(ignoreColor + " " + (failPercent + errorPercent + ignorePercent) + "%");
+				gradients.push(ignoreColor + " " + (errorPercent + failPercent) + "%");
+			}
+			if (passPercent > 0) {
+				gradients.push(passColor + " " + (failPercent + errorPercent + ignorePercent)  + "%");
 			}
 			
-			gradients.push(passColor + " 100%");
-			
-			if (/Firefox/.test(global.navigator.userAgent)) {
-				//mozilla
+			if (/Mozilla/.test(global.navigator.userAgent)) {
 				test.element.style.backgroundImage = "-moz-linear-gradient(left, " + gradients.join(", ") + ")";
 			} else if (/WebKit/.test(global.navigator.userAgent)) {
-				//webkit (safari/chrome)
 				test.element.style.backgroundImage = "-webkit-linear-gradient(left, " + gradients.join(", ") + ")";
 			}
 		}
