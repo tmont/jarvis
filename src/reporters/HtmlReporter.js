@@ -208,7 +208,7 @@
 	
 	global.Jarvis.reporter = new Jarvis.HtmlReporter();
 	global.Jarvis.htmlDiffs = true;
-	global.Jarvis.collapsedByDefault = false;
+	global.Jarvis.collapsedByDefault = true;
 	
 	//add stylesheet
 	var style = doc.createElement("style");
