@@ -59,7 +59,17 @@
 }\
 .jarvis-test-result-fail {\
 	background-color: #FFCCCC;\
-}";
+}\
+\
+.jarvis-test ins {\
+	background-color: #66FF66;\
+	text-decoration: none;\
+}\
+.jarvis-test del {\
+	background-color: #FF6666;\
+	text-decoration: none;\
+}\
+";
 	
 	global.Jarvis.HtmlReporter = function(container) {
 		container = container || doc.body;
@@ -177,8 +187,16 @@
 			test.title.appendChild(doc.createTextNode(" " + info));
 			
 			if (result.message) {
-				messageContainer = doc.createElement("pre");
-				messageContainer.appendChild(doc.createTextNode(result.message));
+				messageContainer = doc.createElement("pre"); 
+				
+				if (result.message[0] && typeof(result.message[0].nodeType) !== "undefined") {
+					for (i = 0; i < result.message.length; i++) {
+						messageContainer.appendChild(result.message[i]);
+					}
+				} else {
+					messageContainer.appendChild(doc.createTextNode(result.message));
+				}
+				
 				messageContainer.style.display = "none";
 				test.element.appendChild(messageContainer);
 			}
@@ -210,7 +228,7 @@
 	}
 	
 	//append to head element
-	var head = doc.body.getElementsByTagName("head")[0];
+	var head = doc.getElementsByTagName("head")[0];
 	if (!head) {
 		head = doc.createElement("head");
 		doc.documentElement.insertBefore(head, doc.body);

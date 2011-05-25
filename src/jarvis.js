@@ -13,11 +13,66 @@
 	function getFunctionName(func) {
 		var match = /function\s([\w$]+)\(\)\s\{/.exec(func.toString());
 		if (!match && func.constructor) {
-			console.log(func.constructor.toString());
 			return getFunctionName(func.constructor);
 		}
 		
 		return match !== null ? match[1] : "<unnamed function>";
+	}
+	
+	//adapted from diff_match_patch.diff_prettyHtml()
+	function getDiffNodes(expected, actual) {
+		//compute diff
+		var diff = new diff_match_patch();
+		var diffs = diff.diff_main(expected, actual);
+		diff.diff_cleanupSemantic(diffs);
+		
+		var html = [];
+		var i = 0;
+		var pattern_amp = /&/g;
+		var pattern_lt = /</g;
+		var pattern_gt = />/g;
+		var pattern_para = /\n/g;
+		for (var x = 0; x < diffs.length; x++) {
+			var op = diffs[x][0];    // Operation (insert, delete, equal)
+			var data = diffs[x][1];  // Text of change.
+			var text = data.replace(pattern_amp, "&amp;")
+				.replace(pattern_lt, "&lt;")
+				.replace(pattern_gt, "&gt;")
+				.replace(pattern_para, "&para;<br />");
+			
+			switch (op) {
+				case 1:
+					html[x] = "<ins>" + text + "</ins>";
+					break;
+				case -1:
+					html[x] = "<del>" + text + "</del>";
+					break;
+				case 0:
+					html[x] = "<span>" + text + "</span>";
+					break;
+			}
+			
+			if (op !== -1) {
+				i += data.length;
+			}
+		}
+		
+		var html = html.join('');
+		
+		var pre = document.createElement("pre");
+		pre.innerHTML = html;
+		
+		var nodes = pre.cloneNode(true).children;
+		var actualNodes = [];
+		for (var i = 0; i < nodes.length; i++) {
+			actualNodes[i] = nodes[i];
+		}
+		pre = null;
+		return actualNodes;
+	}
+	
+	function getBinaryFailureMessage(actual, expected) {
+		return "Expected: " + expected + "\nActual:   " + actual;
 	}
 	
 	function getType(object) {
@@ -52,7 +107,12 @@
 					return "<empty string>";
 				}
 				
-				return object;
+				if (object.length > 100) {
+					//truncate it
+					object = object.substring(0, 50) + "..." + object.substring(object.substring.length - 50);
+				}
+				
+				return "\"" + object + "\"";
 			case "number":
 			case "boolean":
 				return object;
@@ -97,7 +157,14 @@
 		this.isValidFor = function(actual) {
 			return actual === expected;
 		};
-		this.conjunction = "is identical to";
+		
+		this.getFailureMessage = function(actual) {
+			if (typeof(actual) === "string" && typeof(expected) === "string") {
+				return getDiffNodes(expected, actual);
+			}
+			
+			return getBinaryFailureMessage(toString(expected), toString(actual));
+		}
 	}
 	
 	function EqualToConstraint(expected) {
@@ -108,42 +175,59 @@
 			
 			return actual == expected;
 		};
-		this.conjunction = "is equal to";
+		
+		this.getFailureMessage = function(actual) {
+			if (typeof(actual) === "string" && typeof(expected) === "string") {
+				return getDiffNodes(expected, actual);
+			}
+			
+			return getBinaryFailureMessage(toString(expected), toString(actual));
+		}
 	}
 	
 	function LessThanConstraint(expected) {
 		this.isValidFor = function(actual) {
 			return actual < expected;
 		};
-		this.conjunction = "is less than";
+		this.getFailureMessage = function(actual) {
+			return "Expected " + toString(actual) + " to be less than " + toString(expected);
+		}
 	}
 	
 	function LessThanOrEqualToConstraint(expected) {
 		this.isValidFor = function(actual) {
 			return actual <= expected;
 		};
-		this.conjunction = "is less than or equal to";
+		this.getFailureMessage = function(actual) {
+			return "Expected " + toString(actual) + " to be less than or equal to " + toString(expected);
+		}
 	}
 	
 	function GreaterThanConstraint(expected) {
 		this.isValidFor = function(actual) {
 			return actual > expected;
 		};
-		this.conjunction = "is greater than";
+		this.getFailureMessage = function(actual) {
+			return "Expected " + toString(actual) + " to be greater than " + toString(expected);
+		}
 	}
 	
 	function GreaterThanOrEqualToConstraint(expected) {
 		this.isValidFor = function(actual) {
 			return actual >= expected;
 		};
-		this.conjunction = "is greater than or equal to";
+		this.getFailureMessage = function(actual) {
+			return "Expected " + toString(actual) + " to be greater than or equal to " + toString(expected);
+		}
 	}
 	
 	function RegexConstraint(regex) {
 		this.isValidFor = function(actual) {
 			return typeof(actual) === "string" && regex.match(actual);
 		};
-		this.conjunction = "matches";
+		this.getFailureMessage = function(actual) {
+			return "Expected " + toString(actual) + " to match the regular expression " + toString(expected);
+		}
 	}
 
 	function NotConstraint(constraint) {
@@ -151,14 +235,19 @@
 			return !constraint.isValidFor(actual);
 		};
 		
-		this.conjunction = constraint.conjunction.replace(/\bis\b/g, "is not").replace(/\bmatches\b/g, "does not match").replace(/\contains\b/g, "does not contain");
+		this.getFailureMessage = function(actual) {
+			return constraint.getFailureMessage(actual).replace(/\bto\b/g, "to not");
+		};
 	}
 	
 	function NullConstraint() {
 		this.isValidFor = function(actual) {
 			return actual === null;
 		};
-		this.conjunction = "is null";
+		
+		this.getFailureMessage = function(actual) {
+			return "Expected " + toString(actual) + " to be null";
+		}
 	}
 	
 	function EmptyConstraint() {
@@ -168,7 +257,10 @@
 				|| actual === undefined
 				|| (actual.length && actual.length === 0);
 		};
-		this.conjunction = "is empty";
+		
+		this.getFailureMessage = function(actual) {
+			return "Expected " + toString(actual) + " to be empty";
+		}
 	}
 	
 	function ContainsMemberConstraint(value) {
@@ -183,7 +275,9 @@
 			return false;
 		};
 		
-		this.conjunction = "contains";
+		this.getFailureMessage = function(actual) {
+			return "Expected " + toString(actual) + " to contain " + toString(value);
+		}
 	}
 	
 	function ContainsPropertyConstraint(property) {
@@ -198,14 +292,18 @@
 			return false;
 		};
 		
-		this.conjunction = "contains property";
+		this.getFailureMessage = function(actual) {
+			return "Expected " + toString(actual) + " to contain the property " + toString(property);
+		}
 	}
 	
 	function LengthConstraint(length) {
 		this.isValidFor = function(actual) {
 			return actual.length !== undefined && actual.length === length;
 		};
-		this.conjunction = "has length";
+		this.getFailureMessage = function(actual) {
+			return "Expected " + toString(actual) + " to have " + toString(expected) + " elements";
+		}
 	}
 	
 	function AssertionInterface(factory) {
@@ -268,36 +366,29 @@
 	Has = new CollectionAssertionInterface(function(constraint) { return constraint; });
 	Has.not = new CollectionAssertionInterface(function(constraint) { return new NotConstraint(constraint); });
 	
-	Assert = function() {
-		function getFailureMessage(actual, constraint, message) {
-			return (message ? message + "\n\n" : "") + 
-				"Failed asserting that " + 
-				toString(actual) + 
-				" " + 
-				constraint.conjunction;
-		}
-		
-		return {
-			that: function(actual, constraint, message) {
-				assertionCount++;
-				if (!constraint.isValidFor(actual)) {
-					throw new JarvisError(getFailureMessage(actual, constraint, message), "fail");
-				}
-			},
-			
-			willThrow: function(expectedError) {
-				globalExpectedError = expectedError || true;
-			},
-			
-			fail: function(message) {
-				throw new JarvisError(message, "fail");
-			},
-			
-			ignore: function(message) {
-				throw new JarvisError(message, "ignore");
+	Assert = {
+		that: function(actual, constraint, message) {
+			assertionCount++;
+			if (!constraint.isValidFor(actual)) {
+				message = message ? message + "\n\n" : "";
+				//TODO add message
+				
+				throw new JarvisError(constraint.getFailureMessage(actual), "fail");
 			}
-		};
-	}();
+		},
+		
+		willThrow: function(expectedError) {
+			globalExpectedError = expectedError || true;
+		},
+		
+		fail: function(message) {
+			throw new JarvisError(message, "fail");
+		},
+		
+		ignore: function(message) {
+			throw new JarvisError(message, "ignore");
+		}
+	};
 	
 	var testId = 1;
 	
@@ -360,6 +451,8 @@
 				
 				caughtError = error;
 			}
+			
+			
 			
 			result = {
 				status: caughtError === undefined ? "pass" : caughtError.type,

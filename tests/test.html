@@ -140,19 +140,26 @@
 								try {
 									Assert.that(func1, Is.equalTo(func2));
 								} catch (error) {
-									Assert.that(error.message, Is.equalTo("Failed asserting that [Function(func1)] is equal to"));
+									Assert.that(error.message, Is.equalTo("Expected: [Function(func1)]\nActual:   [Function(func2)]"));
 								}
+							},
+							
+							function Pretty_diff() {
+								var expected = "this is a story all about how my life got flipped turned upside down";
+								var actual =   "this is a storey all about how my life got twisted turned Upside down";
+								
+								Assert.that(expected, Is.equalTo(actual));
 							},
 							
 							function String_failure_messages_should_be_pretty_printed() {
 								var expected = "this is a story all about how my life got flipped turned upside down";
 								var actual =   "this is a storey all about how my life got twisted turned Upside down";
-								
-								try {
-									Assert.that(expected, Is.equalTo(actual));
-								} catch (error) {
-									Assert.that(error.message, Is.equalTo("an awesome looking diff"));
-								}
+								//
+								//try {
+								//	Assert.that(expected, Is.equalTo(actual));
+								//} catch (error) {
+								//	Assert.that(error.message, Is.equalTo("an awesome looking diff"));
+								//}
 							}
 						];
 					},
