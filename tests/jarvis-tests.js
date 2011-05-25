@@ -232,6 +232,38 @@ function Constraint_tests() {
 			];
 		},
 		
+		function Empty_tests() {
+			return [
+				function Empty_string_is_empty() {
+					Assert.that("", Is.empty);
+				},
+				
+				function Null_is_empty() {
+					Assert.that(null, Is.empty);
+				},
+				
+				function Empty_object_is_empty() {
+					Assert.that({}, Is.empty);
+				},
+				
+				function Empty_array_is_empty() {
+					Assert.that([], Is.empty);
+				},
+				
+				function Nonempty_object_is_not_empty() {
+					Assert.that({ foo: "bar" }, Is.not.empty);
+				},
+				
+				function Nonempty_array_is_not_empty() {
+					Assert.that([0], Is.not.empty);
+				},
+				
+				function Zero_is_not_empty() {
+					Assert.that(0, Is.not.empty);
+				}
+			];
+		},
+		
 		function Exact_equality_tests() {
 			return [
 				function Strings_are_identical_to_strings() {
@@ -311,8 +343,7 @@ function Sample_tests_showcasing_the_other_test_result_statuses() {
 	return [
 		function Should_ignore_this_test() {
 			Assert.ignore("Ignoring a test with Assert.ignore()");
-			
-			Assert.fail(); //never gets here
+			Assert.fail("tommy is a total idiot"); //never gets here
 		},
 		
 		function Fail_using_assertion() {

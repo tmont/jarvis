@@ -252,10 +252,10 @@
 	
 	function EmptyConstraint() {
 		this.isValidFor = function(actual) {
-			return actual === null 
-				|| actual === ""
-				|| actual === undefined
-				|| (actual.length && actual.length === 0);
+			return actual === null || 
+				actual === "" || 
+				actual === undefined || 
+				(typeof(actual) === "object" && compareIterables(actual, {}));
 		};
 		
 		this.getFailureMessage = function(actual) {
