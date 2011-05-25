@@ -343,16 +343,16 @@ function Constraint_tests() {
 		
 		function Collection_tests() {
 			return [
-				function Collection_member_tests() {
+				function Collection_key_and_value_tests() {
 					return [
 						function Array_contains_value() {
 							function f() {}
 							var collection = [1, "foo", f, { foo: "bar" }];
 							
-							Assert.that(collection, Has.value(1));
-							Assert.that(collection, Has.value("foo"));
-							Assert.that(collection, Has.value(f));
-							Assert.that(collection, Has.value({ foo: "bar" }));
+							Assert.that(collection, Contains.value(1));
+							Assert.that(collection, Contains.value("foo"));
+							Assert.that(collection, Contains.value(f));
+							Assert.that(collection, Contains.value({ foo: "bar" }));
 						},
 						
 						function Object_contains_value() {
@@ -364,21 +364,45 @@ function Constraint_tests() {
 								d: { foo: "bar" }
 							};
 							
-							Assert.that(collection, Has.value(1));
-							Assert.that(collection, Has.value("foo"));
-							Assert.that(collection, Has.value(f));
-							Assert.that(collection, Has.value({ foo: "bar" }));
+							Assert.that(collection, Contains.value(1));
+							Assert.that(collection, Contains.value("foo"));
+							Assert.that(collection, Contains.value(f));
+							Assert.that(collection, Contains.value({ foo: "bar" }));
 						},
 						
 						function Collection_does_not_contain_value() {
 							function f() {}
 							var collection = [1, "foo",  { foo: "bar" }];
 							
-							Assert.that(collection, Has.not.value(4));
-							Assert.that(collection, Has.not.value("bar"));
-							Assert.that(collection, Has.not.value({}));
-							Assert.that(collection, Has.not.value(null));
-							Assert.that(collection, Has.not.value(undefined));
+							Assert.that(collection, Contains.not.value(4));
+							Assert.that(collection, Contains.not.value("bar"));
+							Assert.that(collection, Contains.not.value({}));
+							Assert.that(collection, Contains.not.value(null));
+							Assert.that(collection, Contains.not.value(undefined));
+						},
+						
+						function Array_contains_key() {
+							Assert.that([1, 2, 3], Contains.key(0));
+							Assert.that([1, 2, 3], Contains.key(1));
+							Assert.that([1, 2, 3], Contains.key(2));
+							Assert.that([1, 2, 3], Contains.not.key(3));
+							Assert.that([], Contains.not.key(undefined));
+						}
+					];
+				},
+				
+				function Object_property_value_tests() {
+					return [
+						function Should_find_property_value() {
+							Assert.that({ foo: "bar" }, Contains.property("foo").equalTo("bar"));
+						},
+						
+						function Should_not_find_property_value() {
+							Assert.that({ foo: "bar" }, Contains.property("foo").not.equalTo("baz"));
+						},
+						
+						function Should_find_array_length() {
+							Assert.that([1, 2, 3], Contains.property("length").greaterThan(2));
 						}
 					];
 				}
@@ -403,6 +427,10 @@ function Sample_tests_showcasing_the_other_test_result_statuses() {
 			var actual =   "that was a storey all about how my life\ngot twisted turned Upside down";
 			
 			Assert.that(expected, Is.equalTo(actual));
+		},
+		
+		function I_AM_ERROR() {
+			foo
 		}
 	];
 }

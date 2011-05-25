@@ -2,7 +2,7 @@
 	
 	var Assert,
 		Is,
-		Has,
+		Contains,
 		assertionCount = 0,
 		globalExpectedError;
 	
@@ -82,13 +82,11 @@
 			case "number":
 			case "boolean":
 			case "function":
+			case "undefined":
 				return type;
 			case "object":
 				if (object === null) {
 					return "null";
-				}
-				if (object === undefined) {
-					return "undefined";
 				}
 				if (isArray(object)) {
 					return "array";
@@ -121,7 +119,8 @@
 			case "undefined":
 				return "<undefined>";
 			case "object":
-				return "[Object(" + getObjectType(object.constructor) + ")]";
+				console.log(object);
+				return "[Object(" + getFunctionName(object.constructor.toString()) + ")]";
 			case "array":
 				return "[Array(length=" + object.length + ")]";
 			case "function":
@@ -284,11 +283,11 @@
 		}
 	}
 	
-	function ContainsPropertyConstraint(property) {
-		var equalTo = new EqualToConstraint(property);
+	function ContainsKeyConstraint(key) {
+		var equalTo = new EqualToConstraint(key);
 		this.isValidFor = function(collection) {
-			for (var key in collection) {
-				if (equalTo.isValidFor(key)) {
+			for (var i in collection) {
+				if (equalTo.isValidFor(i)) {
 					return true;
 				}
 			}
@@ -297,16 +296,31 @@
 		};
 		
 		this.getFailureMessage = function(actual) {
-			return "Expected " + toString(actual) + " to contain the property " + toString(property);
+			return "Expected " + toString(actual) + " to contain the key " + toString(key);
 		}
 	}
 	
-	function LengthConstraint(length) {
+	function ObjectPropertyValueConstraint(property, constraint) {
 		this.isValidFor = function(actual) {
-			return actual.length !== undefined && actual.length === length;
+			if (!actual || typeof(actual[property]) === "undefined") {
+				return false;
+			}
+			
+			return constraint.isValidFor(actual[property]);
 		};
+		
 		this.getFailureMessage = function(actual) {
-			return "Expected " + toString(actual) + " to have " + toString(expected) + " elements";
+			var message = "Failed making an assertion on an object with property \"" + property + "\"\n\n";
+			var constraintMessage = constraint.getFailureMessage(actual[property]);
+			
+			if (typeof(constraintMessage) !== "string") {
+				//node list (e.g. HTML for diff between strings)
+				message = document.createTextNode(message);
+				constraintMessage.unshift(message);
+				return constraintMessage;
+			}
+			
+			return message + constraintMessage;
 		}
 	}
 	
@@ -349,12 +363,20 @@
 			return factory(new ContainsMemberConstraint(value));
 		};
 		
-		this.length = function(length) {
-			return factory(new LengthConstraint(length));
+		this.key = function(key) {
+			return factory(new ContainsKeyConstraint(key));
 		};
 		
 		this.property = function(property) {
-			return factory(new ContainsPropertyConstraint(property));
+			var iface = new AssertionInterface(function(constraint) {
+				return new ObjectPropertyValueConstraint(property, constraint);
+			});
+			
+			iface.not = new AssertionInterface(function(constraint) {
+				return new NotConstraint(new ObjectPropertyValueConstraint(property, constraint));
+			});
+			
+			return iface;
 		};
 	}
 	
@@ -367,8 +389,9 @@
 	Is = new AssertionInterface(function(constraint) { return constraint; });
 	Is.not = new AssertionInterface(function(constraint) { return new NotConstraint(constraint); });
 	
-	Has = new CollectionAssertionInterface(function(constraint) { return constraint; });
-	Has.not = new CollectionAssertionInterface(function(constraint) { return new NotConstraint(constraint); });
+	Contains = new CollectionAssertionInterface(function(constraint) { return constraint; });
+	Contains.not = new CollectionAssertionInterface(function(constraint) { return new NotConstraint(constraint); });
+	Contains.not.property = undefined; //doesn't really make sense to make this kind of negative assertion
 	
 	Assert = {
 		that: function(actual, constraint, message) {
@@ -402,7 +425,7 @@
 	
 	global.Assert = Assert;
 	global.Is = Is;
-	global.Has = Has;
+	global.Contains = Contains;
 	global.Jarvis = {
 		reporter: null,
 		htmlDiffs: false,
