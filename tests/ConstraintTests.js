@@ -1,6 +1,6 @@
 function Constraint_tests() {
 	return [
-		function Equality_constraint_tests() {
+		function Equality_tests() {
 			return [
 				function Strings_are_equal_to_strings() {
 					Assert.that("foo", Is.equalTo("foo"));
