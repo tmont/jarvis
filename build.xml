@@ -44,10 +44,9 @@
 		<delete dir="${build.dir}"/>
 	</target>
 	
-	<target name="compress" depends="init, clean, create-build-dirs, copy-uncompressed" description="Compresses JavaScript source files using YUI compressor">
+	<target name="compress" depends="init, clean, create-build-dirs, copy-source" description="Compresses JavaScript source files using YUI compressor">
 		<!-- combine all files -->
 		<concat destfile="${temp.dir}/jarvis-all.js" encoding="UTF-8" eol="lf">
-			<fileset dir="${temp.dir}" includes="diff_match_patch.js"/>
 			<fileset dir="${temp.dir}" includes="jarvis.js"/>
 			<fileset dir="${temp.dir}" includes="reporters/ConsoleReporter.js"/>
 			<fileset dir="${temp.dir}" includes="reporters/HtmlReporter.js"/>
@@ -57,6 +56,7 @@
 			<include name="jarvis-all.js"/>
 		</yui-compressor>
 		
+		<copy file="${temp.dir}/diff_match_patch.js" todir="${deploy.dir}" />
 		<move file="${deploy.dir}/jarvis-all-min.js" tofile="${deploy.dir}/jarvis-min.js" />
 		
 		<!-- delete temporary files -->
@@ -79,7 +79,7 @@
 		<mkdir dir="${deploy.dir}"/>
 	</target>
 	
-	<target name="copy-uncompressed">
+	<target name="copy-source">
 		<mkdir dir="${temp.dir}"/>
 		<copy todir="${temp.dir}">
 			<fileset dir="${src.dir}" includes="**/*.js"/>

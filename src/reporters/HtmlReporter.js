@@ -229,4 +229,4 @@
 	
 	head.appendChild(style);
 
-}(this, document))
+}(this, document));

@@ -156,7 +156,12 @@
 	}
 	
 	function shouldUseHtmlDiff(expected, actual) {
-		return Jarvis.htmlDiffs && doc && doc.createElement && typeof(actual) === "string" && typeof(expected) === "string";
+		return typeof(global.diff_match_patch) !== "undefined" && 
+			Jarvis.htmlDiffs && 
+			doc && 
+			doc.createElement && 
+			typeof(actual) === "string" && 
+			typeof(expected) === "string";
 	}
 	
 	function IdenticalToConstraint(expected) {
@@ -538,4 +543,4 @@
 		}
 	};
 	
-}(this, document))
+}(this, document));
