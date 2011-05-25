@@ -132,6 +132,14 @@ function Failure_message_tests() {
 		
 		function Other_constraint_failure_messages() {
 			return [
+				function Should_show_readable_message_for_undefined_constraint() {
+					try {
+						Assert.that(3, Is.undefined);
+					} catch (error) {
+						Assert.that(error.message, Is.equalTo("Expected 3 to be undefined"));
+					}
+				},
+				
 				function Should_show_readable_less_than_message() {
 					try {
 						Assert.that(3, Is.lessThan(1));
@@ -184,6 +192,14 @@ function Failure_message_tests() {
 		
 		function Negated_failure_messages() {
 			return [
+				function Should_show_negated_message_for_undefined_constraint() {
+					try {
+						Assert.that(undefined, Is.not.undefined);
+					} catch (error) {
+						Assert.that(error.message, Is.equalTo("Expected <undefined> to not be undefined"));
+					}
+				},
+				
 				function Should_show_negated_message_for_collection_contains() {
 					try {
 						Assert.that({ foo: "bar" }, Contains.not.value("bar"));
