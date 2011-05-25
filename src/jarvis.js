@@ -223,7 +223,7 @@
 	
 	function RegexConstraint(regex) {
 		this.isValidFor = function(actual) {
-			return typeof(actual) === "string" && regex.match(actual);
+			return typeof(actual) === "string" && regex.test(actual);
 		};
 		this.getFailureMessage = function(actual) {
 			return "Expected " + toString(actual) + " to match the regular expression " + toString(expected);
@@ -331,7 +331,7 @@
 			return factory(new GreaterThanOrEqualToConstraint(expected));
 		},
 		
-		this.stringMatching = function(regex) {
+		this.regexMatch = function(regex) {
 			return factory(new RegexConstraint(regex));
 		},
 		
