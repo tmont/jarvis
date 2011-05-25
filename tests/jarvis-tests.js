@@ -427,9 +427,17 @@ function Failure_message_tests() {
 					function foo() {}
 					
 					try {
-						Assert.that(new foo(), Is.equalTo(/foo/));
+						Assert.that(new foo(), Is.equalTo({}));
 					} catch (error) {
-						Assert.that(error.message, Is.equalTo("Failed asserting that two objects are equal\n\nExpected: [Object(RegExp)]\nActual:   [Object(foo)]"));
+						Assert.that(error.message, Is.equalTo("Failed asserting that two objects are equal\n\nExpected: [Object(Object)]\nActual:   [Object(foo)]"));
+					}
+				},
+				
+				function Should_print_regex_comparing_with_a_regex() {
+					try {
+						Assert.that(true, Is.equalTo(/foo/));
+					} catch (error) {
+						Assert.that(error.message, Is.equalTo("Failed asserting that two objects are equal\n\nExpected: [Object(RegExp:/foo/)]\nActual:   true"));
 					}
 				},
 				
@@ -498,6 +506,90 @@ function Failure_message_tests() {
 						Assert.that(1, Is.NULL);
 					} catch (error) {
 						Assert.that(error.message, Is.equalTo("Expected 1 to be null"));
+					}
+				}
+			];
+		},
+		
+		function Negated_failure_messages() {
+			return [
+				function Should_show_negated_message_for_collection_contains() {
+					try {
+						Assert.that({ foo: "bar" }, Contains.not.value("bar"));
+					} catch (error) {
+						Assert.that(error.message, Is.equalTo("Expected [Object(Object)] to not contain the value \"bar\""));
+					}
+				},
+				
+				function Should_show_negated_message_for_equality() {
+					try {
+						Assert.that(1, Is.not.equalTo(3));
+					} catch (error) {
+						Assert.that(error.message, Is.regexMatch(/^Failed assserting that two numbers are equal/));
+					}
+				},
+				
+				function Should_show_negated_message_for_exact_equality() {
+					try {
+						Assert.that(1, Is.not.identicalTo(3));
+					} catch (error) {
+						Assert.that(error.message, Is.regexMatch(/^Failed assserting that two numbers are identical/));
+					}
+				},
+				
+				function Should_show_negated_less_than_message() {
+					try {
+						Assert.that(1, Is.not.lessThan(3));
+					} catch (error) {
+						Assert.that(error.message, Is.equalTo("Expected 1 to not be less than 3"));
+					}
+				},
+				
+				function Should_show_negated_less_than_message() {
+					try {
+						Assert.that(1, Is.not.lessThan(3));
+					} catch (error) {
+						Assert.that(error.message, Is.equalTo("Expected 1 to not be less than 3"));
+					}
+				},
+				
+				function Should_show_negated_less_than_or_equal_message() {
+					try {
+						Assert.that(1, Is.not.lessThanOrEqualTo(3));
+					} catch (error) {
+						Assert.that(error.message, Is.equalTo("Expected 1 to not be less than or equal to 3"));
+					}
+				},
+				
+				function Should_show_negated_greater_than_message() {
+					try {
+						Assert.that(3, Is.not.greaterThan(1));
+					} catch (error) {
+						Assert.that(error.message, Is.equalTo("Expected 3 to not be greater than 1"));
+					}
+				},
+				
+				function Should_show_negated_greater_than_or_equal_message() {
+					try {
+						Assert.that(3, Is.not.greaterThanOrEqualTo(1));
+					} catch (error) {
+						Assert.that(error.message, Is.equalTo("Expected 3 to not be greater than or equal to 1"));
+					}
+				},
+				
+				function Should_show_negated_message_for_empty_constraint() {
+					try {
+						Assert.that("", Is.not.empty);
+					} catch (error) {
+						Assert.that(error.message, Is.equalTo("Expected <empty string> to not be empty"));
+					}
+				},
+				
+				function Should_show_negated_message_for_null_constraint() {
+					try {
+						Assert.that(null, Is.not.NULL);
+					} catch (error) {
+						Assert.that(error.message, Is.equalTo("Expected <null> to not be null"));
 					}
 				}
 			];

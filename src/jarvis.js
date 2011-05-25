@@ -119,7 +119,10 @@
 			case "undefined":
 				return "<undefined>";
 			case "object":
-				console.log(object);
+				if (object instanceof RegExp) {
+					return "[Object(RegExp:" + object.toString() + ")]";
+				}
+				
 				return "[Object(" + getFunctionName(object.constructor.toString()) + ")]";
 			case "array":
 				return "[Array(length=" + object.length + ")]";
@@ -157,12 +160,12 @@
 			return actual === expected;
 		};
 		
-		this.getFailureMessage = function(actual) {
+		this.getFailureMessage = function(actual, negate) {
 			if (Jarvis.htmlDiffs && typeof(actual) === "string" && typeof(expected) === "string") {
 				return getDiffNodes(expected, actual);
 			}
 			
-			var message = "Failed asserting that two " + getType(expected) + "s are identical\n\n";
+			var message = "Failed asserting that two " + getType(expected) + "s are " + (negate ? "not " : "") + "identical\n\n";
 			return message + getBinaryFailureMessage(toString(expected), toString(actual));
 		}
 	}
@@ -170,7 +173,8 @@
 	function EqualToConstraint(expected) {
 		this.isValidFor = function(actual) {
 			if (expected !== null && typeof(expected) === "object") {
-				return typeof(actual) === "object" &&
+				return actual !== null &&
+					typeof(actual) === "object" &&
 					getFunctionName(actual.constructor) === getFunctionName(expected.constructor) && 
 					compareIterables(actual, expected);
 			}
@@ -178,22 +182,22 @@
 			return actual == expected;
 		};
 		
-		this.getFailureMessage = function(actual) {
-			if (Jarvis.htmlDiffs && typeof(actual) === "string" && typeof(expected) === "string") {
+		this.getFailureMessage = function(actual, negate) {
+			if (Jarvis.htmlDiffs && getType(actual) === "string" && getType(expected) === "string") {
 				return getDiffNodes(expected, actual);
 			}
 			
-			var message = "Failed asserting that two " + getType(expected) + "s are equal\n\n";
+			var message = "Failed asserting that two " + getType(expected) + "s are " + (negate ? "not " : "") + "equal\n\n";
 			return message + getBinaryFailureMessage(toString(expected), toString(actual));
-		}
+		};
 	}
 	
 	function LessThanConstraint(expected) {
 		this.isValidFor = function(actual) {
 			return actual < expected;
 		};
-		this.getFailureMessage = function(actual) {
-			return "Expected " + toString(actual) + " to be less than " + toString(expected);
+		this.getFailureMessage = function(actual, negate) {
+			return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "be less than " + toString(expected);
 		}
 	}
 	
@@ -201,8 +205,8 @@
 		this.isValidFor = function(actual) {
 			return actual <= expected;
 		};
-		this.getFailureMessage = function(actual) {
-			return "Expected " + toString(actual) + " to be less than or equal to " + toString(expected);
+		this.getFailureMessage = function(actual, negate) {
+			return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "be less than or equal to " + toString(expected);
 		}
 	}
 	
@@ -210,8 +214,8 @@
 		this.isValidFor = function(actual) {
 			return actual > expected;
 		};
-		this.getFailureMessage = function(actual) {
-			return "Expected " + toString(actual) + " to be greater than " + toString(expected);
+		this.getFailureMessage = function(actual, negate) {
+			return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "be greater than " + toString(expected);
 		}
 	}
 	
@@ -219,8 +223,8 @@
 		this.isValidFor = function(actual) {
 			return actual >= expected;
 		};
-		this.getFailureMessage = function(actual) {
-			return "Expected " + toString(actual) + " to be greater than or equal to " + toString(expected);
+		this.getFailureMessage = function(actual, negate) {
+			return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "be greater than or equal to " + toString(expected);
 		}
 	}
 	
@@ -228,8 +232,8 @@
 		this.isValidFor = function(actual) {
 			return typeof(actual) === "string" && regex.test(actual);
 		};
-		this.getFailureMessage = function(actual) {
-			return "Expected " + toString(actual) + " to match the regular expression " + toString(expected);
+		this.getFailureMessage = function(actual, negate) {
+			return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "match the regular expression " + toString(regex);
 		}
 	}
 
@@ -239,7 +243,7 @@
 		};
 		
 		this.getFailureMessage = function(actual) {
-			return constraint.getFailureMessage(actual).replace(/\bto\b/g, "to not").replace(/\bare\b/g, "are not");
+			return constraint.getFailureMessage(actual, true);
 		};
 	}
 	
@@ -248,8 +252,8 @@
 			return actual === null;
 		};
 		
-		this.getFailureMessage = function(actual) {
-			return "Expected " + toString(actual) + " to be null";
+		this.getFailureMessage = function(actual, negate) {
+			return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "be null";
 		}
 	}
 	
@@ -261,12 +265,12 @@
 				(typeof(actual) === "object" && compareIterables(actual, {}));
 		};
 		
-		this.getFailureMessage = function(actual) {
-			return "Expected " + toString(actual) + " to be empty";
+		this.getFailureMessage = function(actual, negate) {
+			return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "be empty";
 		}
 	}
 	
-	function ContainsMemberConstraint(value) {
+	function ContainsValueConstraint(value) {
 		var equalTo = new EqualToConstraint(value);
 		this.isValidFor = function(collection) {
 			for (var key in collection) {
@@ -278,8 +282,8 @@
 			return false;
 		};
 		
-		this.getFailureMessage = function(actual) {
-			return "Expected " + toString(actual) + " to contain " + toString(value);
+		this.getFailureMessage = function(actual, negate) {
+			return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "contain the value " + toString(value);
 		}
 	}
 	
@@ -295,8 +299,8 @@
 			return false;
 		};
 		
-		this.getFailureMessage = function(actual) {
-			return "Expected " + toString(actual) + " to contain the key " + toString(key);
+		this.getFailureMessage = function(actual, negate) {
+			return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "contain the key " + toString(key);
 		}
 	}
 	
@@ -360,7 +364,7 @@
 	
 	function CollectionAssertionInterface(factory) {
 		this.value = function(value) {
-			return factory(new ContainsMemberConstraint(value));
+			return factory(new ContainsValueConstraint(value));
 		};
 		
 		this.key = function(key) {
