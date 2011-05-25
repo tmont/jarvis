@@ -1,5 +1,4 @@
-
-(function(global, undefined){
+(function(global, doc, undefined){
 	
 	var Assert,
 		Is,
@@ -60,7 +59,7 @@
 		
 		var html = html.join('');
 		
-		var pre = document.createElement("pre");
+		var pre = doc.createElement("pre");
 		pre.innerHTML = html;
 		
 		var nodes = pre.cloneNode(true).children;
@@ -156,13 +155,17 @@
 		return true;
 	}
 	
+	function shouldUseHtmlDiff(expected, actual) {
+		return Jarvis.htmlDiffs && doc && doc.createElement && typeof(actual) === "string" && typeof(expected) === "string";
+	}
+	
 	function IdenticalToConstraint(expected) {
 		this.isValidFor = function(actual) {
 			return actual === expected;
 		};
 		
 		this.getFailureMessage = function(actual, negate) {
-			if (Jarvis.htmlDiffs && typeof(actual) === "string" && typeof(expected) === "string") {
+			if (shouldUseHtmlDiff(expected, actual)) {
 				return getDiffNodes(expected, actual);
 			}
 			
@@ -185,7 +188,7 @@
 		};
 		
 		this.getFailureMessage = function(actual, negate) {
-			if (Jarvis.htmlDiffs && getType(actual) === "string" && getType(expected) === "string") {
+			if (shouldUseHtmlDiff(expected, actual)) {
 				return getDiffNodes(expected, actual);
 			}
 			
@@ -331,7 +334,7 @@
 			
 			if (typeof(constraintMessage) !== "string") {
 				//node list (e.g. HTML for diff between strings)
-				message = document.createTextNode(message);
+				message = doc.createTextNode(message);
 				constraintMessage.unshift(message);
 				return constraintMessage;
 			}
@@ -535,4 +538,4 @@
 		}
 	};
 	
-}(this))
+}(this, document))
