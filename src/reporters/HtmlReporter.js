@@ -75,24 +75,6 @@
 		container = container || doc.body;
 		var tests = {};
 		
-		function getAggregateStatus(results) {
-			var status = "pass";
-			for (var i = 0; i < results.length; i++) {
-				if (results[i] !== "pass") {
-					if (results[i] === "ignore" && (i === 0 || status === "ignore")) {
-						//parent status gets set to ignore only if ALL child statuses are ignore
-						status = "ignore";
-					} else {
-						//otherwise it's a fail and we bail
-						status = "fail";
-						break;
-					}
-				}
-			}
-			
-			return status;
-		}
-		
 		this.startTest = function(name, id, parentId) {
 			var element = doc.createElement("div"),
 				title = doc.createElement("p"),
@@ -108,7 +90,13 @@
 					title: title,
 					parentId: parentId,
 					childContainer: null,
-					childResults: []
+					childResults: {
+						fail: 0,
+						pass: 0,
+						ignore: 0,
+						error: 0,
+						total: 0
+					}
 				};
 			
 			element.className = "jarvis-test jarvis-test-result-running";
@@ -150,36 +138,39 @@
 			test.endTime = new Date().getTime();
 			test.assertions = result.assertions;
 			
-			childResultCount = {
-				fail: 0,
-				pass: 0,
-				ignore: 0,
-				error: 0,
-				total: test.childResults.length,
-			};
-			
-			for (i = 0; i < test.childResults.length; i++) {
-				childResultCount[test.childResults[i]]++;
+			actualStatus = "pass";
+			if (test.childResults.ignore === test.childResults.total) {
+				actualStatus = "ignore";
+			} else if (test.childResults.fail > 0 || test.childResults.error > 0) {
+				actualStatus = "fail";
 			}
 			
-			actualStatus = getAggregateStatus(test.childResults);
-			if (actualStatus === "pass") {
+			if (test.childResults.total === 0) {
 				actualStatus = result.status;
 			}
 			
 			if (test.parentId) {
 				//update parent
-				tests[test.parentId].childResults.push(actualStatus);
+				if (test.childResults.total === 0) {
+					tests[test.parentId].childResults[actualStatus]++;
+					tests[test.parentId].childResults.total++;
+				} else {
+					tests[test.parentId].childResults.pass += test.childResults.pass;
+					tests[test.parentId].childResults.error += test.childResults.error;
+					tests[test.parentId].childResults.fail += test.childResults.fail;
+					tests[test.parentId].childResults.ignore += test.childResults.ignore;
+					tests[test.parentId].childResults.total += test.childResults.total;
+				}
 			}
 			
 			test.element.className = "jarvis-test jarvis-test-result-" + actualStatus;
 			test.icon.src = imageSource[actualStatus];
 			
-			if (childResultCount.total > 0) {
+			if (test.childResults.total > 0) {
 				info = 
 					"[" + 
-						childResultCount.pass + " / " + childResultCount.total + " - " + 
-						(Math.round(childResultCount.pass * 10000 / childResultCount.total) / 100) + 
+						test.childResults.pass + " / " + test.childResults.total + " - " + 
+						(Math.round(test.childResults.pass * 10000 / test.childResults.total) / 100) + 
 					"%] ";
 			}
 			
@@ -200,7 +191,7 @@
 				messageContainer.style.display = "none";
 				test.element.appendChild(messageContainer);
 			}
-			if (result.message || childResultCount.total > 0) {
+			if (result.message || test.childResults.total > 0) {
 				test.title.style.cursor = "pointer";
 				test.title.onclick = titleClick;
 			}
