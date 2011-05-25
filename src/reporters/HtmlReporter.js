@@ -172,6 +172,8 @@
 						test.childResults.pass + " / " + test.childResults.total + " - " + 
 						(Math.round(test.childResults.pass * 10000 / test.childResults.total) / 100) + 
 					"%] ";
+				
+				addGradient(test);
 			}
 			
 			info += "(" + (test.endTime - test.startTime) + "ms, " + test.assertions + " assertions)";
@@ -203,6 +205,49 @@
 			var display = this.nextSibling.style.display;
 			this.nextSibling.style.display = display === "none" ? "block" : "none";
 			return false;
+		}
+		
+		function addGradient(test) {
+			var failPercent,
+				passPercent,
+				errorPercent,
+				ignorePercent,
+				failColor,
+				passColor,
+				errorColor,
+				ignoreColor,
+				gradients = [];
+				
+			//safari and webkit gradients
+			failPercent = Math.round(test.childResults.fail / test.childResults.total * 100);
+			passPercent = Math.round(test.childResults.pass / test.childResults.total * 100);
+			ignorePercent = Math.round(test.childResults.ignore / test.childResults.total * 100);
+			errorPercent = Math.round(test.childResults.error / test.childResults.total * 100);
+			
+			failColor = "#FFCCCC";
+			passColor = "#CCFFCC";
+			errorColor = "#FFCC99";
+			ignoreColor = "#CCCCFF";
+		
+			if (failPercent > 0) {
+				gradients.push(failColor + " " + failPercent + "%");
+			}
+			if (errorPercent > 0) {
+				gradients.push(errorColor + " " + (failPercent + errorPercent) + "%");
+			}
+			if (ignorePercent > 0) {
+				gradients.push(ignoreColor + " " + (failPercent + errorPercent + ignorePercent) + "%");
+			}
+			
+			gradients.push(passColor + " 100%");
+			
+			if (/Firefox/.test(global.navigator.userAgent)) {
+				//mozilla
+				test.element.style.backgroundImage = "-moz-linear-gradient(left, " + gradients.join(", ") + ")";
+			} else if (/WebKit/.test(global.navigator.userAgent)) {
+				//webkit (safari/chrome)
+				test.element.style.backgroundImage = "-webkit-linear-gradient(left, " + gradients.join(", ") + ")";
+			}
 		}
 	};
 	
