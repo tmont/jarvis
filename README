@@ -1,0 +1,21 @@
+Jarvis <http://jarvis.tmont.com/>
+Version 1.0 (see CHANGELOG for details)
+(c) 2011 Tommy Montgomery <http://tommymontgomery.com/>
+
+Licensed under WTFPL: http://sam.zoy.org/wtfpl/
+
+diff_match_patch <http://code.google.com/p/google-diff-match-patch/>
+(c) 2006 Google, Inc.
+	by Neil Fraser
+Licensed under the Apache License, Version 2.0 <http://www.apache.org/licenses/LICENSE-2.0>
+
+Installation
+------------
+- Reference jarvis-min.js at the bottom of your HTML file
+- Create a test script and include if after jarvis-min.js (examples at http://jarvis.tmont.com/)
+- Open up the HTML file in a browser
+- You're winning
+
+Authors
+-------
+Tommy Montgomery <http://tommymontgomery.com/>
