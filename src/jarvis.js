@@ -107,7 +107,7 @@
 				
 				if (object.length > 100) {
 					//truncate it
-					object = object.substring(0, 50) + "..." + object.substring(object.substring.length - 50);
+					object = object.substring(0, 50) + "..." + object.substring(object.length - 50);
 				}
 				
 				return "\"" + object + "\"";
