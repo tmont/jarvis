@@ -12,7 +12,7 @@
 	}
 	
 	function getFunctionName(func) {
-		var match = /function\s([\w$]+)\(\)\s\{/.exec(func.toString());
+		var match = /^function\s([\w$]+)\(\)\s\{/.exec(func.toString());
 		if (!match && func.constructor) {
 			return getFunctionName(func.constructor);
 		}
@@ -454,24 +454,41 @@
 		
 		Error: JarvisError,
 		
-		run: function(test, name, parentId) {
+		run: function(test, parentId) {
 			var id = (testId++),
 				caughtError,
 				assertionCountAtStart = assertionCount,
 				i,
 				result,
 				expectedError,
-				tests;
+				tests,
+				setup = function() {},
+				tearDown = function() {};
 				
-			name = name || getFunctionName(test).replace(/_/g, " ");
+			if (typeof(test) !== "function") {
+				setup = test.setup;
+				tearDown = test.tearDown;
+				test = test.test;
+				if (!test) {
+					throw "No test detected";
+				}
+			}
+			
+			name = getFunctionName(test).replace(/_/g, " ");
 			
 			this.reporter.startTest(name, id, parentId);
 			try {
+				setup && setup();
 				tests = test();
 				expectedError = globalExpectedError;
-				if (tests !== undefined) {
-					for (i = 0; i < tests.length; i++) {
-						this.run(tests[i], null, id);
+				if (typeof(tests) === "object") {
+					if (isArray(tests)) {
+						//run a suite of tests
+						for (i = 0; i < tests.length; i++) {
+							this.run(tests[i], id);
+						}
+					} else {
+						this.run(tests, id);
 					}
 				}
 				
@@ -505,7 +522,7 @@
 				caughtError = error;
 			}
 			
-			console.dir(caughtError);
+			tearDown && tearDown();
 			
 			result = {
 				status: caughtError === undefined ? "pass" : caughtError.type,
