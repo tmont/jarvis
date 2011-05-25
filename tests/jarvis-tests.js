@@ -81,7 +81,8 @@ function Constraint_tests() {
 					};
 					
 					Assert.that(actual, Is.equalTo(expected));
-					Assert.that(/foo/, Is.equalTo(/foo/), "regex objects must be equal");
+					Assert.that(/foo/, Is.equalTo(/foo/));
+					Assert.that(new f(), Is.equalTo(new f()));
 					Assert.that({ foo: "bar" }, Is.not.equalTo({ foo: "baz" }));
 				},
 				
