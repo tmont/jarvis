@@ -181,7 +181,91 @@ function Constraint_tests() {
 				
 				function Zero_is_not_empty() {
 					Assert.that(0, Is.not.empty);
+				},
+				
+				function Undefined_is_empty() {
+					Assert.that(undefined, Is.empty);
 				}
+			];
+		},
+		
+		function Null_tests() {
+			return [
+				function Null_is_null() {
+					Assert.that(null, Is.NULL);
+				},
+				
+				function Empty_string_is_not_null() {
+					Assert.that("", Is.not.NULL);
+				},
+				
+				function Zero_is_not_null() {
+					Assert.that(0, Is.not.NULL);
+				},
+				
+				function Undefined_is_not_null() {
+					Assert.that(undefined, Is.not.NULL);
+				}
+			];
+		},
+		
+		function Undefined_tests() {
+			return [
+				function Undefined_is_undefined() {
+					Assert.that(undefined, Is.undefined);
+				},
+				
+				function Empty_string_is_not_undefined() {
+					Assert.that("", Is.not.undefined);
+				},
+				
+				function Zero_is_not_undefined() {
+					Assert.that(0, Is.not.undefined);
+				},
+				
+				function Undefined_variable_is_undefined() {
+					Assert.that(this["foo"], Is.undefined);
+				}
+			];
+		},
+		
+		function Inequality_tests() {
+			return [
+				function Integers_are_greater_than_integers() {
+					Assert.that(5, Is.greaterThan(3));
+				},
+				
+				function Floats_are_greater_than_floats() {
+					Assert.that(5.7, Is.greaterThan(3.3));
+				},
+				
+				function Integers_are_less_than_integers() {
+					Assert.that(3, Is.lessThan(5));
+				},
+				
+				function Floats_are_less_than_floats() {
+					Assert.that(3.4, Is.lessThan(5.7));
+				},
+				
+				function Integers_are_greater_than_or_equal_to_integers() {
+					Assert.that(5, Is.greaterThanOrEqualTo(5));
+					Assert.that(5, Is.greaterThanOrEqualTo(3));
+				},
+				
+				function Floats_are_greater_than_or_equal_to_floats() {
+					Assert.that(5.7, Is.greaterThanOrEqualTo(3.3));
+					Assert.that(5.7, Is.greaterThanOrEqualTo(5.7));
+				},
+				
+				function Integers_are_less_than_or_equal_to_integers() {
+					Assert.that(3, Is.lessThanOrEqualTo(5));
+					Assert.that(3, Is.lessThanOrEqualTo(3));
+				},
+				
+				function Floats_are_less_than_or_equal_to_floats() {
+					Assert.that(3.4, Is.lessThanOrEqualTo(5.7));
+					Assert.that(3.4, Is.lessThanOrEqualTo(3.4));
+				},
 			];
 		},
 		

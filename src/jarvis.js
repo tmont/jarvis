@@ -1,3 +1,4 @@
+
 (function(global, undefined){
 	
 	var Assert,
@@ -271,6 +272,16 @@
 		}
 	}
 	
+	function UndefinedConstraint() {
+		this.isValidFor = function(actual) {
+			return actual === undefined;
+		};
+		
+		this.getFailureMessage = function(actual, negate) {
+			return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "be undefined";
+		}
+	}
+	
 	function ContainsValueConstraint(value) {
 		var equalTo = new EqualToConstraint(value);
 		this.isValidFor = function(collection) {
@@ -332,35 +343,37 @@
 	function AssertionInterface(factory) {
 		this.identicalTo = function(expected) {
 			return factory(new IdenticalToConstraint(expected));
-		},
+		};
 		
 		this.equalTo = function(expected) {
 			return factory(new EqualToConstraint(expected));
-		},
+		};
 		
 		this.lessThan = function(expected) {
 			return factory(new LessThanConstraint(expected));
-		},
+		};
 		
 		this.lessThanOrEqualTo = function(expected) {
 			return factory(new LessThanOrEqualToConstraint(expected));
-		},
+		};
 		
 		this.greaterThan = function(expected) {
 			return factory(new GreaterThanConstraint(expected));
-		},
+		};
 		
 		this.greaterThanOrEqualTo = function(expected) {
 			return factory(new GreaterThanOrEqualToConstraint(expected));
-		},
+		};
 		
 		this.regexMatch = function(regex) {
 			return factory(new RegexConstraint(regex));
-		},
+		};
 		
-		this.NULL = factory(new NullConstraint()),
+		this.NULL = factory(new NullConstraint());
 		
-		this.empty = factory(new EmptyConstraint())
+		this.empty = factory(new EmptyConstraint());
+		
+		this.undefined = factory(new UndefinedConstraint());
 	};
 	
 	function CollectionAssertionInterface(factory) {
