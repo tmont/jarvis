@@ -172,6 +172,7 @@
 	
 	function EqualToConstraint(expected) {
 		this.isValidFor = function(actual) {
+			//testing for null because typeof(null) === "object"
 			if (expected !== null && typeof(expected) === "object") {
 				return actual !== null &&
 					typeof(actual) === "object" &&
