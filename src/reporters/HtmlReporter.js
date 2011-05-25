@@ -94,34 +94,35 @@
 		}
 		
 		this.startTest = function(name, id, parentId) {
-			var element = doc.createElement("div");
+			var element = doc.createElement("div"),
+				title = doc.createElement("p"),
+				icon = doc.createElement("img"),
+				parent,
+				childContainer,
+				test = { 
+					name: name,
+					startTime: new Date().getTime(),
+					endTime: 0,
+					element: element,
+					icon: icon,
+					title: title,
+					parentId: parentId,
+					childContainer: null,
+					childResults: []
+				};
+			
 			element.className = "jarvis-test jarvis-test-result-running";
-			var title = doc.createElement("p");
 			title.appendChild(doc.createTextNode(name));
 			
-			var icon = doc.createElement("img");
 			icon.className = "jarvis-icon";
 			icon.src = imageSource.running;
 			
 			element.appendChild(icon);
 			element.appendChild(title);
 			
-			var test = { 
-				name: name,
-				startTime: new Date().getTime(),
-				endTime: 0,
-				element: element,
-				icon: icon,
-				title: title,
-				parentId: parentId,
-				childContainer: null,
-				childResults: []
-			};
-			
-			var parent;
 			if (tests[parentId]) {
 				if (!tests[parentId].childContainer) {
-					var childContainer = doc.createElement("div");
+					childContainer = doc.createElement("div");
 					childContainer.className = "jarvis-child-test-container";
 					childContainer.style.display = "none";
 					tests[parentId].element.appendChild(childContainer);
@@ -134,7 +135,6 @@
 			}
 			
 			parent.appendChild(test.element);
-			
 			tests[id] = test;
 		};
 		
@@ -216,6 +216,7 @@
 	};
 	
 	global.Jarvis.reporter = new Jarvis.HtmlReporter();
+	global.Jarvis.htmlDiffs = true;
 	
 	//add stylesheet
 	var style = doc.createElement("style");

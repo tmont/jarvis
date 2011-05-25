@@ -58,6 +58,7 @@
 		}
 		
 		var html = html.join('');
+		console.log(html);
 		
 		var pre = document.createElement("pre");
 		pre.innerHTML = html;
@@ -159,7 +160,7 @@
 		};
 		
 		this.getFailureMessage = function(actual) {
-			if (typeof(actual) === "string" && typeof(expected) === "string") {
+			if (Jarvis.htmlDiffs && typeof(actual) === "string" && typeof(expected) === "string") {
 				return getDiffNodes(expected, actual);
 			}
 			
@@ -177,7 +178,7 @@
 		};
 		
 		this.getFailureMessage = function(actual) {
-			if (typeof(actual) === "string" && typeof(expected) === "string") {
+			if (Jarvis.htmlDiffs && typeof(actual) === "string" && typeof(expected) === "string") {
 				return getDiffNodes(expected, actual);
 			}
 			
@@ -371,9 +372,13 @@
 			assertionCount++;
 			if (!constraint.isValidFor(actual)) {
 				message = message ? message + "\n\n" : "";
-				//TODO add message
 				
-				throw new JarvisError(constraint.getFailureMessage(actual), "fail");
+				var constraintMessage = constraint.getFailureMessage(actual);
+				if (typeof(constraintMessage) === "string") {
+					constraintMessage = message + constraintMessage;
+				}
+				
+				throw new JarvisError(constraintMessage, "fail");
 			}
 		},
 		
@@ -397,6 +402,7 @@
 	global.Has = Has;
 	global.Jarvis = {
 		reporter: null,
+		htmlDiffs: false,
 		
 		Error: JarvisError,
 		
