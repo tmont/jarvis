@@ -21,10 +21,10 @@
 			switch (result.status) {
 				case "fail":
 				case "error":
-					console.error(result.message);
+					console.error(result.message || "");
 					break;
 				case "ignore":
-					console.warn(result.message);
+					console.warn(result.message || "");
 					break;
 			}
 			
@@ -33,5 +33,7 @@
 			tests[id] = undefined;
 		};
 	};
+	
+	global.Jarvis.reporter = new ConsoleReporter();
 	
 }(this));
