@@ -4,6 +4,7 @@
 		Is,
 		Contains,
 		assertionCount = 0,
+		testId = 1,
 		globalExpectedError;
 	
 	function isArray(o) {
@@ -22,23 +23,27 @@
 	//adapted from diff_match_patch.diff_prettyHtml()
 	function getDiffNodes(expected, actual) {
 		//compute diff
-		var diff = new diff_match_patch();
-		var diffs = diff.diff_main(expected, actual);
+		var diff = new diff_match_patch(),
+			diffs = diff.diff_main(expected, actual),
+			html = [],
+			i,
+			pre,
+			nodes,
+			actualNodes,
+			x,
+			op,
+			data,
+			text;
+		
 		diff.diff_cleanupSemantic(diffs);
 		
-		var html = [];
-		var i = 0;
-		var pattern_amp = /&/g;
-		var pattern_lt = /</g;
-		var pattern_gt = />/g;
-		var pattern_para = /\n/g;
-		for (var x = 0; x < diffs.length; x++) {
-			var op = diffs[x][0];    // Operation (insert, delete, equal)
-			var data = diffs[x][1];  // Text of change.
-			var text = data.replace(pattern_amp, "&amp;")
-				.replace(pattern_lt, "&lt;")
-				.replace(pattern_gt, "&gt;")
-				.replace(pattern_para, "&para;<br />");
+		for (x = 0; x < diffs.length; x++) {
+			op = diffs[x][0];    // Operation (insert, delete, equal)
+			data = diffs[x][1];  // Text of change.
+			text = data.replace(/&/g, "&amp;")
+				.replace(/</g, "&lt;")
+				.replace(/>/g, "&gt;")
+				.replace(/\n/g, "&para;<br />");
 			
 			switch (op) {
 				case 1:
@@ -57,14 +62,14 @@
 			}
 		}
 		
-		var html = html.join('');
+		html = html.join('');
 		
-		var pre = doc.createElement("pre");
+		pre = doc.createElement("pre");
 		pre.innerHTML = html;
 		
-		var nodes = pre.cloneNode(true).children;
-		var actualNodes = [];
-		for (var i = 0; i < nodes.length; i++) {
+		nodes = pre.cloneNode(true).children;
+		actualNodes = [];
+		for (i = 0; i < nodes.length; i++) {
 			actualNodes[i] = nodes[i];
 		}
 		pre = null;
@@ -170,11 +175,12 @@
 		};
 		
 		this.getFailureMessage = function(actual, negate) {
+			var message;
 			if (shouldUseHtmlDiff(expected, actual)) {
 				return getDiffNodes(expected, actual);
 			}
 			
-			var message = "Failed asserting that two " + getType(expected) + "s are " + (negate ? "not " : "") + "identical\n\n";
+			message = "Failed asserting that two " + getType(expected) + "s are " + (negate ? "not " : "") + "identical\n\n";
 			return message + getBinaryFailureMessage(toString(expected), toString(actual));
 		}
 	}
@@ -193,11 +199,12 @@
 		};
 		
 		this.getFailureMessage = function(actual, negate) {
+			var message;
 			if (shouldUseHtmlDiff(expected, actual)) {
 				return getDiffNodes(expected, actual);
 			}
 			
-			var message = "Failed asserting that two " + getType(expected) + "s are " + (negate ? "not " : "") + "equal\n\n";
+			message = "Failed asserting that two " + getType(expected) + "s are " + (negate ? "not " : "") + "equal\n\n";
 			return message + getBinaryFailureMessage(toString(expected), toString(actual));
 		};
 	}
@@ -206,6 +213,7 @@
 		this.isValidFor = function(actual) {
 			return actual < expected;
 		};
+		
 		this.getFailureMessage = function(actual, negate) {
 			return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "be less than " + toString(expected);
 		}
@@ -215,6 +223,7 @@
 		this.isValidFor = function(actual) {
 			return actual <= expected;
 		};
+		
 		this.getFailureMessage = function(actual, negate) {
 			return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "be less than or equal to " + toString(expected);
 		}
@@ -224,6 +233,7 @@
 		this.isValidFor = function(actual) {
 			return actual > expected;
 		};
+		
 		this.getFailureMessage = function(actual, negate) {
 			return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "be greater than " + toString(expected);
 		}
@@ -233,6 +243,7 @@
 		this.isValidFor = function(actual) {
 			return actual >= expected;
 		};
+		
 		this.getFailureMessage = function(actual, negate) {
 			return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "be greater than or equal to " + toString(expected);
 		}
@@ -242,6 +253,7 @@
 		this.isValidFor = function(actual) {
 			return typeof(actual) === "string" && regex.test(actual);
 		};
+		
 		this.getFailureMessage = function(actual, negate) {
 			return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "match the regular expression " + toString(regex);
 		}
@@ -292,8 +304,10 @@
 	
 	function ContainsValueConstraint(value) {
 		var equalTo = new EqualToConstraint(value);
+			
 		this.isValidFor = function(collection) {
-			for (var key in collection) {
+			var key;
+			for (key in collection) {
 				if (equalTo.isValidFor(collection[key])) {
 					return true;
 				}
@@ -310,7 +324,8 @@
 	function ContainsKeyConstraint(key) {
 		var equalTo = new EqualToConstraint(key);
 		this.isValidFor = function(collection) {
-			for (var i in collection) {
+			var i;
+			for (i in collection) {
 				if (equalTo.isValidFor(i)) {
 					return true;
 				}
@@ -334,8 +349,8 @@
 		};
 		
 		this.getFailureMessage = function(actual) {
-			var message = "Failed making an assertion on an object with property \"" + property + "\"\n\n";
-			var constraintMessage = constraint.getFailureMessage(actual[property]);
+			var message = "Failed making an assertion on an object with property \"" + property + "\"\n\n",
+				constraintMessage = constraint.getFailureMessage(actual[property]);
 			
 			if (typeof(constraintMessage) !== "string") {
 				//node list (e.g. HTML for diff between strings)
@@ -423,9 +438,9 @@
 		that: function(actual, constraint, message) {
 			assertionCount++;
 			if (!constraint.isValidFor(actual)) {
+				var constraintMessage = constraint.getFailureMessage(actual);
 				message = message ? message + "\n\n" : "";
 				
-				var constraintMessage = constraint.getFailureMessage(actual);
 				if (typeof(constraintMessage) === "string") {
 					constraintMessage = message + constraintMessage;
 				}
@@ -451,8 +466,6 @@
 		}
 	};
 	
-	var testId = 1;
-	
 	global.Assert = Assert;
 	global.Is = Is;
 	global.Contains = Contains;
@@ -470,8 +483,9 @@
 				result,
 				expectedError,
 				tests,
-				setup = function() {},
-				tearDown = function() {};
+				setup,
+				tearDown,
+				equalTo;
 				
 			if (typeof(test) !== "function") {
 				setup = test.setup;
@@ -513,7 +527,7 @@
 					//verify that it wasn't expected
 					if (expectedError !== undefined) {
 						//expectedError was set, so check to see if the thrown error matches what was expected
-						var equalTo = new EqualToConstraint(expectedError);
+						equalTo = new EqualToConstraint(expectedError);
 						if (expectedError !== true && !equalTo.isValidFor(error)) {
 							error = new JarvisError(
 								"Expected error, " + toString(expectedError) + ", did not match actual error, " + toString(error),

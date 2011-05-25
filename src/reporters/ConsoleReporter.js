@@ -15,8 +15,8 @@
 		};
 		
 		this.endTest = function(result, id) {
-			var endTime = new Date().getTime();
-			var test = tests[id];
+			var endTime = new Date().getTime(),
+				test = tests[id];
 			
 			switch (result.status) {
 				case "fail":
