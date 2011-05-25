@@ -58,7 +58,6 @@
 		}
 		
 		var html = html.join('');
-		console.log(html);
 		
 		var pre = document.createElement("pre");
 		pre.innerHTML = html;
