@@ -486,8 +486,6 @@
 		reporter: null,
 		htmlDiffs: false,
 		
-		Error: JarvisError,
-		
 		run: function(test, parentId) {
 			var id = (testId++),
 				caughtError,
