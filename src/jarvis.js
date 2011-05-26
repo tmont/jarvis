@@ -408,7 +408,7 @@
 		};
 		
 		this.getFailureMessage = function(selector, negate) {
-			return "Failed asserting that the DOM " + (negate ? "does not contain" : "contains") + " an element for selector \"" + selector + "\"";
+			return "Failed asserting that the DOM " + (negate ? "does not contain" : "contains") + " an element matching the selector\n   " + selector;
 		};
 	}
 	
