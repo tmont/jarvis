@@ -28,7 +28,7 @@
 					break;
 			}
 			
-			console.log("    %dms, %d assertion%s", endTime - test.startTime, result.assertions, result.assertions !== 1 ? "s" : "");
+			console.log("  " + (endTime - test.startTime) + "ms " + result.assertions + " assertion" + (result.assertions !== 1 ? "s" : ""));
 			console.groupEnd();
 			tests[id] = undefined;
 		};
