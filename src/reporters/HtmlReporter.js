@@ -12,12 +12,12 @@
 	
 		css = "\
 .jarvis-test {\
-	/*border-width: 1px;\
-	border-style: solid;*/\
 	color: black;\
 	font-family: \"Trebuchet MS\", \"Droid sans Mono\", Calibri, Verdana, sans-serif;\
 	padding: 5px;\
 	margin: 8px auto;\
+	opacity: .9;\
+	filter: alpha(opacity=90);\
 	font-size: 14px;\
 	position: relative;\
 	box-shadow: 0 8px 5px -5px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 0, 0, 0.1) inset;\
@@ -27,26 +27,26 @@
 .jarvis-test .jarvis-test {\
 	margin-left: 10px;\
 }\
-/*.jarvis-test.jarvis-test-result-pass {\
-	border-color: #83B187;\
+.jarvis-test-info {\
+	font-family: Consolas, Inconsolata, Monaco, \"Courier New\", monospace;\
+	font-size: 12px;\
+	font-weight: normal;\
+	float: right;\
 }\
-.jarvis-test.jarvis-test-result-fail {\
-	border-color: #C89A9A;\
-}\
-.jarvis-test.jarvis-test-result-error {\
-	border-color: #D7A137;\
-}\
-.jarvis-test.jarvis-test-result-ignore {\
-	border-color: #A1A1D2;\
-}*/\
 \
 .jarvis-test p {\
 	font-weight: bold;\
 	padding: 0;\
 	margin: 0;\
+	text-shadow: 2px -1px 1px #CCCCCC;\
+	color: #000000;\
 }\
 .jarvis-test p img {\
 	margin-right: 3px;\
+}\
+.jarvis-test:hover {\
+	opacity: 1;\
+	filter: alpha(opacity=100);\
 }\
 \
 .jarvis-test pre {\
@@ -156,6 +156,7 @@
 				parent,
 				actualStatus,
 				info = "",
+				infoContainer,
 				messageContainer,
 				i;
 				
@@ -192,17 +193,17 @@
 			test.icon.src = imageSource[actualStatus];
 			
 			if (test.childResults.total > 0) {
-				info = 
-					"[" + 
-						test.childResults.pass + " / " + test.childResults.total + " - " + 
-						(Math.round(test.childResults.pass * 10000 / test.childResults.total) / 100) + 
-					"%] ";
+				info = 	test.childResults.pass + "/" + test.childResults.total + " " + 
+					(Math.round(test.childResults.pass * 10000 / test.childResults.total) / 100) + "% ";
 				
 				addGradient(test);
 			}
 			
 			info += "(" + (test.endTime - test.startTime) + "ms, " + test.assertions + " assertion" + (test.assertions !== 1 ? "s" : "") + ")";
-			test.title.appendChild(doc.createTextNode(" " + info));
+			infoContainer = document.createElement("span");
+			infoContainer.className = "jarvis-test-info";
+			infoContainer.appendChild(document.createTextNode(info));
+			test.title.appendChild(infoContainer);
 			
 			if (result.message) {
 				messageContainer = doc.createElement("pre"); 
