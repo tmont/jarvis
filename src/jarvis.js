@@ -12,16 +12,8 @@
 	}
 	
 	function getFunctionName(func) {
-		// if (func instanceof RegExp) {
-			// return "RegExp";
-		// }
-		
-		var match = /^function\s([\w$]+)\(\)\s\{/.exec(func.toString());
-		if (!match && func.constructor) {
-			return getFunctionName(func.constructor);
-		}
-		
-		return match !== null ? match[1] : "<unnamed function>";
+		var match = /^\s*function\s([\w$]+)\(\)\s\{/.exec(func.toString());
+		return match ? match[1] : "<unnamed function>";
 	}
 	
 	//adapted from diff_match_patch.diff_prettyHtml()
@@ -196,6 +188,11 @@
 	
 	function EqualToConstraint(expected) {
 		this.isValidFor = function(actual) {
+			if (expected === actual) {
+				//short circuit for reference equality
+				return true;
+			}
+			
 			//regular expressions are a special case, because they're handled differently in different browsers
 			if (actual instanceof RegExp && expected instanceof RegExp) {
 				return actual.toString() == expected.toString();
