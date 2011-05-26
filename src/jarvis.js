@@ -12,6 +12,10 @@
 	}
 	
 	function getFunctionName(func) {
+		// if (func instanceof RegExp) {
+			// return "RegExp";
+		// }
+		
 		var match = /^function\s([\w$]+)\(\)\s\{/.exec(func.toString());
 		if (!match && func.constructor) {
 			return getFunctionName(func.constructor);
@@ -81,6 +85,11 @@
 	}
 	
 	function getType(object) {
+		if (object instanceof RegExp) {
+			//chrome thinks a RegExp is a function
+			return "object";
+		}
+		
 		var type = typeof(object);
 		switch (type) {
 			case "string":
@@ -187,6 +196,11 @@
 	
 	function EqualToConstraint(expected) {
 		this.isValidFor = function(actual) {
+			//regular expressions are a special case, because they're handled differently in different browsers
+			if (actual instanceof RegExp && expected instanceof RegExp) {
+				return actual.toString() == expected.toString();
+			}
+			
 			//testing for null because typeof(null) === "object"
 			if (expected !== null && typeof(expected) === "object") {
 				return actual !== null &&

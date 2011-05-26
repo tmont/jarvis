@@ -81,9 +81,16 @@ function Constraint_tests() {
 					};
 					
 					Assert.that(actual, Is.equalTo(expected));
-					Assert.that(/foo/, Is.equalTo(/foo/));
-					Assert.that(new f(), Is.equalTo(new f()));
 					Assert.that({ foo: "bar" }, Is.not.equalTo({ foo: "baz" }));
+				},
+				
+				function Object_instances_are_equal() {
+					function f() {}
+					Assert.that(new f(), Is.equalTo(new f()));
+				},
+				
+				function Regular_expressions_are_equal() {
+					Assert.that(/foo/, Is.equalTo(/foo/));
 				},
 				
 				function Empty_objects_are_equal() {
