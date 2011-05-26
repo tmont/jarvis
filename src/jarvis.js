@@ -1,14 +1,40 @@
 (function(global, doc, undefined){
 	
-	var Assert,
+	var $ = global.Sizzle,
+		Assert,
 		Is,
-		Contains,
+		Has,
 		assertionCount = 0,
 		testId = 1,
 		globalExpectedError;
 	
 	function isArray(o) {
 		return Object.prototype.toString.call(o) === '[object Array]';
+	}
+	
+	function any(collection, predicate) {
+		for (var i = 0; i < collection.length; i++) {
+			if (predicate(collection[i])) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	function getTextRecursive(node) {
+		var text = "",
+			i = 0;
+		
+		if (node.nodeType === 3) {
+			return node.nodeValue;
+		}
+		
+		for (i = 0; i < node.childNodes.length; i++) {
+			text += getTextRecursive(node.childNodes[i]);
+		}
+		
+		return text;
 	}
 	
 	function getFunctionName(func) {
@@ -376,6 +402,88 @@
 		}
 	}
 	
+	function InDomConstraint() {
+		this.isValidFor = function(selector) {
+			return $(selector).length > 0;
+		};
+		
+		this.getFailureMessage = function(selector, negate) {
+			return "Failed asserting that the DOM " + (negate ? "does not contain" : "contains") + " an element for selector \"" + selector + "\"";
+		};
+	}
+	
+	function getFailureMessageForDomElementTextMatch(message, constraint, texts) {
+		var messages = [],
+			i, 
+			j, 
+			list,
+			item;
+		
+		for (i = 0; i < texts.length; i++) {
+			messages[i] = constraint.getFailureMessage(texts[i]);
+		}
+		
+		if (typeof(messages[0]) !== "string") {
+			//node list
+			message = [doc.createTextNode(message)];
+			list = doc.createElement("ol");
+			for (i = 0; i < messages.length; i++) {
+				item = doc.createElement("li");
+				for (j = 0; j < messages[i].length; j++) {
+					item.appendChild(messages[i][j]);
+				}
+				
+				list.appendChild(item);
+			}
+			
+			message.push(list);
+		} else {
+			for (i = 0; i < messages.length; i++) {
+				message += (i + 1) + ") " + messages[i] + "\n\n";
+			}
+		}
+		
+		return message;
+	}
+	
+	function DomElementTextConstraint(constraint) {
+		var texts = [];
+		
+		this.isValidFor = function(selector) {
+			return any($(selector), function(element) {
+				if (element.childNodes.length === 1 && element.childNodes[0].nodeType === 3) {
+					texts.push(element.childNodes[0].nodeValue);
+					return constraint.isValidFor(element.childNodes[0].nodeValue);
+				}
+				
+				return false;
+			});
+		};
+		
+		this.getFailureMessage = function(selector, negate) {
+			var message = "Failed asserting a condition about the " + 
+				"text for any of the DOM elements defined by the selector\n    " + selector + "\n\n";
+			return getFailureMessageForDomElementTextMatch(message, constraint, texts);
+		};
+	}
+	
+	function DomElementFlattenedTextConstraint(constraint) {
+		var texts = [];
+		
+		this.isValidFor = function(selector) {
+			return any($(selector), function(element) {
+				texts.push(getTextRecursive(element));
+				return constraint.isValidFor(texts[texts.length - 1]);
+			});
+		};
+		
+		this.getFailureMessage = function(selector, negate) {
+			var message = "Failed asserting a condition about the recursively flattened " + 
+				"text for any of the DOM elements defined by the selector\n    " + selector + "\n\n";
+			return getFailureMessageForDomElementTextMatch(message, constraint, texts);
+		};
+	}
+	
 	function AssertionInterface(factory) {
 		this.identicalTo = function(expected) {
 			return factory(new IdenticalToConstraint(expected));
@@ -410,6 +518,8 @@
 		this.empty = factory(new EmptyConstraint());
 		
 		this.undefined = factory(new UndefinedConstraint());
+		
+		this.inDom = factory(new InDomConstraint());
 	};
 	
 	function CollectionAssertionInterface(factory) {
@@ -432,6 +542,30 @@
 			
 			return iface;
 		};
+		
+		this.text = function() {
+			var iface = new AssertionInterface(function(constraint) {
+				return new DomElementTextConstraint(constraint);
+			});
+			
+			iface.not = new AssertionInterface(function(constraint) {
+				return new NotConstraint(new DomElementTextConstraint(constraint));
+			});
+			
+			return iface;
+		}();
+		
+		this.flattenedText = function() {
+			var iface = new AssertionInterface(function(constraint) {
+				return new DomElementFlattenedTextConstraint(constraint);
+			});
+			
+			iface.not = new AssertionInterface(function(constraint) {
+				return new NotConstraint(new DomElementFlattenedTextConstraint(constraint));
+			});
+			
+			return iface;
+		}();
 	}
 	
 	function JarvisError(message, type) { 
@@ -443,13 +577,12 @@
 	Is = new AssertionInterface(function(constraint) { return constraint; });
 	Is.not = new AssertionInterface(function(constraint) { return new NotConstraint(constraint); });
 	
-	Contains = new CollectionAssertionInterface(function(constraint) { return constraint; });
-	Contains.not = new CollectionAssertionInterface(function(constraint) { return new NotConstraint(constraint); });
-	Contains.not.property = undefined; //doesn't really make sense to make this kind of negative assertion
+	Has = new CollectionAssertionInterface(function(constraint) { return constraint; });
+	Has.no = new CollectionAssertionInterface(function(constraint) { return new NotConstraint(constraint); });
+	Has.no.property = undefined; //doesn't really make sense to make this kind of negative assertion
 	
 	Assert = {
 		that: function(actual, constraint, message) {
-			assertionCount++;
 			if (!constraint.isValidFor(actual)) {
 				var constraintMessage = constraint.getFailureMessage(actual);
 				message = message ? message + "\n\n" : "";
@@ -460,6 +593,8 @@
 				
 				throw new JarvisError(constraintMessage, "fail");
 			}
+			
+			assertionCount++;
 		},
 		
 		willThrow: function(expectedError) {
@@ -481,7 +616,7 @@
 	
 	global.Assert = Assert;
 	global.Is = Is;
-	global.Contains = Contains;
+	global.Has = Has;
 	global.Jarvis = {
 		reporter: null,
 		htmlDiffs: false,
@@ -493,7 +628,7 @@
 				i,
 				result,
 				expectedError,
-				tests,
+				childTests,
 				setup,
 				tearDown,
 				equalTo;
@@ -512,16 +647,16 @@
 			this.reporter.startTest(name, id, parentId);
 			try {
 				setup && setup();
-				tests = test();
+				childTests = test();
 				expectedError = globalExpectedError;
-				if (typeof(tests) === "object") {
-					if (isArray(tests)) {
+				if (typeof(childTests) === "object") {
+					if (isArray(childTests)) {
 						//run a suite of tests
-						for (i = 0; i < tests.length; i++) {
-							this.run(tests[i], id);
+						for (i = 0; i < childTests.length; i++) {
+							this.run(childTests[i], id);
 						}
 					} else {
-						this.run(tests, id);
+						this.run(childTests, id);
 					}
 				}
 				

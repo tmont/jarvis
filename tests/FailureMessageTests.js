@@ -205,7 +205,7 @@ function Failure_message_tests() {
 				
 				function Should_show_negated_message_for_collection_contains() {
 					try {
-						Assert.that({ foo: "bar" }, Contains.not.value("bar"));
+						Assert.that({ foo: "bar" }, Has.no.value("bar"));
 					} catch (error) {
 						Assert.that(error.message, Is.equalTo("Expected [Object(Object)] to not contain the value \"bar\""));
 					}

@@ -375,10 +375,10 @@ function Constraint_tests() {
 							function f() {}
 							var collection = [1, "foo", f, { foo: "bar" }];
 							
-							Assert.that(collection, Contains.value(1));
-							Assert.that(collection, Contains.value("foo"));
-							Assert.that(collection, Contains.value(f));
-							Assert.that(collection, Contains.value({ foo: "bar" }));
+							Assert.that(collection, Has.value(1));
+							Assert.that(collection, Has.value("foo"));
+							Assert.that(collection, Has.value(f));
+							Assert.that(collection, Has.value({ foo: "bar" }));
 						},
 						
 						function Object_contains_value() {
@@ -390,29 +390,29 @@ function Constraint_tests() {
 								d: { foo: "bar" }
 							};
 							
-							Assert.that(collection, Contains.value(1));
-							Assert.that(collection, Contains.value("foo"));
-							Assert.that(collection, Contains.value(f));
-							Assert.that(collection, Contains.value({ foo: "bar" }));
+							Assert.that(collection, Has.value(1));
+							Assert.that(collection, Has.value("foo"));
+							Assert.that(collection, Has.value(f));
+							Assert.that(collection, Has.value({ foo: "bar" }));
 						},
 						
 						function Collection_does_not_contain_value() {
 							function f() {}
 							var collection = [1, "foo",  { foo: "bar" }];
 							
-							Assert.that(collection, Contains.not.value(4));
-							Assert.that(collection, Contains.not.value("bar"));
-							Assert.that(collection, Contains.not.value({}));
-							Assert.that(collection, Contains.not.value(null));
-							Assert.that(collection, Contains.not.value(undefined));
+							Assert.that(collection, Has.no.value(4));
+							Assert.that(collection, Has.no.value("bar"));
+							Assert.that(collection, Has.no.value({}));
+							Assert.that(collection, Has.no.value(null));
+							Assert.that(collection, Has.no.value(undefined));
 						},
 						
 						function Array_contains_key() {
-							Assert.that([1, 2, 3], Contains.key(0));
-							Assert.that([1, 2, 3], Contains.key(1));
-							Assert.that([1, 2, 3], Contains.key(2));
-							Assert.that([1, 2, 3], Contains.not.key(3));
-							Assert.that([], Contains.not.key(undefined));
+							Assert.that([1, 2, 3], Has.key(0));
+							Assert.that([1, 2, 3], Has.key(1));
+							Assert.that([1, 2, 3], Has.key(2));
+							Assert.that([1, 2, 3], Has.no.key(3));
+							Assert.that([], Has.no.key(undefined));
 						}
 					];
 				},
@@ -420,15 +420,15 @@ function Constraint_tests() {
 				function Object_property_value_tests() {
 					return [
 						function Should_find_property_value() {
-							Assert.that({ foo: "bar" }, Contains.property("foo").equalTo("bar"));
+							Assert.that({ foo: "bar" }, Has.property("foo").equalTo("bar"));
 						},
 						
 						function Should_not_find_property_value() {
-							Assert.that({ foo: "bar" }, Contains.property("foo").not.equalTo("baz"));
+							Assert.that({ foo: "bar" }, Has.property("foo").not.equalTo("baz"));
 						},
 						
 						function Should_find_array_length() {
-							Assert.that([1, 2, 3], Contains.property("length").greaterThan(2));
+							Assert.that([1, 2, 3], Has.property("length").greaterThan(2));
 						}
 					];
 				}
