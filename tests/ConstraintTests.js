@@ -37,6 +37,7 @@ function Constraint_tests() {
 				
 				function Null_is_equal_to_undefined() {
 					Assert.that(null, Is.equalTo(undefined));
+					Assert.that(undefined, Is.equalTo(null));
 				},
 				
 				function True_is_equal_to_true() {
@@ -45,6 +46,7 @@ function Constraint_tests() {
 				
 				function True_is_equal_to_1() {
 					Assert.that(true, Is.equalTo(1));
+					Assert.that(1, Is.equalTo(true));
 				},
 				
 				function False_is_equal_to_false() {
@@ -53,6 +55,17 @@ function Constraint_tests() {
 				
 				function False_is_equal_to_0() {
 					Assert.that(false, Is.equalTo(0));
+					Assert.that(0, Is.equalTo(false));
+				},
+				
+				function False_is_equal_to_empty_string() {
+					Assert.that(false, Is.equalTo(""));
+					Assert.that("", Is.equalTo(false));
+				},
+				
+				function Null_is_not_equal_to_empty_string() {
+					Assert.that(null, Is.not.equalTo(""));
+					Assert.that("", Is.not.equalTo(null));
 				},
 				
 				function Object_references_are_equal() {
@@ -273,6 +286,11 @@ function Constraint_tests() {
 					Assert.that(3.4, Is.lessThanOrEqualTo(5.7));
 					Assert.that(3.4, Is.lessThanOrEqualTo(3.4));
 				},
+				
+				function Strings_are_less_than_strings_based_on_the_alphabet() {
+					Assert.that("foo", Is.lessThan("goo"));
+					Assert.that("zebra", Is.not.lessThan("Apple"));
+				}
 			];
 		},
 		
