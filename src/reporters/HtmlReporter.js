@@ -221,7 +221,8 @@
 			if (result.message || test.childResults.total > 0) {
 				test.title.style.cursor = "pointer";
 				test.title.insertBefore(document.createElement("img"), test.title.firstChild);
-				test.title.firstChild.src = imageSource.expand;
+				test.title.firstChild.src = global.Jarvis.collapsedByDefault ? imageSource.expand : imageSource.collapse;
+				test.title.firstChild.alt = global.Jarvis.collapsedByDefault ? "+" : "-";
 				test.title.onclick = titleClick;
 			}
 			
@@ -232,6 +233,7 @@
 			var display = this.nextSibling.style.display;
 			this.nextSibling.style.display = display === "none" ? "block" : "none";
 			this.firstChild.src = display === "none" ? imageSource.collapse : imageSource.expand;
+			this.firstChild.alt = display === "none" ? "-" : "+";
 			return false;
 		}
 		
