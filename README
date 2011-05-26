@@ -13,7 +13,7 @@ Installation
 ------------
 - Reference jarvis-min.js at the bottom of your HTML file
 - Reference diff_match_path.js if you like looking at fancy diffs
-- Create a test script and include it after jarvis-min.js (examples at http://jarvis.tmont.com/)
+- Create a test script and include it after jarvis-min.js (examples at http://jarvis.tmont.com/#example)
 - Open up the HTML file in a browser
 - You're winning
 
