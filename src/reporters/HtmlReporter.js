@@ -281,7 +281,7 @@
 		}
 	};
 	
-	global.Jarvis.reporter = new Jarvis.HtmlReporter(undefined, true);
+	global.Jarvis.defaultReporter = new Jarvis.HtmlReporter(undefined, true);
 	global.Jarvis.htmlDiffs = true;
 	
 	//add stylesheet

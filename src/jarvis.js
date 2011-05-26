@@ -618,10 +618,10 @@
 	global.Is = Is;
 	global.Has = Has;
 	global.Jarvis = {
-		reporter: null,
+		defaultReporter: null,
 		htmlDiffs: false,
 		
-		run: function(test, parentId) {
+		run: function(test, reporter, parentId) {
 			var id = (testId++),
 				caughtError,
 				assertionCountAtStart = assertionCount,
@@ -633,18 +633,23 @@
 				tearDown,
 				equalTo;
 				
+				
 			if (typeof(test) !== "function") {
 				setup = test.setup;
 				tearDown = test.tearDown;
 				test = test.test;
-				if (!test) {
-					throw "No test detected";
+				if (typeof(test) !== "function") {
+					throw "No test detected or is not a function";
 				}
 			}
 			
 			name = getFunctionName(test).replace(/_/g, " ");
+			reporter = reporter || this.defaultReporter;
+			if (!reporter) {
+				throw "No reporter given";
+			}
 			
-			this.reporter.startTest(name, id, parentId);
+			reporter.startTest(name, id, parentId);
 			try {
 				setup && setup();
 				childTests = test();
@@ -653,7 +658,7 @@
 					if (isArray(childTests)) {
 						//run a suite of tests
 						for (i = 0; i < childTests.length; i++) {
-							this.run(childTests[i], id);
+							this.run(childTests[i], reporter, id);
 						}
 					} else {
 						this.run(childTests, id);
@@ -698,7 +703,7 @@
 				assertions: assertionCount - assertionCountAtStart
 			};
 			
-			this.reporter.endTest(result, id);
+			reporter.endTest(result, id);
 			globalExpectedError = undefined;
 		}
 	};
