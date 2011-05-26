@@ -176,7 +176,7 @@
 				addGradient(test);
 			}
 			
-			info += "(" + (test.endTime - test.startTime) + "ms, " + test.assertions + " assertions)";
+			info += "(" + (test.endTime - test.startTime) + "ms, " + test.assertions + " assertion" + (test.assertions !== 1 ? "s" : "") + ")";
 			test.title.appendChild(doc.createTextNode(" " + info));
 			
 			if (result.message) {
