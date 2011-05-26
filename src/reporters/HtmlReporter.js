@@ -242,7 +242,7 @@
 				gradients.push(passColor + " " + (failPercent + errorPercent + ignorePercent)  + "%");
 			}
 			
-			if (/Mozilla/.test(global.navigator.userAgent)) {
+			if (/Firefox/.test(global.navigator.userAgent)) {
 				test.element.style.backgroundImage = "-moz-linear-gradient(left, " + gradients.join(", ") + ")";
 			} else if (/WebKit/.test(global.navigator.userAgent)) {
 				test.element.style.backgroundImage = "-webkit-linear-gradient(left, " + gradients.join(", ") + ")";
