@@ -16,7 +16,10 @@ function Failure_message_tests() {
 				function Comparing_two_strings_should_show_a_diff() {
 					var expected = "this is a story all about how my life got flipped turned upside down";
 					var actual =   "this is a storey all about how my life got twisted turned Upside down";
-					var expectedHtml = "<span>this is a stor</span><del>e</del><span>y all about how my life got </span><del>twist</del><ins>flipp</ins><span>ed turned </span><del>U</del><ins>u</ins><span>pside down</span>";
+					var expectedHtml = 
+						"<(span|SPAN)>this is a stor</(span|SPAN)><(del|DEL)>e</(del|DEL)><(span|SPAN)>y all about how my life got " +
+						"</(span|SPAN)><(del|DEL)>twist</(del|DEL)><(ins|INS)>flipp</(ins|INS)><(span|SPAN)>ed turned </(span|SPAN)><(del|DEL)>U</(del|DEL)>"+
+						"<(ins|INS)>u</(ins|INS)><(span|SPAN)>pside down</(span|SPAN)>";
 					
 					try {
 						Assert.that(expected, Is.equalTo(actual));
@@ -26,7 +29,7 @@ function Failure_message_tests() {
 							dummy.appendChild(error.message[i].cloneNode(true));
 						}
 						
-						Assert.that(dummy.innerHTML, Is.equalTo(expectedHtml));
+						Assert.that(dummy.innerHTML, Is.regexMatch(new RegExp(expectedHtml)));
 					}
 				},
 				

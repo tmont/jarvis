@@ -39,6 +39,8 @@
 			text = data.replace(/&/g, "&amp;")
 				.replace(/</g, "&lt;")
 				.replace(/>/g, "&gt;")
+				.replace(/\r\n/g, "&crarr;&para;<br />")
+				.replace(/\r/g, "&crarr;<br />")
 				.replace(/\n/g, "&para;<br />");
 			
 			switch (op) {
@@ -73,7 +75,7 @@
 	}
 	
 	function getBinaryFailureMessage(expected, actual) {
-		return "Expected: " + expected + "\nActual:   " + actual;
+		return "Expected: " + expected + "\n" + "Actual:   " + actual;
 	}
 	
 	function getType(object) {
@@ -181,7 +183,7 @@
 				return getDiffNodes(expected, actual);
 			}
 			
-			message = "Failed asserting that two " + getType(expected) + "s are " + (negate ? "not " : "") + "identical\n\n";
+			message = "Failed asserting that two " + getType(expected) + "s are " + (negate ? "not " : "") + "identical" + "\n\n";
 			return message + getBinaryFailureMessage(toString(expected), toString(actual));
 		}
 	}
@@ -215,7 +217,7 @@
 				return getDiffNodes(expected, actual);
 			}
 			
-			message = "Failed asserting that two " + getType(expected) + "s are " + (negate ? "not " : "") + "equal\n\n";
+			message = "Failed asserting that two " + getType(expected) + "s are " + (negate ? "not " : "") + "equal" + "\n\n";
 			return message + getBinaryFailureMessage(toString(expected), toString(actual));
 		};
 	}
@@ -360,7 +362,7 @@
 		};
 		
 		this.getFailureMessage = function(actual) {
-			var message = "Failed making an assertion on an object with property \"" + property + "\"\n\n",
+			var message = "Failed making an assertion on an object with property \"" + property + "\"" + "\n\n",
 				constraintMessage = constraint.getFailureMessage(actual[property]);
 			
 			if (typeof(constraintMessage) !== "string") {
