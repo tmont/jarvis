@@ -98,8 +98,8 @@ function getDomTests() {
 							
 							function Should_show_diffs_for_all_matched_elements_on_failure() {
 								var expectedHtml = "Failed asserting a condition about the text for any of the DOM elements " +
-									"defined by the selector\n    #domtest p\n\n<ol><li><del>lorem ipsum</del><ins>This is some " + 
-									"text</ins></li><li><del>lorem ipsum</del><ins>This is also some text</ins></li></ol>";
+									"defined by the selector\n    #domtest p\n\n<(ol|OL)><(li|LI)><(del|DEL)>lorem ipsum</(del|DEL)><(ins|INS)>This is some " + 
+									"text</(ins|INS)></(li|LI)><(li|LI)><(del|DEL)>lorem ipsum</(del|DEL)><(ins|INS)>This is also some text</(ins|INS)></(li|LI)></(ol|OL)>";
 								
 								try {
 									Assert.that("#domtest p", Has.text.equalTo("lorem ipsum"));
@@ -114,7 +114,7 @@ function getDomTests() {
 										dummy.appendChild(error.message[i].cloneNode(true));
 									}
 									
-									Assert.that(dummy.innerHTML, Is.equalTo(expectedHtml));
+									Assert.that(dummy.innerHTML, Is.regexMatch(new RegExp(expectedHtml)));
 								}
 							},
 							
@@ -137,9 +137,9 @@ function getDomTests() {
 							
 							function Should_show_error_messages_for_all_matched_elements_on_recursive_text_comparison_failure() {
 								var expectedHtml = "Failed asserting a condition about the recursively flattened text for any of the DOM " + 
-									"elements defined by the selector\n    #domtest p\n\n<ol><li><del>oh hai inner</del><ins>This is " +
-									"some</ins><span> text</span></li><li><del>oh hai inner</del><ins>This is also some</ins><span> text</span>" +
-									"</li><li><del>o</del><ins>O</ins><span>h hai inner text</span></li></ol>";
+									"elements defined by the selector\n    #domtest p\n\n<(ol|OL)><(li|LI)><(del|DEL)>oh hai inner</(del|DEL)><(ins|INS)>This is " +
+									"some</(ins|INS)><(span|SPAN)> text</(span|SPAN)></(li|LI)><(li|LI)><(del|DEL)>oh hai inner</(del|DEL)><(ins|INS)>This is also some</(ins|INS)><(span|SPAN)> text</(span|SPAN)>" +
+									"</(li|LI)><(li|LI)><(del|DEL)>o</(del|DEL)><(ins|INS)>O</(ins|INS)><(span|SPAN)>h hai inner text</(span|SPAN)></(li|LI)></(ol|OL)>";
 									
 								try {
 									Assert.that("#domtest p", Has.flattenedText.equalTo("oh hai inner text"));
@@ -153,7 +153,7 @@ function getDomTests() {
 										dummy.appendChild(error.message[i].cloneNode(true));
 									}
 									
-									Assert.that(dummy.innerHTML, Is.equalTo(expectedHtml));
+									Assert.that(dummy.innerHTML, Is.regexMatch(new RegExp(expectedHtml)));
 								}
 							}
 						];
