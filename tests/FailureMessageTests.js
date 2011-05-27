@@ -45,45 +45,43 @@ function Failure_message_tests() {
 					}
 				},
 				
-				function Should_show_human_readable_message_for_strings_without_diff() {
+				function() {
 					var original = Jarvis.htmlDiffs;
-					Jarvis.htmlDiffs = false;
-					try {
-						Assert.that("foo", Is.equalTo("bar"));
-						Jarvis.htmlDiffs = original;
-					} catch (error) {
-						Jarvis.htmlDiffs = original;
-						Assert.that(error.message, Is.equalTo("Failed asserting that two strings are equal\n\nExpected: \"bar\"\nActual:   \"foo\""));
-					}
-				},
-				
-				function Should_truncate_long_strings() {
-					var original = Jarvis.htmlDiffs;
-					Jarvis.htmlDiffs = false;
 					
-					var longString = new Array(201).join("x");
-					try {
-						Assert.that("hello world!", Is.equalTo(longString));
-						Jarvis.htmlDiffs = original;
-					} catch (error) {
-						Jarvis.htmlDiffs = original;
-						var expectedString = new Array(51).join("x") + "..." + new Array(51).join("x");
-						Assert.that(error.message, Is.equalTo("Failed asserting that two strings are equal\n\nExpected: \"" + expectedString + "\"\nActual:   \"hello world!\""));
-					}
-				},
-				
-				function Should_print_something_visible_for_empty_string() {
-					var original = Jarvis.htmlDiffs;
-					Jarvis.htmlDiffs = false;
-					
-					try {
-						Assert.that("", Is.equalTo("not empty"));
-						Jarvis.htmlDiffs = original;
-					} catch (error) {
-						Jarvis.htmlDiffs = original;
-						Assert.that(error.message, Is.equalTo("Failed asserting that two strings are equal\n\nExpected: \"not empty\"\nActual:   <empty string>"));
-					}
-				},
+					return {
+						setup: function() { Jarvis.htmlDiffs = false; },
+						tearDown: function() { Jarvis.htmlDiffs = original; },
+						test: function Tests_that_require_htmlDiffs_to_be_false() {
+							return [
+								function Should_show_human_readable_message_for_strings_without_diff() {
+									try {
+										Assert.that("foo", Is.equalTo("bar"));
+									} catch (error) {
+										Assert.that(error.message, Is.equalTo("Failed asserting that two strings are equal\n\nExpected: \"bar\"\nActual:   \"foo\""));
+									}
+								},
+								
+								function Should_truncate_long_strings() {
+									var longString = new Array(201).join("x");
+									try {
+										Assert.that("hello world!", Is.equalTo(longString));
+									} catch (error) {
+										var expectedString = new Array(51).join("x") + "..." + new Array(51).join("x");
+										Assert.that(error.message, Is.equalTo("Failed asserting that two strings are equal\n\nExpected: \"" + expectedString + "\"\nActual:   \"hello world!\""));
+									}
+								},
+								
+								function Should_print_something_visible_for_empty_string() {
+									try {
+										Assert.that("", Is.equalTo("not empty"));
+									} catch (error) {
+										Assert.that(error.message, Is.equalTo("Failed asserting that two strings are equal\n\nExpected: \"not empty\"\nActual:   <empty string>"));
+									}
+								}
+							];
+						}
+					};
+				}(),
 				
 				function Should_print_something_visible_for_null() {
 					try {
