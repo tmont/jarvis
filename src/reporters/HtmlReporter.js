@@ -155,7 +155,7 @@
 			title.appendChild(doc.createTextNode("Summary"));
 			
 			infoContainer.className = "jarvis-test-info";
-			infoContainer.appendChild(doc.createTextNode(totals.pass + "/" + totals.total + " " + percent + "% (" + totals.elapsedTime + "ms " + totalAssertions + " assertion" + (totalAssertions !== 1 ? "s" : "") + ")"));
+			infoContainer.appendChild(doc.createTextNode(totals.pass + "/" + totals.total + " " + percent + "% (" + totals.elapsedTime + "ms, " + totalAssertions + " assertion" + (totalAssertions !== 1 ? "s" : "") + ")"));
 			
 			summary.appendChild(title);
 			title.appendChild(infoContainer);
