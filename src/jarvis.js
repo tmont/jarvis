@@ -579,6 +579,7 @@
 		var newFrames = [],
 			i;
 		
+		//this only cleans up the uncompressed version since all the functions get renamed... meh.
 		for (i = frames.length - 1; i >= 0; i--) {
 			if (/^JarvisError\(/.test(frames[i])) {
 				break;
@@ -594,7 +595,7 @@
 		this.message = message; 
 		this.type = type;
 		this["!!jarvis"] = true;
-		this.stackTrace = cleanStackTrace(global.getStackTrace({ e: thrownError }));
+		this.stackTrace = global.Jarvis.showStackTraces ? cleanStackTrace(global.getStackTrace({ e: thrownError })) : [];
 	}
 	
 	Is = new AssertionInterface(function(constraint) { return constraint; });
@@ -605,7 +606,7 @@
 	Has.no.property = undefined; //doesn't really make sense to make this kind of negative assertion
 	
 	Assert = {
-		that: function assertThat(actual, constraint, message) {
+		that: function(actual, constraint, message) {
 			if (!constraint.isValidFor(actual)) {
 				var constraintMessage = constraint.getFailureMessage(actual);
 				message = message ? message + "\n\n" : "";
@@ -620,7 +621,7 @@
 			assertionCount++;
 		},
 		
-		willThrow: function assertWillThrow(expectedError) {
+		willThrow: function(expectedError) {
 			if (expectedError === true) {
 				throw new JarvisError("Cannot set expected error to true", "error");
 			}
@@ -628,11 +629,11 @@
 			globalExpectedError = expectedError !== undefined ? expectedError : true;
 		},
 		
-		fail: function fail(message) {
+		fail: function(message) {
 			throw new JarvisError(message, "fail");
 		},
 		
-		ignore: function ignore(message) {
+		ignore: function(message) {
 			throw new JarvisError(message, "ignore");
 		}
 	};
@@ -643,6 +644,7 @@
 	global.Jarvis = {
 		defaultReporter: null,
 		htmlDiffs: false,
+		showStackTraces: true,
 		
 		reset: function() {
 			assertionCount = 0;
@@ -657,7 +659,7 @@
 			reporter.summary(assertionCount);
 		},
 		
-		run: function runTest(test, reporter, parentId) {
+		run: function(test, reporter, parentId) {
 			var id = (testId++),
 				caughtError,
 				assertionCountAtStart = assertionCount,

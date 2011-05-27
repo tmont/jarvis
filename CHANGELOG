@@ -12,11 +12,15 @@
 		- Has.flattenedText: make an assertion about the recursively retrieved text of a DOM node
 	- correctly print the plural or singular form of "assertion"
 	- added stack trace output for failures/errors for HtmlReporter
+	- added global option Jarvis.showStackTraces to switch stack trace output on and off. The default
+	  is on, and is only rendered when using the HtmlReporter.
 - Breaking changes
 	- Jarvis.reporter became Jarvis.defaultReporter
 	- second argument to Jarvis.run() is an optional reporter to use for that test; falls back to
 	  Jarvis.defaultReporter if not given
-	- Jarvis.collapsedByDefault is now injected as the second argument of the HtmlReporter constructor
+	- Jarvis.collapsedByDefault is gone
+	- HtmlReporter takes an object as an optional second argument for defining options. The only relevant 
+	  property now is collapsedByDefault, which defaults to true.
 
 1.0 2011-05-26
 --------------
