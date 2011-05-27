@@ -1,3 +1,21 @@
+1.1 2011-05-26
+--------------
+- Enhancements
+	- added Jarvis.summary()
+	- prettier output using CSS3 (TEXT SHADOW! DROP SHADOW!)
+	- bundled diff_match_patch.js in jarvis-min.js
+	- bundled sizzle.js in jarvis-min.js
+	- new assertions
+		- Is.inDom: determine if a node is present in the DOM
+		- Has.text: make an assertion about the text of a DOM node
+		- Has.flattenedText: make an assertion about the recursively retrieved text of a DOM node
+	- correctly print the plural or singular form of "assertion"
+- Breaking changes
+	- Jarvis.reporter became Jarvis.defaultReporter
+	- second argument to Jarvis.run() is an optional reporter to use for that test; falls back to
+	  Jarvis.defaultReporter if not given
+	- Jarvis.collapsedByDefault is now injected as the second argument of the HtmlReporter constructor
+
 1.0 2011-05-26
 --------------
 Initial release

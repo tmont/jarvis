@@ -2,6 +2,8 @@ Jarvis <http://jarvis.tmont.com/>
 Version 1.0 (see CHANGELOG for details)
 (c) 2011 Tommy Montgomery <http://tommymontgomery.com/>
 
+Jarvis is a unit testing framework similar to [N|J|S]Unit. But mostly similar to NUnit.
+
 Licensed under WTFPL: http://sam.zoy.org/wtfpl/
 
 diff_match_patch <http://code.google.com/p/google-diff-match-patch/>
@@ -9,11 +11,14 @@ diff_match_patch <http://code.google.com/p/google-diff-match-patch/>
 	by Neil Fraser
 Licensed under the Apache License, Version 2.0 <http://www.apache.org/licenses/LICENSE-2.0>
 
+Sizzle selector engine <http://sizzlejs.com/>
+(c) 2011 The Dojo foundation
+Licensed under the MIT, BSD, and GPL Licenses.
+
 Installation
 ------------
 - Reference jarvis-min.js at the bottom of your HTML file
-- Reference diff_match_path.js if you like looking at fancy diffs
-- Create a test script and include it after jarvis-min.js (examples at http://jarvis.tmont.com/#example)
+- Create a test script and include it after jarvis-min.js (example at http://jarvis.tmont.com/#example)
 - Open up the HTML file in a browser
 - You're winning
 

@@ -1,5 +1,12 @@
+/**
+ * Jarvis: JavaScript unit testing library
+ *   (c) 2011 Tommy Montgomery <http://tommymontgomery.com/>
+ *
+ * More information: <http://jarvis.tmont.com/>
+ * 
+ * Released under the WTFPL <http://sam.zoy.org/wtfpl/>
+ */
 (function(global, doc, undefined){
-	
 	var $ = global.Sizzle,
 		Assert,
 		Is,
