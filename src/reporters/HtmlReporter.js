@@ -11,6 +11,18 @@
 		},
 	
 		css = "\
+/* new clearfix */\
+.clearfix:after {\
+    visibility: hidden;\
+    display: block;\
+    font-size: 0;\
+    content: \" \";\
+    clear: both;\
+    height: 0;\
+}\
+* html .clearfix             { zoom: 1; } /* IE6 */\
+*:first-child+html .clearfix { zoom: 1; } /* IE7 */\
+\
 .jarvis-test {\
 	color: black;\
 	font-family: \"Trebuchet MS\", \"Droid sans Mono\", Calibri, Verdana, sans-serif;\
@@ -32,6 +44,7 @@
 	font-size: 12px;\
 	font-weight: normal;\
 	float: right;\
+	line-height: 18px;\
 }\
 \
 .jarvis-test p {\
@@ -43,10 +56,22 @@
 }\
 .jarvis-test p img {\
 	margin-right: 3px;\
+	width: 11px;\
+	height: 11px;\
 }\
 .jarvis-test:hover {\
 	opacity: 1;\
 	filter: alpha(opacity=100);\
+}\
+\
+.jarvis-summary {\
+	background-color: #EEEEEE;\
+	font-size: 20px;\
+}\
+.jarvis-summary .jarvis-test-info {\
+	font-size: 16px;\
+	font-weight: bold;\
+	line-height: 24px;\
 }\
 \
 .jarvis-test pre {\
@@ -97,8 +122,35 @@
 ";
 	
 	global.Jarvis.HtmlReporter = function(container, collapsedByDefault) {
-		var tests = {};
+		var tests = {}, 
+			totals = {
+				pass: 0,
+				fail: 0,
+				error: 0,
+				ignore: 0,
+				total: 0,
+				elapsedTime: 0
+			};
+		
 		container = container || doc.body;
+		
+		this.summary = function(totalAssertions) {
+			var summary = doc.createElement("div");
+			summary.className = "jarvis-test jarvis-summary";
+			
+			var title = document.createElement("p");
+			title.className = "clearfix";
+			title.appendChild(document.createTextNode("Summary"));
+			
+			var infoContainer = document.createElement("span");
+			infoContainer.className = "jarvis-test-info";
+			var percent = totals.total === 0 ? 0 : Math.round(totals.pass * 10000 / totals.total) / 100;
+			infoContainer.appendChild(document.createTextNode(totals.pass + "/" + totals.total + " " + percent + "% (" + totals.elapsedTime + "ms " + totalAssertions + " assertion" + (totalAssertions !== 1 ? "s" : "") + ")"));
+			summary.appendChild(title);
+			title.appendChild(infoContainer);
+			
+			container.appendChild(summary);
+		},
 		
 		this.startTest = function(name, id, parentId) {
 			var element = doc.createElement("div"),
@@ -125,6 +177,7 @@
 				};
 			
 			element.className = "jarvis-test jarvis-test-result-running";
+			title.className = "clearfix";
 			title.appendChild(doc.createTextNode(name));
 			
 			icon.className = "jarvis-icon";
@@ -180,12 +233,20 @@
 				if (test.childResults.total === 0) {
 					parent.childResults[actualStatus]++;
 					parent.childResults.total++;
+					totals.total++;
+					totals[actualStatus]++;
 				} else {
 					parent.childResults.pass += test.childResults.pass;
 					parent.childResults.error += test.childResults.error;
 					parent.childResults.fail += test.childResults.fail;
 					parent.childResults.ignore += test.childResults.ignore;
 					parent.childResults.total += test.childResults.total;
+					
+					totals.pass += test.childResults.pass;
+					totals.error += test.childResults.error;
+					totals.fail += test.childResults.fail;
+					totals.ignore += test.childResults.ignore;
+					totals.total += test.childResults.total;
 				}
 			}
 			
@@ -216,7 +277,7 @@
 					messageContainer.appendChild(doc.createTextNode(result.message));
 				}
 				
-				messageContainer.style.display = global.Jarvis.collapsedByDefault ? "none" : "block";
+				messageContainer.style.display = collapsedByDefault ? "none" : "block";
 				test.element.appendChild(messageContainer);
 			}
 			if (result.message || test.childResults.total > 0) {
@@ -227,6 +288,7 @@
 				test.title.onclick = titleClick;
 			}
 			
+			totals.elapsedTime += (test.endTime - test.startTime);
 			delete tests[id];
 		};
 		

@@ -621,6 +621,15 @@
 		defaultReporter: null,
 		htmlDiffs: false,
 		
+		summary: function(reporter) {
+			reporter = reporter || this.defaultReporter;
+			if (!reporter) {
+				throw "No reporter given";
+			}
+			
+			reporter.summary(assertionCount);
+		},
+		
 		run: function(test, reporter, parentId) {
 			var id = (testId++),
 				caughtError,
