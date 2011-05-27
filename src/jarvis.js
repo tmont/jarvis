@@ -576,8 +576,10 @@
 	}
 	
 	function cleanStackTrace(frames) {
-		var newFrames = []
-		for (var i = frames.length - 1; i >= 0; i--) {
+		var newFrames = [],
+			i;
+		
+		for (i = frames.length - 1; i >= 0; i--) {
 			if (/^JarvisError\(/.test(frames[i])) {
 				break;
 			}
