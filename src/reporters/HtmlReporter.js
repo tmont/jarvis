@@ -135,19 +135,23 @@
 		container = container || doc.body;
 		
 		this.summary = function(totalAssertions) {
-			var summary = doc.createElement("div");
+			var summary = doc.createElement("div"),
+				title = doc.createElement("p"),
+				infoContainer = doc.createElement("span")
+				percent = totals.total === 0 ? 0 : Math.round(totals.pass * 10000 / totals.total) / 100;
+			
 			summary.className = "jarvis-test jarvis-summary";
 			
-			var title = document.createElement("p");
 			title.className = "clearfix";
-			title.appendChild(document.createTextNode("Summary"));
+			title.appendChild(doc.createTextNode("Summary"));
 			
-			var infoContainer = document.createElement("span");
 			infoContainer.className = "jarvis-test-info";
-			var percent = totals.total === 0 ? 0 : Math.round(totals.pass * 10000 / totals.total) / 100;
-			infoContainer.appendChild(document.createTextNode(totals.pass + "/" + totals.total + " " + percent + "% (" + totals.elapsedTime + "ms " + totalAssertions + " assertion" + (totalAssertions !== 1 ? "s" : "") + ")"));
+			infoContainer.appendChild(doc.createTextNode(totals.pass + "/" + totals.total + " " + percent + "% (" + totals.elapsedTime + "ms " + totalAssertions + " assertion" + (totalAssertions !== 1 ? "s" : "") + ")"));
+			
 			summary.appendChild(title);
 			title.appendChild(infoContainer);
+			
+			addGradient(totals, summary);
 			
 			container.appendChild(summary);
 		},
@@ -257,7 +261,7 @@
 				info = 	test.childResults.pass + "/" + test.childResults.total + " " + 
 					(Math.round(test.childResults.pass * 10000 / test.childResults.total) / 100) + "% ";
 				
-				addGradient(test);
+				addGradient(test.childResults, test.element);
 			}
 			
 			info += "(" + (test.endTime - test.startTime) + "ms, " + test.assertions + " assertion" + (test.assertions !== 1 ? "s" : "") + ")";
@@ -300,7 +304,7 @@
 			return false;
 		}
 		
-		function addGradient(test) {
+		function addGradient(totals, element) {
 			var failPercent,
 				passPercent,
 				errorPercent,
@@ -312,10 +316,10 @@
 				gradients = [];
 				
 			//safari and webkit gradients
-			failPercent = Math.round(test.childResults.fail / test.childResults.total * 100);
-			passPercent = Math.round(test.childResults.pass / test.childResults.total * 100);
-			ignorePercent = Math.round(test.childResults.ignore / test.childResults.total * 100);
-			errorPercent = Math.round(test.childResults.error / test.childResults.total * 100);
+			failPercent = Math.round(totals.fail / totals.total * 100);
+			passPercent = Math.round(totals.pass / totals.total * 100);
+			ignorePercent = Math.round(totals.ignore / totals.total * 100);
+			errorPercent = Math.round(totals.error / totals.total * 100);
 			
 			failColor = "#FFCCCC";
 			passColor = "#CCFFCC";
@@ -336,9 +340,9 @@
 			}
 			
 			if (/Firefox/.test(global.navigator.userAgent)) {
-				test.element.style.backgroundImage = "-moz-linear-gradient(left, " + gradients.join(", ") + ")";
+				element.style.backgroundImage = "-moz-linear-gradient(left, " + gradients.join(", ") + ")";
 			} else if (/WebKit/.test(global.navigator.userAgent)) {
-				test.element.style.backgroundImage = "-webkit-linear-gradient(left, " + gradients.join(", ") + ")";
+				element.style.backgroundImage = "-webkit-linear-gradient(left, " + gradients.join(", ") + ")";
 			}
 		}
 	};
