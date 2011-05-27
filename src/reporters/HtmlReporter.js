@@ -64,6 +64,10 @@
 	filter: alpha(opacity=100);\
 }\
 \
+.jarvis-stack-trace {\
+	color: #990000;\
+}\
+\
 .jarvis-summary {\
 	background-color: #EEEEEE;\
 	font-size: 20px;\
@@ -264,20 +268,36 @@
 			infoContainer.appendChild(document.createTextNode(info));
 			test.title.appendChild(infoContainer);
 			
-			if (result.message) {
-				messageContainer = doc.createElement("pre"); 
+			if (result.message || result.stackTrace.length > 0) {
+				messageContainer = doc.createElement("pre");
 				
-				if (result.message[0] && typeof(result.message[0].nodeType) !== "undefined") {
-					for (i = 0; i < result.message.length; i++) {
-						messageContainer.appendChild(result.message[i]);
+				if (result.message) {
+					if (result.message[0] && typeof(result.message[0].nodeType) !== "undefined") {
+						for (i = 0; i < result.message.length; i++) {
+							messageContainer.appendChild(result.message[i]);
+						}
+					} else {
+						messageContainer.appendChild(doc.createTextNode(result.message));
 					}
-				} else {
-					messageContainer.appendChild(doc.createTextNode(result.message));
+				}
+				
+				if (result.stackTrace) {
+					var list = doc.createElement("ol");
+					list.className = "jarvis-stack-trace";
+					var item;
+					for (i = 0; i < result.stackTrace.length; i++) {
+						item = doc.createElement("li");
+						item.appendChild(doc.createTextNode(result.stackTrace[i]));
+						list.appendChild(item);
+					}
+					
+					messageContainer.appendChild(list);
 				}
 				
 				messageContainer.style.display = collapsedByDefault ? "none" : "block";
 				test.element.appendChild(messageContainer);
 			}
+			
 			if (result.message || test.childResults.total > 0) {
 				test.title.style.cursor = "pointer";
 				test.title.insertBefore(document.createElement("img"), test.title.firstChild);

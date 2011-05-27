@@ -575,10 +575,24 @@
 		}();
 	}
 	
-	function JarvisError(message, type) { 
+	function cleanStackTrace(frames) {
+		var newFrames = []
+		for (var i = frames.length - 1; i >= 0; i--) {
+			if (/^JarvisError\(/.test(frames[i])) {
+				break;
+			}
+			
+			newFrames.unshift(frames[i]);
+		}
+		
+		return newFrames;
+	}
+	
+	function JarvisError(message, type, thrownError) { 
 		this.message = message; 
 		this.type = type;
 		this["!!jarvis"] = true;
+		this.stackTrace = cleanStackTrace(global.getStackTrace({ e: thrownError }));
 	}
 	
 	Is = new AssertionInterface(function(constraint) { return constraint; });
@@ -589,7 +603,7 @@
 	Has.no.property = undefined; //doesn't really make sense to make this kind of negative assertion
 	
 	Assert = {
-		that: function(actual, constraint, message) {
+		that: function assertThat(actual, constraint, message) {
 			if (!constraint.isValidFor(actual)) {
 				var constraintMessage = constraint.getFailureMessage(actual);
 				message = message ? message + "\n\n" : "";
@@ -604,7 +618,7 @@
 			assertionCount++;
 		},
 		
-		willThrow: function(expectedError) {
+		willThrow: function assertWillThrow(expectedError) {
 			if (expectedError === true) {
 				throw new JarvisError("Cannot set expected error to true", "error");
 			}
@@ -612,11 +626,11 @@
 			globalExpectedError = expectedError !== undefined ? expectedError : true;
 		},
 		
-		fail: function(message) {
+		fail: function fail(message) {
 			throw new JarvisError(message, "fail");
 		},
 		
-		ignore: function(message) {
+		ignore: function ignore(message) {
 			throw new JarvisError(message, "ignore");
 		}
 	};
@@ -641,7 +655,7 @@
 			reporter.summary(assertionCount);
 		},
 		
-		run: function(test, reporter, parentId) {
+		run: function runTest(test, reporter, parentId) {
 			var id = (testId++),
 				caughtError,
 				assertionCountAtStart = assertionCount,
@@ -653,7 +667,6 @@
 				tearDown,
 				runLastTearDown = true,
 				equalTo;
-				
 				
 			if (typeof(test) !== "function") {
 				setup = test.setup;
@@ -713,13 +726,14 @@
 						if (expectedError !== true && !equalTo.isValidFor(error)) {
 							error = new JarvisError(
 								"Expected error, " + toString(expectedError) + ", did not match actual error, " + toString(error),
-								"fail"
+								"fail",
+								error
 							);
 						} else {
 							error = undefined;
 						}
 					} else {
-						error = new JarvisError("An error occurred while running the test: " + (error.toString ? error.toString() : error), "error");
+						error = new JarvisError("An error occurred while running the test: " + (error.toString ? error.toString() : error), "error", error);
 					}
 				}
 				
@@ -733,6 +747,7 @@
 			result = {
 				status: caughtError === undefined ? "pass" : caughtError.type,
 				message: caughtError === undefined ? "" : caughtError.message,
+				stackTrace: caughtError === undefined ? [] : caughtError.stackTrace,
 				assertions: assertionCount - assertionCountAtStart
 			};
 			
