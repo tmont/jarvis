@@ -368,6 +368,7 @@
 	
 	global.Jarvis.defaultReporter = new Jarvis.HtmlReporter();
 	global.Jarvis.htmlDiffs = true;
+	global.Jarvis.showStackTraces = true;
 	
 	//add stylesheet
 	(function(){

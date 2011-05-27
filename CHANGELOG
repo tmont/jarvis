@@ -16,7 +16,8 @@
 		- Has.flattenedText: make an assertion about the recursively retrieved text of a DOM node
 	- added stack trace output for failures/errors for HtmlReporter
 	- added global option Jarvis.showStackTraces to switch stack trace output on and off. The default
-	  is on, and is only rendered when using the HtmlReporter.
+	  is on, and is only rendered when using the HtmlReporter. This option is disabled for Opera, because
+	  it's insanely slow.
 - Breaking changes
 	- Jarvis.reporter became Jarvis.defaultReporter
 	- second argument to Jarvis.run() is an optional reporter to use for that test; falls back to

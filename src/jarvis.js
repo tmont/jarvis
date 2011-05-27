@@ -579,9 +579,8 @@
 		var newFrames = [],
 			i;
 		
-		//this only cleans up the uncompressed version since all the functions get renamed... meh.
 		for (i = frames.length - 1; i >= 0; i--) {
-			if (/^JarvisError\(/.test(frames[i])) {
+			if (/(Object doesn't support property or method 'undef'|Object.createException)/.test(frames[i])) {
 				break;
 			}
 			
@@ -595,7 +594,7 @@
 		this.message = message; 
 		this.type = type;
 		this["!!jarvis"] = true;
-		this.stackTrace = global.Jarvis.showStackTraces ? cleanStackTrace(global.getStackTrace({ e: thrownError })) : [];
+		this.stackTrace = global.Jarvis.showStackTraces && !global.opera ? cleanStackTrace(global.getStackTrace({ e: thrownError })) : [];
 	}
 	
 	Is = new AssertionInterface(function(constraint) { return constraint; });
@@ -644,7 +643,7 @@
 	global.Jarvis = {
 		defaultReporter: null,
 		htmlDiffs: false,
-		showStackTraces: true,
+		showStackTraces: false,
 		
 		reset: function() {
 			assertionCount = 0;
