@@ -245,12 +245,6 @@
 					parent.childResults.fail += test.childResults.fail;
 					parent.childResults.ignore += test.childResults.ignore;
 					parent.childResults.total += test.childResults.total;
-					
-					totals.pass += test.childResults.pass;
-					totals.error += test.childResults.error;
-					totals.fail += test.childResults.fail;
-					totals.ignore += test.childResults.ignore;
-					totals.total += test.childResults.total;
 				}
 			}
 			
