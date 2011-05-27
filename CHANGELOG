@@ -1,4 +1,4 @@
-1.1 2011-05-26
+1.1 2011-05-27
 --------------
 - Enhancements
 	- added Jarvis.summary()
@@ -11,6 +11,7 @@
 		- Has.text: make an assertion about the text of a DOM node
 		- Has.flattenedText: make an assertion about the recursively retrieved text of a DOM node
 	- correctly print the plural or singular form of "assertion"
+	- added stack trace output for failures/errors for HtmlReporter
 - Breaking changes
 	- Jarvis.reporter became Jarvis.defaultReporter
 	- second argument to Jarvis.run() is an optional reporter to use for that test; falls back to

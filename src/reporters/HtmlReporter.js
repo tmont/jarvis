@@ -219,6 +219,8 @@
 				info = "",
 				infoContainer,
 				messageContainer,
+				list,
+				item,
 				i;
 				
 			test.endTime = new Date().getTime();
@@ -282,9 +284,8 @@
 				}
 				
 				if (result.stackTrace) {
-					var list = doc.createElement("ol");
+					list = doc.createElement("ol");
 					list.className = "jarvis-stack-trace";
-					var item;
 					for (i = 0; i < result.stackTrace.length; i++) {
 						item = doc.createElement("li");
 						item.appendChild(doc.createTextNode(result.stackTrace[i]));

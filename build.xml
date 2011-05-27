@@ -49,6 +49,7 @@
 		<concat destfile="${temp.dir}/jarvis-all.js" encoding="UTF-8" eol="lf">
 			<fileset dir="${temp.dir}" includes="diff_match_patch.js"/>
 			<fileset dir="${temp.dir}" includes="sizzle.js"/>
+			<fileset dir="${temp.dir}" includes="stacktrace.js"/>
 			<fileset dir="${temp.dir}" includes="jarvis.js"/>
 			<fileset dir="${temp.dir}" includes="reporters/ConsoleReporter.js"/>
 			<fileset dir="${temp.dir}" includes="reporters/HtmlReporter.js"/>
