@@ -19,6 +19,8 @@
 	  is on, and is only rendered when using the HtmlReporter. This option is disabled for Opera, because
 	  it's insanely slow.
 - Breaking changes
+	- Contains became Has
+	- Contains.not became Has.no
 	- Jarvis.reporter became Jarvis.defaultReporter
 	- second argument to Jarvis.run() is an optional reporter to use for that test; falls back to
 	  Jarvis.defaultReporter if not given
