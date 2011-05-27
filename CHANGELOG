@@ -2,6 +2,7 @@
 --------------
 - Enhancements
 	- added Jarvis.summary()
+	- added Jarvis.reset() to reset the global assertionCount variable
 	- prettier output using CSS3 (TEXT SHADOW! DROP SHADOW!)
 	- bundled diff_match_patch.js in jarvis-min.js
 	- bundled sizzle.js in jarvis-min.js

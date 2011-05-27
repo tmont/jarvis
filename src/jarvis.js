@@ -628,6 +628,10 @@
 		defaultReporter: null,
 		htmlDiffs: false,
 		
+		reset: function() {
+			assertionCount = 0;
+		},
+		
 		summary: function(reporter) {
 			reporter = reporter || this.defaultReporter;
 			if (!reporter) {
