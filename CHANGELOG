@@ -1,16 +1,19 @@
 1.1 2011-05-27
 --------------
+- Bugfixes
+	- correctly print the plural or singular form of "assertion"
+	- use \r instead of \n on IE for failure/error messages
 - Enhancements
 	- added Jarvis.summary()
 	- added Jarvis.reset() to reset the global assertionCount variable
 	- prettier output using CSS3 (TEXT SHADOW! DROP SHADOW!)
 	- bundled diff_match_patch.js in jarvis-min.js
 	- bundled sizzle.js in jarvis-min.js
+	- bundled stacktrace.js in jarvis-min.js
 	- new assertions
 		- Is.inDom: determine if a node is present in the DOM
 		- Has.text: make an assertion about the text of a DOM node
 		- Has.flattenedText: make an assertion about the recursively retrieved text of a DOM node
-	- correctly print the plural or singular form of "assertion"
 	- added stack trace output for failures/errors for HtmlReporter
 	- added global option Jarvis.showStackTraces to switch stack trace output on and off. The default
 	  is on, and is only rendered when using the HtmlReporter.
