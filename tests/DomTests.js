@@ -105,6 +105,10 @@ function getDomTests() {
 									Assert.that("#domtest p", Has.text.equalTo("lorem ipsum"));
 									Assert.fail("test did not throw an assertion error");
 								} catch (error) {
+									if (typeof(error.message) !== "object") {
+										Assert.ignore("Not relevant unless error.message returns a collection of DOM nodes");
+									}
+									
 									var dummy = document.createElement("pre");
 									for (var i = 0; i < error.message.length; i++) {
 										dummy.appendChild(error.message[i].cloneNode(true));
@@ -141,6 +145,9 @@ function getDomTests() {
 									Assert.that("#domtest p", Has.flattenedText.equalTo("oh hai inner text"));
 									Assert.fail("test did not throw an assertion error");
 								} catch (error) {
+									if (typeof(error.message) !== "object") {
+										Assert.ignore("Not relevant unless error.message returns a collection of DOM nodes");
+									}
 									var dummy = document.createElement("pre");
 									for (var i = 0; i < error.message.length; i++) {
 										dummy.appendChild(error.message[i].cloneNode(true));

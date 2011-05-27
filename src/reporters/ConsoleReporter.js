@@ -3,6 +3,10 @@
 	global.ConsoleReporter = function() {
 		var tests = {};
 		
+		this.summary = function(totalAssertions) {
+			//not implemented
+		};
+		
 		this.startTest = function(name, id) {
 			var test = { 
 				name: name,
@@ -34,6 +38,7 @@
 		};
 	};
 	
-	global.Jarvis.reporter = new ConsoleReporter();
+	global.Jarvis.htmlDiffs = false;
+	global.Jarvis.defaultReporter = new ConsoleReporter();
 	
 }(this));

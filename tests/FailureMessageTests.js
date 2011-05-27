@@ -24,6 +24,10 @@ function Failure_message_tests() {
 					try {
 						Assert.that(expected, Is.equalTo(actual));
 					} catch (error) {
+						if (typeof(error.message) !== "object") {
+							Assert.ignore("Not relevant unless error.message returns a collection of DOM nodes");
+						}
+						
 						var dummy = document.createElement("pre");
 						for (var i = 0; i < error.message.length; i++) {
 							dummy.appendChild(error.message[i].cloneNode(true));
