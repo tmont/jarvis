@@ -651,6 +651,7 @@
 				childTests,
 				setup,
 				tearDown,
+				runLastTearDown = true,
 				equalTo;
 				
 				
@@ -675,10 +676,20 @@
 				childTests = test();
 				expectedError = globalExpectedError;
 				if (typeof(childTests) === "object") {
+					
 					if (isArray(childTests)) {
-						//run a suite of tests
+						//if the value is an array, then it's a suite of tests
+						//if setup and tearDown were given, we should run them before and after each child test
+						
+						//we need to tear down because we setup before calling the test function
+						//we'll call setup again before the first child test runs, so we need to reset the state
+						runLastTearDown = false;
+						tearDown && tearDown();
+						
 						for (i = 0; i < childTests.length; i++) {
+							setup && setup();
 							this.run(childTests[i], reporter, id);
+							tearDown && tearDown();
 						}
 					} else {
 						this.run(childTests, id);
@@ -715,7 +726,9 @@
 				caughtError = error;
 			}
 			
-			tearDown && tearDown();
+			if (runLastTearDown) {
+				tearDown && tearDown();
+			}
 			
 			result = {
 				status: caughtError === undefined ? "pass" : caughtError.type,

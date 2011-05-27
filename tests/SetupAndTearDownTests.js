@@ -8,32 +8,32 @@ function Setup_and_tear_down_tests() {
 		
 		{
 			setup: function() {
-				foo = "bar";
+				foo = "setup";
 			},
 			
 			tearDown: function() {
-				foo = "foo";
+				foo = "teardown";
 			},
 			
 			test: function Modifies_bound_variable_and_resets_it() {
 				return [
 					function Setup_and_tear_down_test1() {
-						Assert.that(foo, Is.equalTo("bar"));
+						Assert.that(foo, Is.equalTo("setup"));
+						foo = "something else";
 					},
 					
 					function Setup_and_tear_down_test2() {
-						Assert.that(foo, Is.equalTo("bar"));
+						Assert.that(foo, Is.equalTo("setup"));
+						foo = "something else again";
 					}
 				];
 			}
 		},
 		
 		function Uses_bound_variable_without_setup_and_teardown2() {
-			Assert.that(foo, Is.equalTo("foo"));
+			Assert.that(foo, Is.equalTo("teardown"));
 		}
 	];
-	
-	return ;
 }
 
 Jarvis.run(Setup_and_tear_down_tests);
