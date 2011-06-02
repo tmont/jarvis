@@ -12,121 +12,120 @@
 		},
 	
 		css = "\
-/* new clearfix */\
-.clearfix:after {\
-    visibility: hidden;\
-    display: block;\
-    font-size: 0;\
-    content: \" \";\
-    clear: both;\
-    height: 0;\
-}\
-* html .clearfix             { zoom: 1; } /* IE6 */\
-*:first-child+html .clearfix { zoom: 1; } /* IE7 */\
-\
-.jarvis-test {\
-	color: black;\
-	font-family: \"Trebuchet MS\", \"Droid sans Mono\", Calibri, Verdana, sans-serif;\
-	padding: 5px;\
-	margin: 8px auto;\
-	opacity: .9;\
-	filter: alpha(opacity=90);\
-	font-size: 14px;\
-	position: relative;\
-	box-shadow: 0 8px 5px -5px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 0, 0, 0.1) inset;\
-	-moz-box-shadow: 0 8px 5px -5px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 0, 0, 0.1) inset;\
-	-webkit-box-shadow: 0 8px 5px -5px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 0, 0, 0.1) inset;\
-}\
-.jarvis-test .jarvis-test {\
-	margin-left: 10px;\
-}\
-.jarvis-test-info {\
-	font-family: Consolas, Inconsolata, Monaco, \"Courier New\", monospace;\
-	font-size: 12px;\
-	font-weight: normal;\
-	float: right;\
-	line-height: 18px;\
-}\
-\
-.jarvis-test p {\
-	font-weight: bold;\
-	padding: 0;\
-	margin: 0;\
-	text-shadow: 2px -1px 1px #CCCCCC;\
-	color: #000000;\
-}\
-.jarvis-test p img {\
-	margin-right: 3px;\
-	width: 11px;\
-	height: 11px;\
-}\
-.jarvis-test:hover {\
-	opacity: 1;\
-	filter: alpha(opacity=100);\
-}\
-\
-.jarvis-stack-trace {\
-	color: #990000;\
-	margin-top: 20px;\
-}\
-\
-.jarvis-summary {\
-	background-color: #EEEEEE;\
-	font-size: 20px;\
-}\
-.jarvis-summary .jarvis-test-info {\
-	font-size: 16px;\
-	font-weight: bold;\
-	line-height: 24px;\
-}\
-\
-.jarvis-test pre {\
-	font-family: Consolas, Inconsolata, \"Courier New\", monospace;\
-	color: #000000;\
-	padding: 5px;\
-	overflow-x: auto;\
-	background-color: #FFFFFF;\
-	box-shadow: 0 15px 10px -10px rgba(0, 0, 0, 0.5), 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;\
-	-moz-box-shadow: 0 15px 10px -10px rgba(0, 0, 0, 0.5), 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;\
-	-webkit-box-shadow: 0 15px 10px -10px rgba(0, 0, 0, 0.5), 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;\
-}\
-\
-.jarvis-test-result-running, .jarvis-test-result-pass, .jarvis-test-result-ignore, .jarvis-test-result-error, .jarvis-test-result-fail {\
-	padding-left: 20px;\
-}\
-\
-.jarvis-icon {\
-	width: 16px;\
-	height: 16px;\
-	position: absolute;\
-	left: 2px;\
-}\
-\
-.jarvis-test-result-running {\
-	background-color: #CCCCCC;\
-}\
-.jarvis-test-result-pass {\
-	background-color: #BBEEBA;\
-}\
-.jarvis-test-result-ignore {\
-	background-color: #CCCCFF;\
-}\
-.jarvis-test-result-error {\
-	background-color: #FFCC99;\
-}\
-.jarvis-test-result-fail {\
-	background-color: #FFCCCC;\
-}\
-\
-.jarvis-test ins {\
-	background-color: #66FF66;\
-	text-decoration: none;\
-}\
-.jarvis-test del {\
-	background-color: #FF6666;\
-	text-decoration: none;\
-}\
-";
+/* new clearfix */\n\
+.clearfix:after {\n\
+    visibility: hidden;\n\
+    display: block;\n\
+    font-size: 0;\n\
+    content: \" \";\n\
+    clear: both;\n\
+    height: 0;\n\
+}\n\
+* html .clearfix             { zoom: 1; } /* IE6 */\n\
+*:first-child+html .clearfix { zoom: 1; } /* IE7 */\n\
+\n\
+.jarvis-test {\n\
+	color: black;\n\
+	font-family: \"Trebuchet MS\", \"Droid sans Mono\", Calibri, Verdana, sans-serif;\n\
+	padding: 5px;\n\
+	margin: 8px auto;\n\
+	opacity: .9;\n\
+	filter: alpha(opacity=90);\n\
+	font-size: 14px;\n\
+	position: relative;\n\
+	box-shadow: 0 8px 5px -5px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 0, 0, 0.1) inset;\n\
+	-moz-box-shadow: 0 8px 5px -5px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 0, 0, 0.1) inset;\n\
+	-webkit-box-shadow: 0 8px 5px -5px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 0, 0, 0.1) inset;\n\
+}\n\
+.jarvis-test .jarvis-test {\n\
+	margin-left: 10px;\n\
+}\n\
+.jarvis-test-info {\n\
+	font-family: Consolas, Inconsolata, Monaco, \"Courier New\", monospace;\n\
+	font-size: 12px;\n\
+	font-weight: normal;\n\
+	float: right;\n\
+	line-height: 18px;\n\
+}\n\
+\n\
+.jarvis-test p {\n\
+	font-weight: bold;\n\
+	padding: 0;\n\
+	margin: 0;\n\
+	text-shadow: 2px -1px 1px #CCCCCC;\n\
+	color: #000000;\n\
+}\n\
+.jarvis-test p img {\n\
+	margin-right: 3px;\n\
+	width: 11px;\n\
+	height: 11px;\n\
+}\n\
+.jarvis-test:hover {\n\
+	opacity: 1;\n\
+	filter: alpha(opacity=100);\n\
+}\n\
+\n\
+.jarvis-stack-trace {\n\
+	color: #990000;\n\
+	margin-top: 20px;\n\
+}\n\
+\n\
+.jarvis-summary {\n\
+	background-color: #EEEEEE;\n\
+	font-size: 20px;\n\
+}\n\
+.jarvis-summary .jarvis-test-info {\n\
+	font-size: 16px;\n\
+	font-weight: bold;\n\
+	line-height: 24px;\n\
+}\n\
+\n\
+.jarvis-test pre {\n\
+	font-family: Consolas, Inconsolata, \"Courier New\", monospace;\n\
+	color: #000000;\n\
+	padding: 5px;\n\
+	overflow-x: auto;\n\
+	background-color: #FFFFFF;\n\
+	box-shadow: 0 15px 10px -10px rgba(0, 0, 0, 0.5), 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;\n\
+	-moz-box-shadow: 0 15px 10px -10px rgba(0, 0, 0, 0.5), 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;\n\
+	-webkit-box-shadow: 0 15px 10px -10px rgba(0, 0, 0, 0.5), 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;\n\
+}\n\
+\n\
+.jarvis-test-result-running, .jarvis-test-result-pass, .jarvis-test-result-ignore, .jarvis-test-result-error, .jarvis-test-result-fail {\n\
+	padding-left: 20px;\n\
+}\n\
+\n\
+.jarvis-icon {\n\
+	width: 16px;\n\
+	height: 16px;\n\
+	position: absolute;\n\
+	left: 2px;\n\
+}\n\
+\n\
+.jarvis-test-result-running {\n\
+	background-color: #CCCCCC;\n\
+}\n\
+.jarvis-test-result-pass {\n\
+	background-color: #BBEEBA;\n\
+}\n\
+.jarvis-test-result-ignore {\n\
+	background-color: #CCCCFF;\n\
+}\n\
+.jarvis-test-result-error {\n\
+	background-color: #FFCC99;\n\
+}\n\
+.jarvis-test-result-fail {\n\
+	background-color: #FFCCCC;\n\
+}\n\
+\n\
+.jarvis-test ins {\n\
+	background-color: #66FF66;\n\
+	text-decoration: none;\n\
+}\n\
+.jarvis-test del {\n\
+	background-color: #FF6666;\n\
+	text-decoration: none;\n\
+}";
 	
 	global.Jarvis.HtmlReporter = function(container, options) {
 		options = options || { collapsedByDefault: true };
