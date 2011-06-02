@@ -2,6 +2,7 @@
 --------------
 - Enhancements
 	- Added Is.TRUE and Is.FALSE
+	- Assert.willThrow() now increments the global assertion count
 - Breaking changes
 	- changed <unnamed function> to <anonymous> when converting an anonymous function to its
 	  string representation
