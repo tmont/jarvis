@@ -46,7 +46,7 @@
 	
 	function getFunctionName(func) {
 		var match = /^\s*function\s([\w$]+)\(\)\s\{/.exec(func.toString());
-		return match ? match[1] : "<unnamed function>";
+		return match ? match[1] : "<anonymous>";
 	}
 	
 	//adapted from diff_match_patch.diff_prettyHtml()
@@ -197,8 +197,7 @@
 	}
 	
 	function shouldUseHtmlDiff(expected, actual) {
-		return typeof(global.diff_match_patch) !== "undefined" && 
-			Jarvis.htmlDiffs && 
+		return Jarvis.htmlDiffs &&
 			doc && 
 			doc.createElement && 
 			typeof(actual) === "string" && 
@@ -230,7 +229,7 @@
 			
 			//regular expressions are a special case, because they're handled differently in different browsers
 			if (actual instanceof RegExp && expected instanceof RegExp) {
-				return actual.toString() == expected.toString();
+				return actual.toString() === expected.toString();
 			}
 			
 			//testing for null because typeof(null) === "object"
@@ -301,7 +300,7 @@
 		};
 		
 		this.getFailureMessage = function(actual, negate) {
-			return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "match the regular expression " + toString(regex);
+			return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "match the regular expression " + regex.toString();
 		}
 	}
 
@@ -322,6 +321,26 @@
 		
 		this.getFailureMessage = function(actual, negate) {
 			return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "be null";
+		}
+	}
+	
+	function TrueConstraint() {
+		this.isValidFor = function(actual) {
+			return actual === true;
+		};
+		
+		this.getFailureMessage = function(actual, negate) {
+			return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "be true";
+		}
+	}
+	
+	function FalseConstraint() {
+		this.isValidFor = function(actual) {
+			return actual === false;
+		};
+		
+		this.getFailureMessage = function(actual, negate) {
+			return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "be false";
 		}
 	}
 	
@@ -521,6 +540,8 @@
 		};
 		
 		this.NULL = factory(new NullConstraint());
+		this.TRUE = factory(new TrueConstraint());
+		this.FALSE = factory(new FalseConstraint());
 		
 		this.empty = factory(new EmptyConstraint());
 		
@@ -593,7 +614,6 @@
 	function JarvisError(message, type, thrownError) { 
 		this.message = message; 
 		this.type = type;
-		this["!!jarvis"] = true;
 		this.stackTrace = global.Jarvis.showStackTraces && !global.opera ? cleanStackTrace(global.getStackTrace({ e: thrownError })) : [];
 	}
 	
@@ -716,7 +736,7 @@
 					throw new JarvisError("Expected " + toString(expectedError) + " to be thrown", "fail");
 				}
 			} catch (error) {
-				if (typeof(error["!!jarvis"]) === "undefined") {
+				if (!(error instanceof JarvisError)) {
 					//not a jarvis error
 					if (!expectedError) {
 						expectedError = globalExpectedError;

@@ -229,6 +229,38 @@ function Constraint_tests() {
 			];
 		},
 		
+		function True_and_false_tests() {
+			return [
+				function True_is_true() {
+					Assert.that(true, Is.TRUE);
+				},
+				
+				function One_is_not_true() {
+					Assert.that(1, Is.not.TRUE);
+				},
+				
+				function False_is_false() {
+					Assert.that(false, Is.FALSE);
+				},
+				
+				function Zero_is_not_false() {
+					Assert.that(0, Is.not.FALSE);
+				},
+				
+				function Empty_string_is_not_false() {
+					Assert.that("", Is.not.FALSE);
+				},
+				
+				function Undefined_is_not_false() {
+					Assert.that(undefined, Is.not.FALSE);
+				},
+				
+				function Null_is_not_false() {
+					Assert.that(null, Is.not.FALSE);
+				}
+			];
+		},
+		
 		function Undefined_tests() {
 			return [
 				function Undefined_is_undefined() {
