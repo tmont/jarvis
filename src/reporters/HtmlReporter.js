@@ -324,44 +324,35 @@
 		}
 		
 		function addGradient(totals, element) {
-			var failPercent,
-				passPercent,
-				errorPercent,
-				ignorePercent,
-				failColor,
-				passColor,
-				errorColor,
-				ignoreColor,
+			if (!/(Firefox|WebKit|Opera)/i.test(global.navigator.userAgent)) {
+				return;
+			}
+			
+			var failPercent = Math.round(totals.fail / totals.total * 100),
+				passPercent = Math.round(totals.pass / totals.total * 100),
+				errorPercent = Math.round(totals.error / totals.total * 100),
+				ignorePercent = Math.round(totals.ignore / totals.total * 100),
 				gradients = [];
 				
-			//safari and webkit gradients
-			failPercent = Math.round(totals.fail / totals.total * 100);
-			passPercent = Math.round(totals.pass / totals.total * 100);
-			ignorePercent = Math.round(totals.ignore / totals.total * 100);
-			errorPercent = Math.round(totals.error / totals.total * 100);
-			
-			failColor = "#FFCCCC";
-			passColor = "#CCFFCC";
-			errorColor = "#FFCC99";
-			ignoreColor = "#CCCCFF";
-		
 			if (failPercent > 0) {
-				gradients.push(failColor + " 0%");
+				gradients.push("#FFCCCC 0%");
 			}
 			if (errorPercent > 0) {
-				gradients.push(errorColor + " " + failPercent + "%");
+				gradients.push("#FFCC99 " + failPercent + "%");
 			}
 			if (ignorePercent > 0) {
-				gradients.push(ignoreColor + " " + (errorPercent + failPercent) + "%");
+				gradients.push("#CCCCFF " + (errorPercent + failPercent) + "%");
 			}
 			if (passPercent > 0) {
-				gradients.push(passColor + " " + (failPercent + errorPercent + ignorePercent)  + "%");
+				gradients.push("#CCFFCC " + (failPercent + errorPercent + ignorePercent)  + "%");
 			}
 			
-			if (/Firefox/.test(global.navigator.userAgent)) {
+			if (/Firefox/i.test(global.navigator.userAgent)) {
 				element.style.backgroundImage = "-moz-linear-gradient(left, " + gradients.join(", ") + ")";
-			} else if (/WebKit/.test(global.navigator.userAgent)) {
+			} else if (/WebKit/i.test(global.navigator.userAgent)) {
 				element.style.backgroundImage = "-webkit-linear-gradient(left, " + gradients.join(", ") + ")";
+			} else if (/Opera/i.test(global.navigator.userAgent)) {
+				element.style.backgroundImage = "-o-linear-gradient(left, " + gradients.join(", ") + ")";
 			}
 		}
 	};
