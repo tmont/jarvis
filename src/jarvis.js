@@ -11,7 +11,7 @@
 		Assert,
 		Is,
 		Has,
-		assertionCount = 0,
+		globalAssertionCount = 0,
 		testId = 1,
 		globalExpectedError;
 	
@@ -637,7 +637,7 @@
 				throw new JarvisError(constraintMessage, "fail");
 			}
 			
-			assertionCount++;
+			globalAssertionCount++;
 		},
 		
 		willThrow: function(expectedError) {
@@ -666,7 +666,7 @@
 		showStackTraces: false,
 		
 		reset: function() {
-			assertionCount = 0;
+			globalAssertionCount = 0;
 		},
 		
 		summary: function(reporter) {
@@ -675,13 +675,13 @@
 				throw "No reporter given";
 			}
 			
-			reporter.summary(assertionCount);
+			reporter.summary(globalAssertionCount);
 		},
 		
 		run: function(test, reporter, parentId) {
 			var id = (testId++),
 				caughtError,
-				assertionCountAtStart = assertionCount,
+				assertionCountAtStart = globalAssertionCount,
 				i,
 				result,
 				expectedError,
@@ -754,6 +754,7 @@
 							);
 						} else {
 							error = undefined;
+							globalAssertionCount++; //count Assert.willThrow() successes as an assertion
 						}
 					} else {
 						error = new JarvisError("An error occurred while running the test: " + (error.toString ? error.toString() : error), "error", error);
@@ -771,7 +772,7 @@
 				status: caughtError === undefined ? "pass" : caughtError.type,
 				message: caughtError === undefined ? "" : caughtError.message,
 				stackTrace: caughtError === undefined ? [] : caughtError.stackTrace,
-				assertions: assertionCount - assertionCountAtStart
+				assertions: globalAssertionCount - assertionCountAtStart
 			};
 			
 			reporter.endTest(result, id);
