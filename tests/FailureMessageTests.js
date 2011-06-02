@@ -2,7 +2,7 @@ function Failure_message_tests() {
 	return [
 		function Equality_failure_messages() {
 			return [
-				function Should_show_function_names_in_failure_message() {
+				function Should_show_function_names() {
 					function func1() {}
 					function func2() {}
 					
@@ -10,6 +10,17 @@ function Failure_message_tests() {
 						Assert.that(func1, Is.equalTo(func2));
 					} catch (error) {
 						Assert.that(error.message, Is.equalTo("Failed asserting that two functions are equal\n\nExpected: [Function(func2)]\nActual:   [Function(func1)]"));
+					}
+				},
+				
+				function Should_show_indication_of_anonymous_function() {
+					var f = function() {};
+					var g = function() {};
+					
+					try {
+						Assert.that(f, Is.equalTo(g));
+					} catch (error) {
+						Assert.that(error.message, Is.equalTo("Failed asserting that two functions are equal\n\nExpected: [Function(<anonymous>)]\nActual:   [Function(<anonymous>)]"));
 					}
 				},
 				
@@ -191,6 +202,22 @@ function Failure_message_tests() {
 					} catch (error) {
 						Assert.that(error.message, Is.equalTo("Expected 1 to be null"));
 					}
+				},
+				
+				function Should_show_readable_message_for_true_constraint() {
+					try {
+						Assert.that(1, Is.TRUE);
+					} catch (error) {
+						Assert.that(error.message, Is.equalTo("Expected 1 to be true"));
+					}
+				},
+				
+				function Should_show_readable_message_for_false_constraint() {
+					try {
+						Assert.that(1, Is.FALSE);
+					} catch (error) {
+						Assert.that(error.message, Is.equalTo("Expected 1 to be false"));
+					}
 				}
 			];
 		},
@@ -282,6 +309,22 @@ function Failure_message_tests() {
 						Assert.that(null, Is.not.NULL);
 					} catch (error) {
 						Assert.that(error.message, Is.equalTo("Expected <null> to not be null"));
+					}
+				},
+				
+				function Should_show_negated_message_for_true_constraint() {
+					try {
+						Assert.that(true, Is.not.TRUE);
+					} catch (error) {
+						Assert.that(error.message, Is.equalTo("Expected true to not be true"));
+					}
+				},
+				
+				function Should_show_negated_message_for_false_constraint() {
+					try {
+						Assert.that(false, Is.not.FALSE);
+					} catch (error) {
+						Assert.that(error.message, Is.equalTo("Expected false to not be false"));
 					}
 				}
 			];
