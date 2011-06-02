@@ -270,9 +270,9 @@
 			}
 			
 			info += "(" + (test.endTime - test.startTime) + "ms, " + test.assertions + " assertion" + (test.assertions !== 1 ? "s" : "") + ")";
-			infoContainer = document.createElement("span");
+			infoContainer = doc.createElement("span");
 			infoContainer.className = "jarvis-test-info";
-			infoContainer.appendChild(document.createTextNode(info));
+			infoContainer.appendChild(doc.createTextNode(info));
 			test.title.appendChild(infoContainer);
 			
 			if (result.message || result.stackTrace.length > 0) {
@@ -306,7 +306,7 @@
 			
 			if (result.message || test.childResults.total > 0) {
 				test.title.style.cursor = "pointer";
-				test.title.insertBefore(document.createElement("img"), test.title.firstChild);
+				test.title.insertBefore(doc.createElement("img"), test.title.firstChild);
 				test.title.firstChild.src = collapsedByDefault ? imageSource.expand : imageSource.collapse;
 				test.title.firstChild.alt = collapsedByDefault ? "+" : "-";
 				test.title.onclick = titleClick;
@@ -388,7 +388,7 @@
 		
 		if (!head) {
 			head = doc.createElement("head");
-			doc.documentElement.insertBefore(head, doc.body);
+			doc.body.parentNode.insertBefore(head, doc.body);
 		}
 		
 		head.appendChild(style);
