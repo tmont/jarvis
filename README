@@ -1,5 +1,5 @@
 Jarvis <http://jarvis.tmont.com/>
-Version 1.1 (see CHANGELOG for details)
+Version 1.2 (see CHANGELOG for details)
 (c) 2011 Tommy Montgomery <http://tommymontgomery.com/>
 
 Jarvis is a unit testing framework similar to [N|J|S]Unit. But mostly similar to NUnit.
@@ -16,7 +16,7 @@ Sizzle selector engine <http://sizzlejs.com/>
 Licensed under the MIT, BSD, and GPL Licenses.
 
 stacktrace.js <https://github.com/eriwen/Javascript-Stacktrace>
-Licensed under the public domain <https://github.com/eriwen/javascript-stacktrace/blob/master/LICENSE.txt>
+Released into the public domain <https://github.com/eriwen/javascript-stacktrace/blob/master/LICENSE.txt>
 
 Various icons taken from the Silk icon set: <http://www.famfamfam.com/lab/icons/silk/>
 Licensed under Creative Commons Attribution 2.5 License http://creativecommons.org/licenses/by/2.5/

@@ -1,3 +1,11 @@
+1.2 2011-06-xx
+--------------
+- Enhancements
+	- Added Is.TRUE and Is.FALSE
+- Breaking changes
+	- changed <unnamed function> to <anonymous> when converting an anonymous function to its
+	  string representation
+
 1.1 2011-05-27
 --------------
 - Bugfixes
