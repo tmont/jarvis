@@ -1,6 +1,6 @@
 Jarvis <http://jarvis.tmont.com/>
 Version 1.2 (see CHANGELOG for details)
-(c) 2011 Tommy Montgomery <http://tommymontgomery.com/>
+	by Tommy Montgomery <http://tommymontgomery.com/>
 
 Jarvis is a unit testing framework similar to [N|J|S]Unit. But mostly similar to NUnit.
 
