@@ -1,4 +1,7 @@
 (function(global, doc, undefined){
+	if (!doc) {
+		return;
+	}
 	
 	var EOL = !+"\v1" ? "\r" : "\n",
 		imageSource = {
@@ -384,4 +387,4 @@
 		head.appendChild(style);
 	}());
 
-}(this, document));
+}(this, this["document"]));

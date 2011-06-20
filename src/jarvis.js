@@ -780,4 +780,4 @@
 		}
 	};
 	
-}(this, document));
+}(this, this["document"]));

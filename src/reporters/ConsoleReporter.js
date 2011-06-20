@@ -1,6 +1,10 @@
-(function(global, undefined){
+(function(jarvis, undefined){
+	if (!jarvis) {
+		return;
+	}
 	
-	global.ConsoleReporter = function() {
+	
+	jarvis.ConsoleReporter = function() {
 		var tests = {};
 		
 		this.summary = function(totalAssertions) {
@@ -38,7 +42,7 @@
 		};
 	};
 	
-	global.Jarvis.htmlDiffs = false;
-	global.Jarvis.defaultReporter = new ConsoleReporter();
+	jarvis.htmlDiffs = false;
+	jarvis.defaultReporter = new jarvis.ConsoleReporter();
 	
-}(this));
+}(this["Jarvis"]));
