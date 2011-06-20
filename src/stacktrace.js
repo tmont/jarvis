@@ -93,7 +93,7 @@ printStackTrace.implementation.prototype = {
     mode: function(e) {
         if (e['arguments'] && e.stack) {
             return (this._mode = 'chrome');
-        } else if (typeof window !== 'undefined' && window.opera) {
+        } else if (typeof global !== 'undefined' && global.opera) {
             return (this._mode = e.stacktrace ? 'opera10' : 'opera');
         } else if (e.stack) {
             return (this._mode = 'firefox');
@@ -110,7 +110,7 @@ printStackTrace.implementation.prototype = {
      * @param {Function} function to call with a stack trace on invocation
      */
     instrumentFunction: function(context, functionName, callback) {
-        context = context || window;
+        context = context || global;
         context['_old' + functionName] = context[functionName];
         context[functionName] = function() {
             callback.call(this, printStackTrace());
