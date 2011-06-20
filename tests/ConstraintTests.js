@@ -118,6 +118,15 @@ function Constraint_tests() {
 					Assert.that({ foo: "bar" }, Is.not.equalTo({}));
 				},
 				
+				function Cyclic_objects_do_not_cause_infinite_loops() {
+					var obj = {};
+					obj.foo = obj;
+					var other = { foo: obj };
+					Assert.that(obj, Is.equalTo(other));
+					Assert.that(other, Is.equalTo(obj));
+					Assert.that(other, Is.not.identicalTo(obj));
+				},
+				
 				function Object_types_are_not_equal_if_constructor_types_do_not_match() {
 					Assert.that(1, Is.not.equalTo({}));
 				},
