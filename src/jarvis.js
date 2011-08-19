@@ -45,7 +45,7 @@
 	}
 	
 	function getFunctionName(func) {
-		var match = /^\s*function\s([\w$]+)\(\)\s\{/.exec(func.toString());
+		var match = /^\s*function\s([\w$]+)\s*\(\)\s\{/.exec(func.toString());
 		return match ? match[1] : "<anonymous>";
 	}
 	
