@@ -21,32 +21,32 @@ function getDomTests() {
 			
 			return [
 				function Should_find_node_by_id() {
-					Assert.that("#domtest", Is.inDom);
-					Assert.that("body > #domtest", Is.inDom);
+					Assert.that("#domtest", Is.inDom());
+					Assert.that("body > #domtest", Is.inDom());
 					
-					Assert.that("#foo", Is.not.inDom);
+					Assert.that("#foo", Is.not.inDom());
 				},
 				
 				function Should_find_node_by_class() {
-					Assert.that(".class1", Is.inDom);
-					Assert.that("body > .class1", Is.inDom);
-					Assert.that(".class2", Is.inDom);
-					Assert.that(".class1.class2", Is.inDom);
-					Assert.that("#domtest.class2", Is.inDom);
+					Assert.that(".class1", Is.inDom());
+					Assert.that("body > .class1", Is.inDom());
+					Assert.that(".class2", Is.inDom());
+					Assert.that(".class1.class2", Is.inDom());
+					Assert.that("#domtest.class2", Is.inDom());
 					
-					Assert.that(".class3", Is.not.inDom);
+					Assert.that(".class3", Is.not.inDom());
 				},
 				
 				function Should_find_node_by_attribute() {
-					Assert.that("[foo]", Is.inDom);
-					Assert.that("[foo='bar']", Is.inDom);
+					Assert.that("[foo]", Is.inDom());
+					Assert.that("[foo='bar']", Is.inDom());
 					
-					Assert.that("[foo='baz']", Is.not.inDom);
+					Assert.that("[foo='baz']", Is.not.inDom());
 				},
 				
 				function Should_show_failure_message_when_node_is_not_in_dom() {
 					try {
-						Assert.that("foo", Is.inDom);
+						Assert.that("foo", Is.inDom());
 						Assert.fail("foo should not be in the DOM");
 					} catch (error) {
 						Assert.that(error.message, Is.equalTo("Failed asserting that the DOM contains an element matching the selector\n   foo"));
@@ -55,7 +55,7 @@ function getDomTests() {
 				
 				function Should_show_negated_failure_message_when_node_is_not_in_dom() {
 					try {
-						Assert.that("#domtest", Is.not.inDom);
+						Assert.that("#domtest", Is.not.inDom());
 						Assert.fail("#domtest should be in the DOM");
 					} catch (error) {
 						Assert.that(error.message, Is.equalTo("Failed asserting that the DOM does not contain an element matching the selector\n   #domtest"));
@@ -124,7 +124,7 @@ function getDomTests() {
 									"1) Expected \"This is some text\" to be null\n\n2) Expected \"This is also some text\" to be null\n\n";
 								
 								try {
-									Assert.that("#domtest p", Has.text.NULL);
+									Assert.that("#domtest p", Has.text.NULL());
 									Assert.fail("test did not throw an assertion error");
 								} catch (error) {
 									Assert.that(error.message, Is.equalTo(expectedText));

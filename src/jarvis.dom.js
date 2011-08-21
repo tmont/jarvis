@@ -114,8 +114,8 @@
 			return new DomElementTextConstraint(constraint);
 		});
 
-		iface.not = new AssertionInterface(function(constraint) {
-			return new NotConstraint(new DomElementTextConstraint(constraint));
+		iface.not = new jarvis.Framework.AssertionInterface(function(constraint) {
+			return new jarvis.Framework.Constraints.Not(new DomElementTextConstraint(constraint));
 		});
 
 		return iface;
@@ -127,7 +127,7 @@
 		});
 
 		iface.not = new jarvis.Framework.AssertionInterface(function(constraint) {
-			return new NotConstraint(new DomElementFlattenedTextConstraint(constraint));
+			return new jarvis.Framework.Constraints.Not(new DomElementFlattenedTextConstraint(constraint));
 		});
 
 		return iface;
@@ -135,6 +135,6 @@
 
 	jarvis.Framework.AssertionInterface.prototype.inDom = function() {
 		return this.factory(new InDomConstraint());
-	}();
+	};
 
 }(Jarvis, Sizzle, document));
