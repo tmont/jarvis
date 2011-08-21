@@ -7,9 +7,7 @@
  * Released under the WTFPL <http://sam.zoy.org/wtfpl/>
  */
 (function(global, doc, undefined){
-	var Is,
-		Has,
-		constraints,
+	var constraints,
 		globalAssertionCount = 0,
 		testId = 1,
 		globalExpectedError;
@@ -80,7 +78,7 @@
 		pre = null;
 		return actualNodes;
 	}
-	
+
 	function getBinaryFailureMessage(expected, actual) {
 		return "Expected: " + expected + "\n" + "Actual:   " + actual;
 	}
@@ -173,7 +171,7 @@
 	}
 	
 	function shouldUseHtmlDiff(expected, actual) {
-		return Jarvis.htmlDiffs &&
+		return global.Jarvis.htmlDiffs &&
 			doc && 
 			doc.createElement && 
 			typeof(actual) === "string" && 
@@ -493,15 +491,9 @@
 		this.stackTrace = global.Jarvis.showStackTraces && !global.opera ? cleanStackTrace(global.getStackTrace({ e: thrownError })) : [];
 	}
 	
-	Is = new AssertionInterface(function(constraint) { return constraint; });
-	Is.not = new AssertionInterface(function(constraint) { return new constraints.Not(constraint); });
-	
-	Has = new CollectionAssertionInterface(function(constraint) { return constraint; });
-	Has.no = new CollectionAssertionInterface(function(constraint) { return new constraints.Not(constraint); });
-	Has.no.property = undefined; //doesn't really make sense to make this kind of negative assertion
-	
 	global.Jarvis = {
 		Framework: {
+			Reporters: {},
 			Error: JarvisError,
 			Constraints: constraints,
 			Assert: {
@@ -538,8 +530,17 @@
 			},
 			AssertionInterface: AssertionInterface,
 			CollectionAssertionInterface: CollectionAssertionInterface,
-			Is: Is,
-			Has: Has
+			Is: function() {
+				var is = new AssertionInterface(function(constraint) { return constraint; });
+				is.not = new AssertionInterface(function(constraint) { return new constraints.Not(constraint); });
+				return is;
+			}(),
+			Has: function() {
+				var has = new CollectionAssertionInterface(function(constraint) { return constraint; });
+				has.no = new CollectionAssertionInterface(function(constraint) { return new constraints.Not(constraint); });
+				has.no.property = undefined; //doesn't really make sense to make this kind of negative assertion
+				return has;
+			}()
 		},
 
 		defaultReporter: null,

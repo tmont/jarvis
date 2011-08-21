@@ -1,10 +1,9 @@
-(function(jarvis, undefined){
-	if (!jarvis) {
+(function(jarvis, console, undefined){
+	if (!jarvis || !console || !console["group"]) {
 		return;
 	}
-	
-	
-	jarvis.ConsoleReporter = function() {
+
+	jarvis.Framework.Reporters.ConsoleReporter = function() {
 		var tests = {};
 		
 		this.summary = function(totalAssertions) {
@@ -43,6 +42,6 @@
 	};
 	
 	jarvis.htmlDiffs = false;
-	jarvis.defaultReporter = new jarvis.ConsoleReporter();
+	jarvis.defaultReporter = new jarvis.Framework.Reporters.ConsoleReporter();
 	
-}(this["Jarvis"]));
+}(Jarvis, console));

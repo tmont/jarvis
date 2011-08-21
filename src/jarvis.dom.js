@@ -137,4 +137,9 @@
 		return this.factory(new InDomConstraint());
 	};
 
+	//add DOM-related constraints to collection
+	jarvis.Framework.Constraints.DomElementText = DomElementTextConstraint;
+	jarvis.Framework.Constraints.DomElementFlattenedText = DomElementFlattenedTextConstraint;
+	jarvis.Framework.Constraints.InDom = InDomConstraint;
+
 }(Jarvis, Sizzle, document));
