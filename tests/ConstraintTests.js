@@ -185,35 +185,35 @@ function Constraint_tests() {
 		function Empty_tests() {
 			return [
 				function Empty_string_is_empty() {
-					Assert.that("", Is.empty);
+					Assert.that("", Is.empty());
 				},
 				
 				function Null_is_empty() {
-					Assert.that(null, Is.empty);
+					Assert.that(null, Is.empty());
 				},
 				
 				function Empty_object_is_empty() {
-					Assert.that({}, Is.empty);
+					Assert.that({}, Is.empty());
 				},
 				
 				function Empty_array_is_empty() {
-					Assert.that([], Is.empty);
+					Assert.that([], Is.empty());
 				},
 				
 				function Nonempty_object_is_not_empty() {
-					Assert.that({ foo: "bar" }, Is.not.empty);
+					Assert.that({ foo: "bar" }, Is.not.empty());
 				},
 				
 				function Nonempty_array_is_not_empty() {
-					Assert.that([0], Is.not.empty);
+					Assert.that([0], Is.not.empty());
 				},
 				
 				function Zero_is_not_empty() {
-					Assert.that(0, Is.not.empty);
+					Assert.that(0, Is.not.empty());
 				},
 				
 				function Undefined_is_empty() {
-					Assert.that(undefined, Is.empty);
+					Assert.that(undefined, Is.empty());
 				}
 			];
 		},
@@ -221,19 +221,19 @@ function Constraint_tests() {
 		function Null_tests() {
 			return [
 				function Null_is_null() {
-					Assert.that(null, Is.NULL);
+					Assert.that(null, Is.NULL());
 				},
 				
 				function Empty_string_is_not_null() {
-					Assert.that("", Is.not.NULL);
+					Assert.that("", Is.not.NULL());
 				},
 				
 				function Zero_is_not_null() {
-					Assert.that(0, Is.not.NULL);
+					Assert.that(0, Is.not.NULL());
 				},
 				
 				function Undefined_is_not_null() {
-					Assert.that(undefined, Is.not.NULL);
+					Assert.that(undefined, Is.not.NULL());
 				}
 			];
 		},
@@ -241,31 +241,31 @@ function Constraint_tests() {
 		function True_and_false_tests() {
 			return [
 				function True_is_true() {
-					Assert.that(true, Is.TRUE);
+					Assert.that(true, Is.TRUE());
 				},
 				
 				function One_is_not_true() {
-					Assert.that(1, Is.not.TRUE);
+					Assert.that(1, Is.not.TRUE());
 				},
 				
 				function False_is_false() {
-					Assert.that(false, Is.FALSE);
+					Assert.that(false, Is.FALSE());
 				},
 				
 				function Zero_is_not_false() {
-					Assert.that(0, Is.not.FALSE);
+					Assert.that(0, Is.not.FALSE());
 				},
 				
 				function Empty_string_is_not_false() {
-					Assert.that("", Is.not.FALSE);
+					Assert.that("", Is.not.FALSE());
 				},
 				
 				function Undefined_is_not_false() {
-					Assert.that(undefined, Is.not.FALSE);
+					Assert.that(undefined, Is.not.FALSE());
 				},
 				
 				function Null_is_not_false() {
-					Assert.that(null, Is.not.FALSE);
+					Assert.that(null, Is.not.FALSE());
 				}
 			];
 		},
@@ -273,19 +273,19 @@ function Constraint_tests() {
 		function Undefined_tests() {
 			return [
 				function Undefined_is_undefined() {
-					Assert.that(undefined, Is.undefined);
+					Assert.that(undefined, Is.undefined());
 				},
 				
 				function Empty_string_is_not_undefined() {
-					Assert.that("", Is.not.undefined);
+					Assert.that("", Is.not.undefined());
 				},
 				
 				function Zero_is_not_undefined() {
-					Assert.that(0, Is.not.undefined);
+					Assert.that(0, Is.not.undefined());
 				},
 				
 				function Undefined_variable_is_undefined() {
-					Assert.that(this["foo"], Is.undefined);
+					Assert.that(this["foo"], Is.undefined());
 				}
 			];
 		},

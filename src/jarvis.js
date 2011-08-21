@@ -1,47 +1,21 @@
 /**
  * Jarvis: JavaScript unit testing library
- *   (c) 2011 Tommy Montgomery <http://tommymontgomery.com/>
+ *   Tommy Montgomery <http://tommymontgomery.com/>
  *
  * More information: <http://jarvis.tmont.com/>
  * 
  * Released under the WTFPL <http://sam.zoy.org/wtfpl/>
  */
 (function(global, doc, undefined){
-	var $ = global.Sizzle,
-		Assert,
-		Is,
+	var Is,
 		Has,
+		constraints,
 		globalAssertionCount = 0,
 		testId = 1,
 		globalExpectedError;
 	
 	function isArray(o) {
 		return Object.prototype.toString.call(o) === '[object Array]';
-	}
-	
-	function any(collection, predicate) {
-		for (var i = 0; i < collection.length; i++) {
-			if (predicate(collection[i])) {
-				return true;
-			}
-		}
-		
-		return false;
-	}
-	
-	function getTextRecursive(node) {
-		var text = "",
-			i = 0;
-		
-		if (node.nodeType === 3) {
-			return node.nodeValue;
-		}
-		
-		for (i = 0; i < node.childNodes.length; i++) {
-			text += getTextRecursive(node.childNodes[i]);
-		}
-		
-		return text;
 	}
 	
 	function getFunctionName(func) {
@@ -174,20 +148,22 @@
 					return "[Function]";
 				}
 		}
+
+		throw "getType() returned an invalid value";
 	}
 	
 	function compareIterables(left, right) {
 		var key, constraint;
 		
 		for (key in right) {
-			constraint = new EqualToConstraint(right[key]);
+			constraint = new constraints.EqualTo(right[key]);
 			if (typeof(left[key]) === "undefined" || !constraint.isValidFor(left[key])) {
 				return false;
 			}
 		}
 		
 		for (key in left) {
-			constraint = new EqualToConstraint(left[key]);
+			constraint = new constraints.EqualTo(left[key]);
 			if (typeof(right[key]) === "undefined" || !constraint.isValidFor(right[key])) {
 				return false;
 			}
@@ -203,398 +179,298 @@
 			typeof(actual) === "string" && 
 			typeof(expected) === "string";
 	}
-	
-	function IdenticalToConstraint(expected) {
-		this.isValidFor = function(actual) {
-			return actual === expected;
-		};
-		
-		this.getFailureMessage = function(actual, negate) {
-			var message;
-			if (shouldUseHtmlDiff(expected, actual)) {
-				return getDiffNodes(expected, actual);
-			}
-			
-			message = "Failed asserting that two " + getType(expected) + "s are " + (negate ? "not " : "") + "identical" + "\n\n";
-			return message + getBinaryFailureMessage(toString(expected), toString(actual));
-		}
-	}
-	
-	function EqualToConstraint(expected) {
-		this.isValidFor = function(actual) {
-			if (expected === actual) {
-				//short circuit for reference equality
-				return true;
-			}
-			
-			//regular expressions are a special case, because they're handled differently in different browsers
-			if (actual instanceof RegExp && expected instanceof RegExp) {
-				return actual.toString() === expected.toString();
-			}
-			
-			//testing for null because typeof(null) === "object"
-			if (expected !== null && typeof(expected) === "object") {
-				return actual !== null &&
-					typeof(actual) === "object" &&
-					getFunctionName(actual.constructor) === getFunctionName(expected.constructor) && 
-					compareIterables(actual, expected);
-			}
-			
-			return actual == expected;
-		};
-		
-		this.getFailureMessage = function(actual, negate) {
-			var message;
-			if (shouldUseHtmlDiff(expected, actual)) {
-				return getDiffNodes(expected, actual);
-			}
-			
-			message = "Failed asserting that two " + getType(expected) + "s are " + (negate ? "not " : "") + "equal" + "\n\n";
-			return message + getBinaryFailureMessage(toString(expected), toString(actual));
-		};
-	}
-	
-	function LessThanConstraint(expected) {
-		this.isValidFor = function(actual) {
-			return actual < expected;
-		};
-		
-		this.getFailureMessage = function(actual, negate) {
-			return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "be less than " + toString(expected);
-		}
-	}
-	
-	function LessThanOrEqualToConstraint(expected) {
-		this.isValidFor = function(actual) {
-			return actual <= expected;
-		};
-		
-		this.getFailureMessage = function(actual, negate) {
-			return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "be less than or equal to " + toString(expected);
-		}
-	}
-	
-	function GreaterThanConstraint(expected) {
-		this.isValidFor = function(actual) {
-			return actual > expected;
-		};
-		
-		this.getFailureMessage = function(actual, negate) {
-			return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "be greater than " + toString(expected);
-		}
-	}
-	
-	function GreaterThanOrEqualToConstraint(expected) {
-		this.isValidFor = function(actual) {
-			return actual >= expected;
-		};
-		
-		this.getFailureMessage = function(actual, negate) {
-			return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "be greater than or equal to " + toString(expected);
-		}
-	}
-	
-	function RegexConstraint(regex) {
-		this.isValidFor = function(actual) {
-			return typeof(actual) === "string" && regex.test(actual);
-		};
-		
-		this.getFailureMessage = function(actual, negate) {
-			return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "match the regular expression " + regex.toString();
-		}
-	}
 
-	function NotConstraint(constraint) {
-		this.isValidFor = function(actual) {
-			return !constraint.isValidFor(actual);
-		};
-		
-		this.getFailureMessage = function(actual) {
-			return constraint.getFailureMessage(actual, true);
-		};
-	}
-	
-	function NullConstraint() {
-		this.isValidFor = function(actual) {
-			return actual === null;
-		};
-		
-		this.getFailureMessage = function(actual, negate) {
-			return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "be null";
-		}
-	}
-	
-	function TrueConstraint() {
-		this.isValidFor = function(actual) {
-			return actual === true;
-		};
-		
-		this.getFailureMessage = function(actual, negate) {
-			return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "be true";
-		}
-	}
-	
-	function FalseConstraint() {
-		this.isValidFor = function(actual) {
-			return actual === false;
-		};
-		
-		this.getFailureMessage = function(actual, negate) {
-			return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "be false";
-		}
-	}
-	
-	function EmptyConstraint() {
-		this.isValidFor = function(actual) {
-			return actual === null || 
-				actual === "" || 
-				actual === undefined || 
-				(typeof(actual) === "object" && compareIterables(actual, {}));
-		};
-		
-		this.getFailureMessage = function(actual, negate) {
-			return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "be empty";
-		}
-	}
-	
-	function UndefinedConstraint() {
-		this.isValidFor = function(actual) {
-			return actual === undefined;
-		};
-		
-		this.getFailureMessage = function(actual, negate) {
-			return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "be undefined";
-		}
-	}
-	
-	function ContainsValueConstraint(value) {
-		var equalTo = new EqualToConstraint(value);
-			
-		this.isValidFor = function(collection) {
-			var key;
-			for (key in collection) {
-				if (equalTo.isValidFor(collection[key])) {
+	constraints = {
+		IdenticalTo: function(expected) {
+			this.isValidFor = function(actual) {
+				return actual === expected;
+			};
+
+			this.getFailureMessage = function(actual, negate) {
+				var message;
+				if (shouldUseHtmlDiff(expected, actual)) {
+					return getDiffNodes(expected, actual);
+				}
+
+				message = "Failed asserting that two " + getType(expected) + "s are " + (negate ? "not " : "") + "identical" + "\n\n";
+				return message + getBinaryFailureMessage(toString(expected), toString(actual));
+			}
+		},
+
+		EqualTo: function(expected) {
+			this.isValidFor = function(actual) {
+				if (expected === actual) {
+					//short circuit for reference equality
 					return true;
 				}
-			}
-			
-			return false;
-		};
-		
-		this.getFailureMessage = function(actual, negate) {
-			return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "contain the value " + toString(value);
-		}
-	}
-	
-	function ContainsKeyConstraint(key) {
-		var equalTo = new EqualToConstraint(key);
-		this.isValidFor = function(collection) {
-			var i;
-			for (i in collection) {
-				if (equalTo.isValidFor(i)) {
-					return true;
+
+				//regular expressions are a special case, because they're handled differently in different browsers
+				if (actual instanceof RegExp && expected instanceof RegExp) {
+					return actual.toString() === expected.toString();
 				}
+
+				//testing for null because typeof(null) === "object"
+				if (expected !== null && typeof(expected) === "object") {
+					return actual !== null &&
+						typeof(actual) === "object" &&
+						getFunctionName(actual.constructor) === getFunctionName(expected.constructor) &&
+						compareIterables(actual, expected);
+				}
+
+				return actual == expected;
+			};
+
+			this.getFailureMessage = function(actual, negate) {
+				var message;
+				if (shouldUseHtmlDiff(expected, actual)) {
+					return getDiffNodes(expected, actual);
+				}
+
+				message = "Failed asserting that two " + getType(expected) + "s are " + (negate ? "not " : "") + "equal" + "\n\n";
+				return message + getBinaryFailureMessage(toString(expected), toString(actual));
+			};
+		},
+
+		LessThan: function(expected) {
+			this.isValidFor = function(actual) {
+				return actual < expected;
+			};
+
+			this.getFailureMessage = function(actual, negate) {
+				return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "be less than " + toString(expected);
 			}
-			
-			return false;
-		};
-		
-		this.getFailureMessage = function(actual, negate) {
-			return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "contain the key " + toString(key);
-		}
-	}
-	
-	function ObjectPropertyValueConstraint(property, constraint) {
-		this.isValidFor = function(actual) {
-			if (!actual || typeof(actual[property]) === "undefined") {
+		},
+
+		LessThanOrEqualTo: function(expected) {
+			this.isValidFor = function(actual) {
+				return actual <= expected;
+			};
+
+			this.getFailureMessage = function(actual, negate) {
+				return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "be less than or equal to " + toString(expected);
+			}
+		},
+
+		GreaterThan: function(expected) {
+			this.isValidFor = function(actual) {
+				return actual > expected;
+			};
+
+			this.getFailureMessage = function(actual, negate) {
+				return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "be greater than " + toString(expected);
+			}
+		},
+
+		GreaterThanOrEqualTo: function(expected) {
+			this.isValidFor = function(actual) {
+				return actual >= expected;
+			};
+
+			this.getFailureMessage = function(actual, negate) {
+				return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "be greater than or equal to " + toString(expected);
+			}
+		},
+
+		Regex: function(regex) {
+			this.isValidFor = function(actual) {
+				return typeof(actual) === "string" && regex.test(actual);
+			};
+
+			this.getFailureMessage = function(actual, negate) {
+				return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "match the regular expression " + regex.toString();
+			}
+		},
+
+		Not: function(constraint) {
+			this.isValidFor = function(actual) {
+				return !constraint.isValidFor(actual);
+			};
+
+			this.getFailureMessage = function(actual) {
+				return constraint.getFailureMessage(actual, true);
+			};
+		},
+
+		Null: function() {
+			this.isValidFor = function(actual) {
+				return actual === null;
+			};
+
+			this.getFailureMessage = function(actual, negate) {
+				return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "be null";
+			}
+		},
+
+		True: function() {
+			this.isValidFor = function(actual) {
+				return actual === true;
+			};
+
+			this.getFailureMessage = function(actual, negate) {
+				return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "be true";
+			}
+		},
+
+		False: function() {
+			this.isValidFor = function(actual) {
+				return actual === false;
+			};
+
+			this.getFailureMessage = function(actual, negate) {
+				return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "be false";
+			}
+		},
+
+		Empty: function() {
+			this.isValidFor = function(actual) {
+				return actual === null ||
+					actual === "" ||
+					actual === undefined ||
+					(typeof(actual) === "object" && compareIterables(actual, {}));
+			};
+
+			this.getFailureMessage = function(actual, negate) {
+				return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "be empty";
+			}
+		},
+
+		Undefined: function() {
+			this.isValidFor = function(actual) {
+				return actual === undefined;
+			};
+
+			this.getFailureMessage = function(actual, negate) {
+				return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "be undefined";
+			}
+		},
+
+		ContainsValue: function(value) {
+			var equalTo = new constraints.EqualTo(value);
+
+			this.isValidFor = function(collection) {
+				var key;
+				for (key in collection) {
+					if (equalTo.isValidFor(collection[key])) {
+						return true;
+					}
+				}
+
 				return false;
+			};
+
+			this.getFailureMessage = function(actual, negate) {
+				return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "contain the value " + toString(value);
 			}
-			
-			return constraint.isValidFor(actual[property]);
-		};
-		
-		this.getFailureMessage = function(actual) {
-			var message = "Failed making an assertion on an object with property \"" + property + "\"" + "\n\n",
-				constraintMessage = constraint.getFailureMessage(actual[property]);
-			
-			if (typeof(constraintMessage) !== "string") {
-				//node list (e.g. HTML for diff between strings)
-				message = doc.createTextNode(message);
-				constraintMessage.unshift(message);
-				return constraintMessage;
-			}
-			
-			return message + constraintMessage;
-		}
-	}
-	
-	function InDomConstraint() {
-		this.isValidFor = function(selector) {
-			return $(selector).length > 0;
-		};
-		
-		this.getFailureMessage = function(selector, negate) {
-			return "Failed asserting that the DOM " + (negate ? "does not contain" : "contains") + " an element matching the selector\n   " + selector;
-		};
-	}
-	
-	function getFailureMessageForDomElementTextMatch(message, constraint, texts) {
-		var messages = [],
-			i, 
-			j, 
-			list,
-			item;
-		
-		for (i = 0; i < texts.length; i++) {
-			messages[i] = constraint.getFailureMessage(texts[i]);
-		}
-		
-		if (typeof(messages[0]) !== "string") {
-			//node list
-			message = [doc.createTextNode(message)];
-			list = doc.createElement("ol");
-			for (i = 0; i < messages.length; i++) {
-				item = doc.createElement("li");
-				for (j = 0; j < messages[i].length; j++) {
-					item.appendChild(messages[i][j]);
+		},
+
+		ContainsKey: function(key) {
+			var equalTo = new this.EqualTo(key);
+			this.isValidFor = function(collection) {
+				var i;
+				for (i in collection) {
+					if (equalTo.isValidFor(i)) {
+						return true;
+					}
 				}
-				
-				list.appendChild(item);
-			}
-			
-			message.push(list);
-		} else {
-			for (i = 0; i < messages.length; i++) {
-				message += (i + 1) + ") " + messages[i] + "\n\n";
-			}
-		}
-		
-		return message;
-	}
-	
-	function DomElementTextConstraint(constraint) {
-		var texts = [];
-		
-		this.isValidFor = function(selector) {
-			return any($(selector), function(element) {
-				if (element.childNodes.length === 1 && element.childNodes[0].nodeType === 3) {
-					texts.push(element.childNodes[0].nodeValue);
-					return constraint.isValidFor(element.childNodes[0].nodeValue);
-				}
-				
+
 				return false;
-			});
-		};
-		
-		this.getFailureMessage = function(selector, negate) {
-			var message = "Failed asserting a condition about the " + 
-				"text for any of the DOM elements defined by the selector\n    " + selector + "\n\n";
-			return getFailureMessageForDomElementTextMatch(message, constraint, texts);
-		};
-	}
-	
-	function DomElementFlattenedTextConstraint(constraint) {
-		var texts = [];
-		
-		this.isValidFor = function(selector) {
-			return any($(selector), function(element) {
-				texts.push(getTextRecursive(element));
-				return constraint.isValidFor(texts[texts.length - 1]);
-			});
-		};
-		
-		this.getFailureMessage = function(selector, negate) {
-			var message = "Failed asserting a condition about the recursively flattened " + 
-				"text for any of the DOM elements defined by the selector\n    " + selector + "\n\n";
-			return getFailureMessageForDomElementTextMatch(message, constraint, texts);
-		};
-	}
-	
+			};
+
+			this.getFailureMessage = function(actual, negate) {
+				return "Expected " + toString(actual) + " to " + (negate ? "not " : "") + "contain the key " + toString(key);
+			}
+		},
+
+		ObjectPropertyValue: function(property, constraint) {
+			this.isValidFor = function(actual) {
+				if (!actual || typeof(actual[property]) === "undefined") {
+					return false;
+				}
+
+				return constraint.isValidFor(actual[property]);
+			};
+
+			this.getFailureMessage = function(actual) {
+				var message = "Failed making an assertion on an object with property \"" + property + "\"" + "\n\n",
+					constraintMessage = constraint.getFailureMessage(actual[property]);
+
+				if (typeof(constraintMessage) !== "string") {
+					//node list (e.g. HTML for diff between strings)
+					message = doc.createTextNode(message);
+					constraintMessage.unshift(message);
+					return constraintMessage;
+				}
+
+				return message + constraintMessage;
+			}
+		}
+	};
+
 	function AssertionInterface(factory) {
-		this.identicalTo = function(expected) {
-			return factory(new IdenticalToConstraint(expected));
-		};
+		this.factory = factory;
+	}
+	
+	AssertionInterface.prototype = {
+		identicalTo: function(expected) {
+			return this.factory(new  constraints.IdenticalTo(expected));
+		},
 		
-		this.equalTo = function(expected) {
-			return factory(new EqualToConstraint(expected));
-		};
+		equalTo: function(expected) {
+			return this.factory(new  constraints.EqualTo(expected));
+		},
 		
-		this.lessThan = function(expected) {
-			return factory(new LessThanConstraint(expected));
-		};
+		lessThan: function(expected) {
+			return this.factory(new  constraints.LessThan(expected));
+		},
 		
-		this.lessThanOrEqualTo = function(expected) {
-			return factory(new LessThanOrEqualToConstraint(expected));
-		};
+		lessThanOrEqualTo: function(expected) {
+			return this.factory(new  constraints.LessThanOrEqualTo(expected));
+		},
 		
-		this.greaterThan = function(expected) {
-			return factory(new GreaterThanConstraint(expected));
-		};
+		greaterThan: function(expected) {
+			return this.factory(new constraints.GreaterThan(expected));
+		},
 		
-		this.greaterThanOrEqualTo = function(expected) {
-			return factory(new GreaterThanOrEqualToConstraint(expected));
-		};
+		greaterThanOrEqualTo: function(expected) {
+			return this.factory(new constraints.GreaterThanOrEqualTo(expected));
+		},
 		
-		this.regexMatch = function(regex) {
-			return factory(new RegexConstraint(regex));
-		};
+		regexMatch: function(regex) {
+			return this.factory(new constraints.Regex(regex));
+		},
 		
-		this.NULL = factory(new NullConstraint());
-		this.TRUE = factory(new TrueConstraint());
-		this.FALSE = factory(new FalseConstraint());
-		
-		this.empty = factory(new EmptyConstraint());
-		
-		this.undefined = factory(new UndefinedConstraint());
-		
-		this.inDom = factory(new InDomConstraint());
+		NULL: function() { return this.factory(new constraints.Null()) },
+		TRUE: function() { return this.factory(new constraints.True()) },
+		FALSE: function() { return this.factory(new constraints.False()) },
+		empty: function() { return this.factory(new constraints.Empty()) },
+		"undefined": function() { return this.factory(new constraints.Undefined()) }
 	};
 	
 	function CollectionAssertionInterface(factory) {
-		this.value = function(value) {
-			return factory(new ContainsValueConstraint(value));
-		};
-		
-		this.key = function(key) {
-			return factory(new ContainsKeyConstraint(key));
-		};
-		
-		this.property = function(property) {
-			var iface = new AssertionInterface(function(constraint) {
-				return new ObjectPropertyValueConstraint(property, constraint);
-			});
-			
-			iface.not = new AssertionInterface(function(constraint) {
-				return new NotConstraint(new ObjectPropertyValueConstraint(property, constraint));
-			});
-			
-			return iface;
-		};
-		
-		this.text = function() {
-			var iface = new AssertionInterface(function(constraint) {
-				return new DomElementTextConstraint(constraint);
-			});
-			
-			iface.not = new AssertionInterface(function(constraint) {
-				return new NotConstraint(new DomElementTextConstraint(constraint));
-			});
-			
-			return iface;
-		}();
-		
-		this.flattenedText = function() {
-			var iface = new AssertionInterface(function(constraint) {
-				return new DomElementFlattenedTextConstraint(constraint);
-			});
-			
-			iface.not = new AssertionInterface(function(constraint) {
-				return new NotConstraint(new DomElementFlattenedTextConstraint(constraint));
-			});
-			
-			return iface;
-		}();
+		this.factory = factory;
 	}
+
+	CollectionAssertionInterface.prototype = {
+		value: function(value) {
+			return this.factory(new constraints.ContainsValue(value));
+		},
+
+		key: function(key) {
+			return this.factory(new constraints.ContainsKey(key));
+		},
+
+		property: function(property) {
+			var iface = new AssertionInterface(function(constraint) {
+				return new constraints.ObjectPropertyValue(property, constraint);
+			});
+
+			iface.not = new AssertionInterface(function(constraint) {
+				return new constraints.Not(new constraints.ObjectPropertyValue(property, constraint));
+			});
+
+			return iface;
+		}
+	};
 	
 	function cleanStackTrace(frames) {
 		var newFrames = [],
@@ -618,71 +494,77 @@
 	}
 	
 	Is = new AssertionInterface(function(constraint) { return constraint; });
-	Is.not = new AssertionInterface(function(constraint) { return new NotConstraint(constraint); });
+	Is.not = new AssertionInterface(function(constraint) { return new constraints.Not(constraint); });
 	
 	Has = new CollectionAssertionInterface(function(constraint) { return constraint; });
-	Has.no = new CollectionAssertionInterface(function(constraint) { return new NotConstraint(constraint); });
+	Has.no = new CollectionAssertionInterface(function(constraint) { return new constraints.Not(constraint); });
 	Has.no.property = undefined; //doesn't really make sense to make this kind of negative assertion
 	
-	Assert = {
-		that: function(actual, constraint, message) {
-			if (!constraint.isValidFor(actual)) {
-				var constraintMessage = constraint.getFailureMessage(actual);
-				message = message ? message + "\n\n" : "";
-				
-				if (typeof(constraintMessage) === "string") {
-					constraintMessage = message + constraintMessage;
-				}
-				
-				throw new JarvisError(constraintMessage, "fail");
-			}
-			
-			globalAssertionCount++;
-		},
-		
-		willThrow: function(expectedError) {
-			if (expectedError === true) {
-				throw new JarvisError("Cannot set expected error to true", "error");
-			}
-			
-			globalExpectedError = expectedError !== undefined ? expectedError : true;
-		},
-		
-		fail: function(message) {
-			throw new JarvisError(message, "fail");
-		},
-		
-		ignore: function(message) {
-			throw new JarvisError(message, "ignore");
-		}
-	};
-	
-	global.Assert = Assert;
-	global.Is = Is;
-	global.Has = Has;
 	global.Jarvis = {
+		Framework: {
+			Error: JarvisError,
+			Constraints: constraints,
+			Assert: {
+				that: function(actual, constraint, message) {
+					if (!constraint.isValidFor(actual)) {
+						var constraintMessage = constraint.getFailureMessage(actual);
+						message = message ? message + "\n\n" : "";
+
+						if (typeof(constraintMessage) === "string") {
+							constraintMessage = message + constraintMessage;
+						}
+
+						throw new JarvisError(constraintMessage, "fail");
+					}
+
+					globalAssertionCount++;
+				},
+
+				willThrow: function(expectedError) {
+					if (expectedError === true) {
+						throw new JarvisError("Cannot set expected error to true", "error");
+					}
+
+					globalExpectedError = expectedError !== undefined ? expectedError : true;
+				},
+
+				fail: function(message) {
+					throw new JarvisError(message, "fail");
+				},
+
+				ignore: function(message) {
+					throw new JarvisError(message, "ignore");
+				}
+			},
+			AssertionInterface: AssertionInterface,
+			CollectionAssertionInterface: CollectionAssertionInterface,
+			Is: Is,
+			Has: Has
+		},
+
 		defaultReporter: null,
 		htmlDiffs: false,
 		showStackTraces: false,
-		
+
 		reset: function() {
 			globalAssertionCount = 0;
 		},
-		
+
 		summary: function(reporter) {
 			reporter = reporter || this.defaultReporter;
 			if (!reporter) {
 				throw "No reporter given";
 			}
-			
+
 			reporter.summary(globalAssertionCount);
 		},
-		
+
 		run: function(test, reporter, parentId) {
 			var id = (testId++),
 				caughtError,
 				assertionCountAtStart = globalAssertionCount,
 				i,
+				name,
 				result,
 				expectedError,
 				childTests,
@@ -690,7 +572,7 @@
 				tearDown,
 				runLastTearDown = true,
 				equalTo;
-				
+
 			if (typeof(test) !== "function") {
 				setup = test.setup;
 				tearDown = test.tearDown;
@@ -699,29 +581,29 @@
 					throw "No test detected or is not a function";
 				}
 			}
-			
+
 			name = getFunctionName(test).replace(/_/g, " ");
 			reporter = reporter || this.defaultReporter;
 			if (!reporter) {
 				throw "No reporter given";
 			}
-			
+
 			reporter.startTest(name, id, parentId);
 			try {
 				setup && setup();
 				childTests = test();
 				expectedError = globalExpectedError;
 				if (typeof(childTests) === "object") {
-					
+
 					if (isArray(childTests)) {
 						//if the value is an array, then it's a suite of tests
 						//if setup and tearDown were given, we should run them before and after each child test
-						
+
 						//we need to tear down because we setup before calling the test function
 						//we'll call setup again before the first child test runs, so we need to reset the state
 						runLastTearDown = false;
 						tearDown && tearDown();
-						
+
 						for (i = 0; i < childTests.length; i++) {
 							setup && setup();
 							this.run(childTests[i], reporter, id);
@@ -731,7 +613,7 @@
 						this.run(childTests, id);
 					}
 				}
-				
+
 				if (expectedError !== undefined) {
 					throw new JarvisError("Expected " + toString(expectedError) + " to be thrown", "fail");
 				}
@@ -741,11 +623,11 @@
 					if (!expectedError) {
 						expectedError = globalExpectedError;
 					}
-					
+
 					//verify that it wasn't expected
 					if (expectedError !== undefined) {
 						//expectedError was set, so check to see if the thrown error matches what was expected
-						equalTo = new EqualToConstraint(expectedError);
+						equalTo = new constraints.EqualTo(expectedError);
 						if (expectedError !== true && !equalTo.isValidFor(error)) {
 							error = new JarvisError(
 								"Expected error, " + toString(expectedError) + ", did not match actual error, " + toString(error),
@@ -760,24 +642,24 @@
 						error = new JarvisError("An error occurred while running the test: " + (error.toString ? error.toString() : error), "error", error);
 					}
 				}
-				
+
 				caughtError = error;
 			}
-			
+
 			if (runLastTearDown) {
 				tearDown && tearDown();
 			}
-			
+
 			result = {
 				status: caughtError === undefined ? "pass" : caughtError.type,
 				message: caughtError === undefined ? "" : caughtError.message,
 				stackTrace: caughtError === undefined ? [] : caughtError.stackTrace,
 				assertions: globalAssertionCount - assertionCountAtStart
 			};
-			
+
 			reporter.endTest(result, id);
 			globalExpectedError = undefined;
 		}
 	};
-	
+
 }(this, this["document"]));

@@ -5,7 +5,7 @@ function Non_passing_status_tests() {
 				Assert.ignore();
 				Assert.fail("Assert.ignore() did not throw a JarvisError");
 			} catch (error) {
-				Assert.that(error.message, Is.empty);
+				Assert.that(error.message, Is.empty());
 				Assert.that(error.type, Is.equalTo("ignore"));
 			}
 		},
@@ -25,7 +25,7 @@ function Non_passing_status_tests() {
 				Assert.fail();
 				alert("Assert.fail() doesn't work");
 			} catch (error) {
-				Assert.that(error.message, Is.empty);
+				Assert.that(error.message, Is.empty());
 				Assert.that(error.type, Is.equalTo("fail"));
 			}
 		},

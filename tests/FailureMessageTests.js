@@ -150,7 +150,7 @@ function Failure_message_tests() {
 			return [
 				function Should_show_readable_message_for_undefined_constraint() {
 					try {
-						Assert.that(3, Is.undefined);
+						Assert.that(3, Is.undefined());
 					} catch (error) {
 						Assert.that(error.message, Is.equalTo("Expected 3 to be undefined"));
 					}
@@ -190,7 +190,7 @@ function Failure_message_tests() {
 				
 				function Should_show_readable_message_for_empty_constraint() {
 					try {
-						Assert.that("foo", Is.empty);
+						Assert.that("foo", Is.empty());
 					} catch (error) {
 						Assert.that(error.message, Is.equalTo("Expected \"foo\" to be empty"));
 					}
@@ -198,7 +198,7 @@ function Failure_message_tests() {
 				
 				function Should_show_readable_message_for_null_constraint() {
 					try {
-						Assert.that(1, Is.NULL);
+						Assert.that(1, Is.NULL());
 					} catch (error) {
 						Assert.that(error.message, Is.equalTo("Expected 1 to be null"));
 					}
@@ -206,7 +206,7 @@ function Failure_message_tests() {
 				
 				function Should_show_readable_message_for_true_constraint() {
 					try {
-						Assert.that(1, Is.TRUE);
+						Assert.that(1, Is.TRUE());
 					} catch (error) {
 						Assert.that(error.message, Is.equalTo("Expected 1 to be true"));
 					}
@@ -214,7 +214,7 @@ function Failure_message_tests() {
 				
 				function Should_show_readable_message_for_false_constraint() {
 					try {
-						Assert.that(1, Is.FALSE);
+						Assert.that(1, Is.FALSE());
 					} catch (error) {
 						Assert.that(error.message, Is.equalTo("Expected 1 to be false"));
 					}
@@ -226,7 +226,7 @@ function Failure_message_tests() {
 			return [
 				function Should_show_negated_message_for_undefined_constraint() {
 					try {
-						Assert.that(undefined, Is.not.undefined);
+						Assert.that(undefined, Is.not.undefined());
 					} catch (error) {
 						Assert.that(error.message, Is.equalTo("Expected <undefined> to not be undefined"));
 					}
@@ -298,7 +298,7 @@ function Failure_message_tests() {
 				
 				function Should_show_negated_message_for_empty_constraint() {
 					try {
-						Assert.that("", Is.not.empty);
+						Assert.that("", Is.not.empty());
 					} catch (error) {
 						Assert.that(error.message, Is.equalTo("Expected <empty string> to not be empty"));
 					}
@@ -306,7 +306,7 @@ function Failure_message_tests() {
 				
 				function Should_show_negated_message_for_null_constraint() {
 					try {
-						Assert.that(null, Is.not.NULL);
+						Assert.that(null, Is.not.NULL());
 					} catch (error) {
 						Assert.that(error.message, Is.equalTo("Expected <null> to not be null"));
 					}
@@ -314,7 +314,7 @@ function Failure_message_tests() {
 				
 				function Should_show_negated_message_for_true_constraint() {
 					try {
-						Assert.that(true, Is.not.TRUE);
+						Assert.that(true, Is.not.TRUE());
 					} catch (error) {
 						Assert.that(error.message, Is.equalTo("Expected true to not be true"));
 					}
@@ -322,7 +322,7 @@ function Failure_message_tests() {
 				
 				function Should_show_negated_message_for_false_constraint() {
 					try {
-						Assert.that(false, Is.not.FALSE);
+						Assert.that(false, Is.not.FALSE());
 					} catch (error) {
 						Assert.that(error.message, Is.equalTo("Expected false to not be false"));
 					}
