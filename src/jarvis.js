@@ -364,7 +364,7 @@
 		},
 
 		ContainsKey: function(key) {
-			var equalTo = new this.EqualTo(key);
+			var equalTo = new constraints.EqualTo(key);
 			this.isValidFor = function(collection) {
 				var i;
 				for (i in collection) {
