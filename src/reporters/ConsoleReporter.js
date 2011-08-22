@@ -1,8 +1,4 @@
-(function(jarvis, console, undefined){
-	if (!jarvis || !console || !console["group"]) {
-		return;
-	}
-
+(function(jarvis, undefined){
 	jarvis.Framework.Reporters.ConsoleReporter = function() {
 		var tests = {};
 		
@@ -44,4 +40,4 @@
 	jarvis.htmlDiffs = false;
 	jarvis.defaultReporter = new jarvis.Framework.Reporters.ConsoleReporter();
 	
-}(Jarvis, console));
+}(typeof(exports) !== "undefined" ? global.Jarvis : Jarvis));

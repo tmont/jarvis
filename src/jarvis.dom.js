@@ -110,27 +110,27 @@
 	}
 
 	jarvis.Framework.CollectionAssertionInterface.prototype.text = function() {
-		var iface = new jarvis.Framework.AssertionInterface(function(constraint) {
+		var assertionInterface = new jarvis.Framework.AssertionInterface(function(constraint) {
 			return new DomElementTextConstraint(constraint);
 		});
 
-		iface.not = new jarvis.Framework.AssertionInterface(function(constraint) {
+		assertionInterface.not = new jarvis.Framework.AssertionInterface(function(constraint) {
 			return new jarvis.Framework.Constraints.Not(new DomElementTextConstraint(constraint));
 		});
 
-		return iface;
+		return assertionInterface;
 	}();
 
 	jarvis.Framework.CollectionAssertionInterface.prototype.flattenedText = function() {
-		var iface = new jarvis.Framework.AssertionInterface(function(constraint) {
+		var assertionInterface = new jarvis.Framework.AssertionInterface(function(constraint) {
 			return new DomElementFlattenedTextConstraint(constraint);
 		});
 
-		iface.not = new jarvis.Framework.AssertionInterface(function(constraint) {
+		assertionInterface.not = new jarvis.Framework.AssertionInterface(function(constraint) {
 			return new jarvis.Framework.Constraints.Not(new DomElementFlattenedTextConstraint(constraint));
 		});
 
-		return iface;
+		return assertionInterface;
 	}();
 
 	jarvis.Framework.AssertionInterface.prototype.inDom = function() {
