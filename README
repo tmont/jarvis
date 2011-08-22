@@ -1,5 +1,5 @@
 Jarvis <http://jarvis.tmont.com/>
-Version 1.3 (see CHANGELOG for details)
+Version 2.0 (see CHANGELOG for details)
 	by Tommy Montgomery <http://tommymontgomery.com/>
 
 Jarvis is a unit testing framework similar to [N|J|S]Unit. But mostly similar to NUnit.
@@ -23,10 +23,26 @@ Licensed under Creative Commons Attribution 2.5 License http://creativecommons.o
 
 Installation
 ------------
-- Reference jarvis-min.js at the bottom of your HTML file
-- Create a test script and include it after jarvis-min.js (example at http://jarvis.tmont.com/#example)
-- Open up the HTML file in a browser
-- You're winning
+
+Browser Installation:
+	- Reference jarvis-browser-min.js at the bottom of your HTML file
+	- Create a test script and include it after jarvis-min.js (example at http://jarvis.tmont.com/#example)
+	- Open up the HTML file in a browser
+
+Node Installation:
+//test.js
+var Jarvis = require('/path/to/jarvis-node-min.js');
+var Assert = Jarvis.Framework.Assert,
+	Is = Jarvis.Framework.Is,
+	Has = Jarvis.Framework.Has;
+
+function Node_test() {
+	Assert.that(2 + 2, Is.equalTo(4));
+	Assert.that(2 + 2, Is.not.equalTo(4));
+}
+
+//command line
+> node test.js
 
 Authors
 -------
