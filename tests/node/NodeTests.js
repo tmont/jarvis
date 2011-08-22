@@ -1,8 +1,4 @@
-var Jarvis = global.Jarvis = require("../../src/jarvis.js");
-require("../../src/reporters/CliReporter.js");
-var Assert = Jarvis.Framework.Assert,
-	Is = Jarvis.Framework.Is,
-	Has = Jarvis.Framework.Has;
+require("../../src/bootstrap/jarvis.bootstrap.node.js");
 
 function Node_tests() {
 	return [

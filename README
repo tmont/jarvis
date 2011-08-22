@@ -31,7 +31,7 @@ Browser Installation:
 
 Node Installation:
 //test.js
-var Jarvis = require('/path/to/jarvis-node-min.js');
+var Jarvis = global.Jarvis = require('/path/to/jarvis-node-min.js');
 var Assert = Jarvis.Framework.Assert,
 	Is = Jarvis.Framework.Is,
 	Has = Jarvis.Framework.Has;

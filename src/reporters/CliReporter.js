@@ -30,7 +30,7 @@
 				case "fail":
 				case "error":
 					console.error(indent + (result.message || ""));
-					console.log("");
+					console.log();
 					for (var i = 0; i < result.stackTrace.length; i++) {
 						console.error(indent + (i + 1) + ". " + result.stackTrace[i]);
 					}
@@ -40,6 +40,7 @@
 					break;
 			}
 
+			console.log();
 			indent = indent.substring(0, indent.length - 2);
 			console.log(indent + (endTime - test.startTime) + "ms " + result.assertions + " assertion" + (result.assertions !== 1 ? "s" : ""));
 			console.log(indent + "-----------------------------------");
