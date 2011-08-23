@@ -45,22 +45,34 @@
 	</target>
 	
 	<target name="compress" depends="init, clean, create-build-dirs, copy-source" description="Compresses JavaScript source files using YUI compressor">
-		<!-- combine all files -->
-		<concat destfile="${temp.dir}/jarvis-all.js" encoding="UTF-8" eol="lf">
+		<!-- browser version -->
+		<concat destfile="${temp.dir}/jarvis-browser.js" encoding="UTF-8" eol="lf">
 			<fileset dir="${temp.dir}" includes="diff_match_patch.js"/>
 			<fileset dir="${temp.dir}" includes="sizzle.js"/>
 			<fileset dir="${temp.dir}" includes="stacktrace.js"/>
 			<fileset dir="${temp.dir}" includes="jarvis.js"/>
+			<fileset dir="${temp.dir}" includes="jarvis.dom.js"/>
 			<fileset dir="${temp.dir}" includes="reporters/ConsoleReporter.js"/>
 			<fileset dir="${temp.dir}" includes="reporters/HtmlReporter.js"/>
 		</concat>
 	
 		<yui-compressor warn="true" munge="true" jsSuffix="-min.js" charset="UTF-8" fromdir="${temp.dir}" todir="${deploy.dir}">
-			<include name="jarvis-all.js"/>
+			<include name="jarvis-browser.js"/>
+			<include name="jarvis.js"/>
+			<include name="reporters/CliReporter.js"/>
 		</yui-compressor>
-		
-		<move file="${deploy.dir}/jarvis-all-min.js" tofile="${deploy.dir}/jarvis-min.js" />
-		
+
+		<!-- node version -->
+		<mkdir dir="${deploy.dir}/node" />
+		<move todir="${deploy.dir}/node">
+			<fileset dir="${deploy.dir}" includes="jarvis-min.js"/>
+			<fileset dir="${deploy.dir}/reporters" includes="CliReporter-min.js"/>
+		</move>
+		<copy file="${temp.dir}/jarvis.js" todir="${deploy.dir}/node"/>
+		<copy file="${temp.dir}/reporters/CliReporter.js" todir="${deploy.dir}/node"/>
+
+		<delete dir="${deploy.dir}/reporters"/>
+
 		<!-- delete temporary files -->
 		<delete dir="${temp.dir}"/>
 	</target>
