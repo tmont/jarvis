@@ -52,6 +52,7 @@
 			<fileset dir="${temp.dir}" includes="stacktrace.js"/>
 			<fileset dir="${temp.dir}" includes="jarvis.js"/>
 			<fileset dir="${temp.dir}" includes="jarvis.dom.js"/>
+			<fileset dir="${temp.dir}" includes="jarvis.browser.js"/>
 			<fileset dir="${temp.dir}" includes="reporters/ConsoleReporter.js"/>
 			<fileset dir="${temp.dir}" includes="reporters/HtmlReporter.js"/>
 		</concat>
