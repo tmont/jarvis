@@ -10,3 +10,4 @@ require("./ExpectedErrorTests.js");
 require("./FailureMessageTests.js");
 require("./SampleTests.js");
 require("./SetupAndTearDownTests.js");
+Jarvis.summary();

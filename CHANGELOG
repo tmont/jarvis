@@ -5,6 +5,8 @@
 	- Separated DOM-related stuff
 	- the global Jarvis object now exposes a Framework property for extending the framework
 	- used prototype for AssertionInterface and CollectionAssertionInterface so that it can be extended
+	- parentId is now passed to Reporter.endTest()
+	- added CliReporter (part of Node support)
 - Breaking changes
 	- DOM stuff has been moved into jarvis.dom.js
 	- added jarvis.bootstrap.browser.js; this MUST be included when running Jarvis in the browser

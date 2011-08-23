@@ -669,7 +669,7 @@
 			assertions: globalAssertionCount - assertionCountAtStart
 		};
 
-		reporter.endTest(result, id);
+		reporter.endTest(result, id, parentId);
 		globalExpectedError = undefined;
 	};
 	

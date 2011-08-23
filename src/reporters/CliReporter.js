@@ -2,14 +2,23 @@ if (typeof(global.Jarvis) === "undefined") {
 	throw "Expected global variable \"Jarvis\" to be set";
 }
 
-Jarvis.Framework.Reporters.CliReporter = function() {
-	var tests = {}, indent = "";
+Jarvis.Framework.Reporters.CliReporter = function(verbosity) {
+	var tests = {}, indent = "", stats = { total: 0, pass: 0, fail: 0, ignore: 0, error: 0 };
+	verbosity = Number(verbosity || 0);
 
 	this.summary = function(totalAssertions) {
-		//not implemented
+		var passPercent = stats.total === 0 ? 0 : Math.round(10000 * stats.pass / stats.total) / 100;
+
+		console.log();
+		console.log("----------- SUMMARY --------------");
+		console.log("| " + stats.pass + "/" + stats.total + " - " + passPercent + "% - " + totalAssertions + " assertion" + (totalAssertions === 1 ? "" : "s"));
+		console.log("|  ignored: " + stats.ignore);
+		console.log("|  failed:  " + stats.fail);
+		console.log("|  erred:   " + stats.error);
+		console.log("----------------------------------");
 	};
 
-	this.startTest = function(name, id) {
+	this.startTest = function(name, id, parentId) {
 		var test = {
 			name: name,
 			startTime: new Date().getTime()
@@ -21,7 +30,7 @@ Jarvis.Framework.Reporters.CliReporter = function() {
 		indent += "  ";
 	};
 
-	this.endTest = function(result, id) {
+	this.endTest = function(result, id, parentId) {
 		var endTime = new Date().getTime(),
 			test = tests[id],
 			i;
@@ -38,6 +47,11 @@ Jarvis.Framework.Reporters.CliReporter = function() {
 			case "ignore":
 				console.warn(indent + (result.message || ""));
 				break;
+		}
+
+		if (!parentId) {
+			stats[result.status]++;
+			stats.total++;
 		}
 
 		console.log();
