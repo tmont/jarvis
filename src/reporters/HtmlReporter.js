@@ -1,3 +1,8 @@
+/**
+ * Reports test results in interactive HTML
+ *
+ * Only supported in the browser context
+ */
 (function(window, undefined){
 	var doc = window.document,
 		jarvis = window.Jarvis,

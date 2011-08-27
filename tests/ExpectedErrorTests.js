@@ -36,7 +36,7 @@ function Tests_that_fail_even_when_they_succeed() {
 			Assert.that(1, Is.equalTo(2), "This assertion is preceded by Assert.willThrow()");
 		}
 	];
-};
+}
 
 Jarvis.run(Expected_error_tests);
 Jarvis.run(Tests_that_fail_even_when_they_succeed);

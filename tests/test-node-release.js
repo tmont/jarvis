@@ -1,7 +1,7 @@
 global.Jarvis = require("../build/2.0/node/jarvis.js");
-global.Assert = Jarvis.Framework.Assert;
-global.Is = Jarvis.Framework.Is;
-global.Has = Jarvis.Framework.Has;
+global.Assert = jarvis.Framework.Assert;
+global.Is = jarvis.Framework.Is;
+global.Has = jarvis.Framework.Has;
 
 require("../build/2.0/node/CliReporter.js");
 

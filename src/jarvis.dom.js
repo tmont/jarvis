@@ -1,7 +1,7 @@
 /**
  * Jarvis DOM extensions
  */
-(function(jarvis, sizzle, doc, undefined){
+(function(jarvis, $, doc, undefined){
 	function getTextRecursive(node) {
 		var text = "",
 			i = 0;
@@ -29,7 +29,7 @@
 
 	function InDomConstraint() {
 		this.isValidFor = function(selector) {
-			return sizzle(selector).length > 0;
+			return $(selector).length > 0;
 		};
 
 		this.getFailureMessage = function(selector, negate) {
@@ -75,7 +75,7 @@
 		var texts = [];
 
 		this.isValidFor = function(selector) {
-			return any(sizzle(selector), function(element) {
+			return any($(selector), function(element) {
 				if (element.childNodes.length === 1 && element.childNodes[0].nodeType === 3) {
 					texts.push(element.childNodes[0].nodeValue);
 					return constraint.isValidFor(element.childNodes[0].nodeValue);
@@ -96,7 +96,7 @@
 		var texts = [];
 
 		this.isValidFor = function(selector) {
-			return any(sizzle(selector), function(element) {
+			return any($(selector), function(element) {
 				texts.push(getTextRecursive(element));
 				return constraint.isValidFor(texts[texts.length - 1]);
 			});

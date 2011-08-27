@@ -1,27 +1,49 @@
-if (typeof(global.Jarvis) === "undefined") {
-	throw "Expected global variable \"Jarvis\" to be set";
+/**
+ * Reports test results to the CLI
+ *
+ * Only supported in Node context
+ */
+
+if (typeof(exports) === "undefined") {
+	throw "CliReporter only supported for Node";
 }
 
-Jarvis.Framework.Reporters.CliReporter = function(verbose) {
+exports = module.exports = function(verbose) {
 	var tests = {},
 		firstRun = true,
 		depth = 1,
 		lineStats = { total: 0, pass: 0, fail: 0, ignore: 0, error: 0 },
 		stats = { total: 0, pass: 0, fail: 0, ignore: 0, error: 0 },
+		failures = [],
 		maxLineLength = 60,
 		currentColumn = 1;
 
 	verbose = !!verbose;
+
+	this.htmlDiffs = false;
 
 	this.summary = function(totalAssertions) {
 		var passPercent = stats.total === 0 ? 0 : Math.round(10000 * stats.pass / stats.total) / 100;
 
 		console.log();
 		console.log();
+
+		if (failures.length) {
+			for (var i = 0; i < failures.length; i++) {
+				console.log("--------------------------------------------");
+				console.log(failures[i].name);
+				printErrorOrFailure(failures[i]);
+				console.log();
+			}
+		}
+
+		console.log();
 		console.log(stats.pass + "/" + stats.total + " - " + passPercent + "% - " + totalAssertions + " assertion" + (totalAssertions === 1 ? "" : "s"));
-		console.log("  ignored: " + stats.ignore);
+		console.log("  passed:  " + stats.pass);
 		console.log("  failed:  " + stats.fail);
 		console.log("  erred:   " + stats.error);
+		console.log("  ignored: " + stats.ignore);
+		console.log();
 	};
 
 	this.startTest = function(name, id, parentId) {
@@ -46,15 +68,18 @@ Jarvis.Framework.Reporters.CliReporter = function(verbose) {
 		
 		if (verbose) {
 			console.log(Array(depth).join(" ") + test.name);
+			depth++;
 		}
-		
-		depth++;
 	};
 
 	function printErrorOrFailure(result) {
-		console.error(depth + (result.message || ""));
-		console.log();
 		var indent = Array(depth).join(" ");
+		if (result.message) {
+			console.error(indent + (result.message || ""));
+		}
+
+		console.log();
+		
 		for (var i = 0; i < result.stackTrace.length; i++) {
 			console.error(indent + (i + 1) + ". " + result.stackTrace[i]);
 		}
@@ -72,6 +97,7 @@ Jarvis.Framework.Reporters.CliReporter = function(verbose) {
 						printErrorOrFailure(result);
 					} else {
 						process.stdout.write("F");
+						failures.push(result);
 					}
 					break;
 				case "error":
@@ -79,6 +105,7 @@ Jarvis.Framework.Reporters.CliReporter = function(verbose) {
 						printErrorOrFailure(result);
 					} else {
 						process.stdout.write("E");
+						failures.push(result);
 					}
 					break;
 				case "ignore":
@@ -86,6 +113,7 @@ Jarvis.Framework.Reporters.CliReporter = function(verbose) {
 						console.error(Array(depth).join(" ") + (result.message || ""));
 					} else {
 						process.stdout.write("I");
+						failures.push(result);
 					}
 					break;
 				case "pass":
@@ -119,6 +147,3 @@ Jarvis.Framework.Reporters.CliReporter = function(verbose) {
 		tests[id] = undefined;
 	};
 };
-
-Jarvis.htmlDiffs = false;
-Jarvis.defaultReporter = new Jarvis.Framework.Reporters.CliReporter();

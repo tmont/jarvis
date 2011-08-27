@@ -504,7 +504,7 @@
 	}
 	
 	exports.Framework = {
-		Reporters: {},
+		Reporters: {}, //only relevant for browser context
 		Error: JarvisError,
 		Constraints: constraints,
 		Assert: {
@@ -663,6 +663,7 @@
 		}
 
 		result = {
+			name: name,
 			status: caughtError === undefined ? "pass" : caughtError.type,
 			message: caughtError === undefined ? "" : caughtError.message,
 			stackTrace: caughtError === undefined ? [] : caughtError.stackTrace,

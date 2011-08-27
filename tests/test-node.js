@@ -3,7 +3,8 @@ global.Assert = Jarvis.Framework.Assert;
 global.Is = Jarvis.Framework.Is;
 global.Has = Jarvis.Framework.Has;
 
-require("../src/reporters/CliReporter.js");
+var CliReporter = require("../src/reporters/CliReporter.js");
+Jarvis.defaultReporter = new CliReporter();
 
 require("./ConstraintTests.js");
 require("./ExpectedErrorTests.js");
