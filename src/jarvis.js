@@ -475,6 +475,7 @@
 			i;
 		
 		for (i = frames.length - 1; i >= 0; i--) {
+			//get rid of superfluous stack frames in chrome/ie
 			if (/(Object doesn't support property or method 'undef'|Object.createException)/.test(frames[i])) {
 				break;
 			}
@@ -492,17 +493,24 @@
 
 		var error = thrownError || new Error();
 		if (typeof(error.stack) !== "undefined") {
-			//nodejs stack trace
+			//nodejs and browsers that support it
 			this.stackTrace = error.stack
 				.split("\n")
 				.slice(2)
-				.filter(function(frame) { return !/\(module\.js:\d+:\d+\)$/.test(frame); })
+				.filter(function(frame) { return !/\(module\.js:\d+:\d+\)$/.test(frame) && !/^\s*$/.test(frame); })
 				.map(function(frame) { return frame.replace(/^\s*at\s*/, ""); });
-		} else if (exports.showStackTraces && !exports.opera) {
-			this.stackTrace = cleanStackTrace(exports.getStackTrace({ e: thrownError }));
+		} else if (shouldShowStackTraceInBrowser()) {
+			this.stackTrace = cleanStackTrace(window.getStackTrace({ e: thrownError }));
 		}
 	}
-	
+
+	function shouldShowStackTraceInBrowser() {
+		return typeof(window) !== "undefined" &&
+			exports.showStackTraces &&
+			typeof(window.getStackTrace) !== "undefined" &&
+			typeof(window.opera) === "undefined";
+	}
+
 	exports.Framework = {
 		Reporters: {}, //only relevant for browser context
 		Error: JarvisError,
