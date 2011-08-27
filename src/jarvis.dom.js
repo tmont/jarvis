@@ -1,7 +1,7 @@
 /**
  * Jarvis DOM extensions
  */
-(function(jarvis, $, doc, undefined){
+(function(jarvis, $, doc){
 	function getTextRecursive(node) {
 		var text = "",
 			i = 0;
