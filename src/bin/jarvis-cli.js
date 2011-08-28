@@ -136,15 +136,13 @@
 	}
 
 	for (var i = 0; i < args.files.length; i++) {
-		var fileName = process.cwd() + "/" + args.files[i];
-		var test = require(fileName);
-		jarvis.run(test);
+		jarvis.run(require(process.cwd() + "/" + args.files[i]));
 	}
+
+	console.log();
 
 	if (args.options.showSummary) {
 		jarvis.summary();
 	}
-
-	console.log();
 
 }());
