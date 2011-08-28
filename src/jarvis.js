@@ -151,18 +151,28 @@
 	}
 	
 	function compareIterables(left, right) {
-		var key, constraint;
-		
+		var key,
+			errorInScope = typeof(Error) !== "undefined",
+			rightIsError = errorInScope && right instanceof Error,
+			leftIsError = errorInScope && left instanceof Error;
+
+		//ignore Error.stack, so that we can more easily compare thrown errors
 		for (key in right) {
-			constraint = new constraints.EqualTo(right[key]);
-			if (typeof(left[key]) === "undefined" || !constraint.isValidFor(left[key])) {
+			if (key === "stack" && rightIsError) {
+				continue;
+			}
+
+			if (typeof(left[key]) === "undefined" || !new constraints.EqualTo(right[key]).isValidFor(left[key])) {
 				return false;
 			}
 		}
-		
+
 		for (key in left) {
-			constraint = new constraints.EqualTo(left[key]);
-			if (typeof(right[key]) === "undefined" || !constraint.isValidFor(right[key])) {
+			if (key === "stack" && leftIsError) {
+				continue;
+			}
+
+			if (typeof(right[key]) === "undefined" || !new constraints.EqualTo(left[key]).isValidFor(right[key])) {
 				return false;
 			}
 		}
@@ -469,7 +479,7 @@
 			return iface;
 		}
 	};
-	
+
 	function cleanStackTrace(frames) {
 		var newFrames = [],
 			i;
@@ -485,13 +495,13 @@
 		
 		return newFrames;
 	}
-	
+
 	function JarvisError(message, type, thrownError) { 
-		this.message = message; 
+		this.message = message;
 		this.type = type;
 		this.stackTrace = [];
 
-		var error = thrownError || new Error();
+		var error = typeof(thrownError.stack) === "undefined" ? new Error() : thrownError;
 		if (typeof(error.stack) !== "undefined") {
 			//nodejs and browsers that support it
 			this.stackTrace = error.stack
@@ -614,7 +624,6 @@
 			childTests = test();
 			expectedError = globalExpectedError;
 			if (typeof(childTests) === "object") {
-
 				if (isArray(childTests)) {
 					//if the value is an array, then it's a suite of tests
 					//if setup and tearDown were given, we should run them before and after each child test
@@ -630,7 +639,7 @@
 						tearDown && tearDown();
 					}
 				} else {
-					this.run(childTests, id);
+					this.run(childTests, reporter, id);
 				}
 			}
 
