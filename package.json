@@ -1,0 +1,32 @@
+{
+	"name": "jarvis",
+	"version": "2.0.0",
+	"keywords": ["testing", "unit", "test", "selenium"],
+	"homepage": "http://jarvis.tmont.com/",
+	"description": "Client-side/server-side unit testing framework.",
+	"author": {
+		"name": "Tommy Montgomery",
+		"email": "tmont@tmont.com",
+		"url": "http://tmont.com/"
+	},
+
+	"files": [
+		"./src/jarvis.js",
+		"./src/reporters/CliReporter.js"
+	],
+
+	"main": "./src/jarvis.js",
+	
+	"bin": {
+		"jarvis": "./src/bin/jarvis-cli.js"
+	},
+
+	"directories": {
+		"lib": "./src"
+	},
+
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/tmont/jarvis.git"
+	}
+}

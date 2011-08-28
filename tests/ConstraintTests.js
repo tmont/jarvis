@@ -478,4 +478,8 @@ function Constraint_tests() {
 	];
 }
 
-Jarvis.run(Constraint_tests);
+if (typeof(module) === "undefined") {
+	Jarvis.run(Constraint_tests);
+} else {
+	module.exports = Constraint_tests;
+}

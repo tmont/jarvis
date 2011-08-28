@@ -38,5 +38,14 @@ function Tests_that_fail_even_when_they_succeed() {
 	];
 }
 
-Jarvis.run(Expected_error_tests);
-Jarvis.run(Tests_that_fail_even_when_they_succeed);
+if (typeof(module) === "undefined") {
+	Jarvis.run(Expected_error_tests);
+	Jarvis.run(Tests_that_fail_even_when_they_succeed);
+} else {
+	module.exports = function() {
+		return [
+			Expected_error_tests,
+			Tests_that_fail_even_when_they_succeed
+		];
+	}
+}

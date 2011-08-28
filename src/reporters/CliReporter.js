@@ -4,11 +4,11 @@
  * Only supported in Node context
  */
 
-if (typeof(exports) === "undefined") {
+if (typeof(module) === "undefined") {
 	throw "CliReporter only supported for Node";
 }
 
-exports = module.exports = function(verbose) {
+module.exports = function(verbose) {
 	var tests = {},
 		firstRun = true,
 		depth = 1,
@@ -25,7 +25,6 @@ exports = module.exports = function(verbose) {
 	this.summary = function(totalAssertions) {
 		var passPercent = stats.total === 0 ? 0 : Math.round(10000 * stats.pass / stats.total) / 100;
 
-		console.log();
 		console.log();
 
 		if (failures.length) {
