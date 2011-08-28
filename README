@@ -1,8 +1,9 @@
 Jarvis <http://jarvis.tmont.com/>
-Version 2.0 (see CHANGELOG for details)
+Version 2.0.0 (see CHANGELOG for details)
 	by Tommy Montgomery <http://tommymontgomery.com/>
 
 Jarvis is a unit testing framework similar to [N|J|S]Unit. But mostly similar to NUnit.
+It supports both client side (browser/DOM/selector/etc.) and server side (node) testing.
 
 Licensed under WTFPL: http://sam.zoy.org/wtfpl/
 
@@ -23,26 +24,45 @@ Licensed under Creative Commons Attribution 2.5 License http://creativecommons.o
 
 Installation
 ------------
-
 Browser Installation:
 	- Reference jarvis-browser-min.js at the bottom of your HTML file
 	- Create a test script and include it after jarvis-min.js (example at http://jarvis.tmont.com/#example)
 	- Open up the HTML file in a browser
 
-Node Installation:
+Node Installation [npm] (recommended):
+$ npm install jarvis
+
 //test.js
-var Jarvis = global.Jarvis = require('/path/to/jarvis-node-min.js');
-var Assert = Jarvis.Framework.Assert,
-	Is = Jarvis.Framework.Is,
-	Has = Jarvis.Framework.Has;
+var jarvis = require('jarvis'),
+	Assert = jarvis.Framework.Assert,
+	Is = jarvis.Framework.Is,
+	Has = jarvis.Framework.Has;
+
+module.exports = function My_test() {
+	Assert.that(2 + 2, Is.equalTo(4));
+	Assert.that(2 + 2, Is.not.equalTo(4)); //should fail
+}
+
+$ jarvis test.js
+
+Node Installation [manual]:
+//test.js
+var jarvis = require('/path/to/jarvis/jarvis.js');
+var CliReporter = require('/path/to/jarvis/CliReporter.js');
+jarvis.defaultReporter = new CliReporter();
+var Assert = jarvis.Framework.Assert,
+	Is = jarvis.Framework.Is,
+	Has = jarvis.Framework.Has;
 
 function Node_test() {
 	Assert.that(2 + 2, Is.equalTo(4));
-	Assert.that(2 + 2, Is.not.equalTo(4));
+	Assert.that(2 + 2, Is.not.equalTo(4)); //should fail
 }
 
-//command line
-> node test.js
+jarvis.run(Node_test);
+jarvis.summary();
+
+$ node test.js
 
 Authors
 -------

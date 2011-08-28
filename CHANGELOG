@@ -1,7 +1,8 @@
-2.0 2011-xx-xx
---------------
+2.0.0 2011-08-xx
+----------------
 - Enhancements
 	- Node support
+	- Enabled installation via npm
 	- Separated DOM-related stuff
 	- the global Jarvis object now exposes a Framework property for extending the framework
 	- used prototype for AssertionInterface and CollectionAssertionInterface so that it can be extended
@@ -9,7 +10,7 @@
 	- added CliReporter (part of Node support)
 - Breaking changes
 	- DOM stuff has been moved into jarvis.dom.js
-	- added jarvis.bootstrap.browser.js; this MUST be included when running Jarvis in the browser
+	- added jarvis.browser.js; this MUST be included when running Jarvis in the browser
 
 1.3 2011-06-20
 --------------

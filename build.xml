@@ -30,13 +30,13 @@
 
 		<!-- non compressed files and test files -->
 		<tar destfile="${build.dist}/${package.source}.tar.gz" compression="gzip">
-			<tarfileset dir="${basedir}" includes="src/**,tests/**,CHANGELOG,COPYING,README" prefix="${package.source}"/>
+			<tarfileset dir="${basedir}" includes="src/**,tests/**,CHANGELOG,COPYING,README,package.json" prefix="${package.source}"/>
 		</tar>
 		
-		<!-- compressed files -->
+		<!-- compressed files and node -->
 		<tar destfile="${build.dist}/${package.release}.tar.gz" compression="gzip">
 			<tarfileset dir="${deploy.dir}" includes="*/**" prefix="${package.release}"/>
-			<tarfileset dir="${basedir}" includes="CHANGELOG,COPYING,README" prefix="${package.release}"/>
+			<tarfileset dir="${basedir}" includes="CHANGELOG,COPYING,README,package.json,src/jarvis.js,src/reporters/CliReporter.js,src/bin/*" prefix="${package.release}"/>
 		</tar>
 	</target>
 	
@@ -59,20 +59,7 @@
 	
 		<yui-compressor warn="true" munge="true" jsSuffix="-min.js" charset="UTF-8" fromdir="${temp.dir}" todir="${deploy.dir}">
 			<include name="jarvis-browser.js"/>
-			<include name="jarvis.js"/>
-			<include name="reporters/CliReporter.js"/>
 		</yui-compressor>
-
-		<!-- node version -->
-		<mkdir dir="${deploy.dir}/node" />
-		<move todir="${deploy.dir}/node">
-			<fileset dir="${deploy.dir}" includes="jarvis-min.js"/>
-			<fileset dir="${deploy.dir}/reporters" includes="CliReporter-min.js"/>
-		</move>
-		<copy file="${temp.dir}/jarvis.js" todir="${deploy.dir}/node"/>
-		<copy file="${temp.dir}/reporters/CliReporter.js" todir="${deploy.dir}/node"/>
-
-		<delete dir="${deploy.dir}/reporters"/>
 
 		<!-- delete temporary files -->
 		<delete dir="${temp.dir}"/>
