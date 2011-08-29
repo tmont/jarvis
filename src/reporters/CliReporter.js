@@ -25,8 +25,6 @@ module.exports = function(verbose) {
 	this.summary = function(totalAssertions) {
 		var passPercent = stats.total === 0 ? 0 : Math.round(10000 * stats.pass / stats.total) / 100;
 
-		console.log();
-
 		if (failures.length) {
 			for (var i = 0; i < failures.length; i++) {
 				console.log("--------------------------------------------");
@@ -34,9 +32,10 @@ module.exports = function(verbose) {
 				printErrorOrFailure(failures[i]);
 				console.log();
 			}
+		} else {
+			console.log();
 		}
-
-		console.log();
+		
 		console.log(stats.pass + "/" + stats.total + " - " + passPercent + "% - " + totalAssertions + " assertion" + (totalAssertions === 1 ? "" : "s"));
 		console.log("  passed:  " + stats.pass);
 		console.log("  failed:  " + stats.fail);

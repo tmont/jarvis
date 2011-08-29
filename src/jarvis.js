@@ -501,7 +501,7 @@
 		this.type = type;
 		this.stackTrace = [];
 
-		var error = typeof(thrownError.stack) === "undefined" ? new Error() : thrownError;
+		var error = !thrownError || typeof(thrownError.stack) === "undefined" ? new Error() : thrownError;
 		if (typeof(error.stack) !== "undefined") {
 			//nodejs and browsers that support it
 			this.stackTrace = error.stack
