@@ -579,8 +579,8 @@
 		reporter.summary(globalAssertionCount);
 	};
 
-	exports.run = function(test, reporter, parentId) {
-		var id = (testId++),
+    function runTest(test, reporter, parentId) {
+        var id = (testId++),
 			caughtError,
 			assertionCountAtStart = globalAssertionCount,
 			i,
@@ -614,7 +614,6 @@
 			childTests = test();
 			expectedError = globalExpectedError;
 			if (typeof(childTests) === "object") {
-
 				if (isArray(childTests)) {
 					//if the value is an array, then it's a suite of tests
 					//if setup and tearDown were given, we should run them before and after each child test
@@ -630,7 +629,7 @@
 						tearDown && tearDown();
 					}
 				} else {
-					this.run(childTests, id);
+					this.run(childTests, reporter, id);
 				}
 			}
 
@@ -680,6 +679,16 @@
 
 		reporter.endTest(result, id, parentId);
 		globalExpectedError = undefined;
+	}
+
+
+
+	exports.run = function(test, reporter) {
+		runTest(test, reporter);
+	};
+
+	exports.runAsync = function(test, reporter) {
+		runTestAsync(test, reporter);
 	};
 	
 
