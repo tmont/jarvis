@@ -10,7 +10,8 @@
 	var constraints,
 		globalAssertionCount = 0,
 		testId = 1,
-		globalExpectedError;
+		globalExpectedError,
+		jarvis = exports;
 	
 	function isArray(o) {
 		return Object.prototype.toString.call(o) === '[object Array]';
@@ -583,14 +584,14 @@
 	exports.summary = function(reporter) {
 		reporter = reporter || this.defaultReporter;
 		if (!reporter) {
-			throw "No reporter given";
+			throw new Error("No reporter given");
 		}
 
 		reporter.summary(globalAssertionCount);
 	};
 
-	exports.run = function(test, reporter, parentId) {
-		var id = (testId++),
+    function runTest(test, reporter, parentId) {
+        var id = (testId++),
 			caughtError,
 			assertionCountAtStart = globalAssertionCount,
 			i,
@@ -613,9 +614,9 @@
 		}
 
 		name = getFunctionName(test).replace(/_/g, " ");
-		reporter = reporter || this.defaultReporter;
+		reporter = reporter || jarvis.defaultReporter;
 		if (!reporter) {
-			throw "No reporter given";
+			throw new Error("No reporter given");
 		}
 
 		reporter.startTest(name, id, parentId);
@@ -635,11 +636,11 @@
 
 					for (i = 0; i < childTests.length; i++) {
 						setup && setup();
-						this.run(childTests[i], reporter, id);
+						runTest(childTests[i], reporter, id);
 						tearDown && tearDown();
 					}
 				} else {
-					this.run(childTests, reporter, id);
+					runTest(childTests, reporter, id);
 				}
 			}
 
@@ -689,6 +690,16 @@
 
 		reporter.endTest(result, id, parentId);
 		globalExpectedError = undefined;
+	}
+
+
+
+	exports.run = function(test, reporter) {
+		runTest(test, reporter);
+	};
+
+	exports.runAsync = function(test, reporter) {
+		runTestAsync(test, reporter);
 	};
 	
 

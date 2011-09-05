@@ -16,7 +16,8 @@ module.exports = function(verbose) {
 		stats = { total: 0, pass: 0, fail: 0, ignore: 0, error: 0 },
 		failures = [],
 		maxLineLength = 60,
-		currentColumn = 1;
+		currentColumn = 1,
+		start;
 
 	verbose = !!verbose;
 
@@ -25,6 +26,8 @@ module.exports = function(verbose) {
 	this.summary = function(totalAssertions) {
 		var passPercent = stats.total === 0 ? 0 : Math.round(10000 * stats.pass / stats.total) / 100;
 
+		console.log();
+
 		if (failures.length) {
 			for (var i = 0; i < failures.length; i++) {
 				console.log("--------------------------------------------");
@@ -32,11 +35,12 @@ module.exports = function(verbose) {
 				printErrorOrFailure(failures[i]);
 				console.log();
 			}
-		} else {
-			console.log();
 		}
-		
-		console.log(stats.pass + "/" + stats.total + " - " + passPercent + "% - " + totalAssertions + " assertion" + (totalAssertions === 1 ? "" : "s"));
+
+		var totalTime = new Date().getTime() - start;
+
+		console.log();
+		console.log(stats.pass + "/" + stats.total + " - " + passPercent + "% - " + totalAssertions + " assertion" + (totalAssertions === 1 ? "" : "s") + " - " + totalTime + "ms");
 		console.log("  passed:  " + stats.pass);
 		console.log("  failed:  " + stats.fail);
 		console.log("  erred:   " + stats.error);
@@ -50,6 +54,7 @@ module.exports = function(verbose) {
 			console.log(" by Tommy Montgomery");
 			console.log();
 			firstRun = false;
+			start = new Date().getTime();
 		}
 
 		var test = {
@@ -65,13 +70,13 @@ module.exports = function(verbose) {
 		}
 		
 		if (verbose) {
-			console.log(Array(depth).join(" ") + test.name);
+			console.log(new Array(depth).join(" ") + test.name);
 			depth++;
 		}
 	};
 
 	function printErrorOrFailure(result) {
-		var indent = Array(depth).join(" ");
+		var indent = new Array(depth).join(" ");
 		if (result.message) {
 			console.error(indent + (result.message || ""));
 		}
@@ -108,7 +113,7 @@ module.exports = function(verbose) {
 					break;
 				case "ignore":
 					if (verbose) {
-						console.error(Array(depth).join(" ") + (result.message || ""));
+						console.error(new Array(depth).join(" ") + (result.message || ""));
 					} else {
 						process.stdout.write("I");
 						failures.push(result);
