@@ -53,7 +53,8 @@
 			usage: false,
 			global: true,
 			showSummary: true,
-			help: false
+			help: false,
+			async: false
 		};
 
 		var files = [];
@@ -84,6 +85,9 @@
 					break;
 				case "--no-summary":
 					options.showSummary = false;
+					break;
+				case "--async":
+					options.async = true;
 					break;
 				default:
 					files.push(args[i]);
@@ -135,8 +139,18 @@
 		jarvis.defaultReporter = new CliReporter(args.options.verbose);
 	}
 
-	for (var i = 0; i < args.files.length; i++) {
-		jarvis.run(require(process.cwd() + "/" + args.files[i]));
+	if (!args.options.async) {
+		for (var i = 0; i < args.files.length; i++) {
+			jarvis.run(require(process.cwd() + "/" + args.files[i]));
+		}
+	} else {
+		(function runNext() {
+			if (!args.files.length) {
+				return;
+			}
+
+			jarvis.runAsync(require(process.cwd() + "/" + args.files.shift()), null, runNext);
+		}());
 	}
 
 	console.log();

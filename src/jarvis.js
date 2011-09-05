@@ -599,15 +599,19 @@
 		reporter.summary(globalAssertionCount);
 	};
 
+	function emptyCallbackHandler(callback) {
+		callback && callback();
+	}
+
 	function Test(func, parentId) {
-		this.setup = emptyFunc;
-		this.tearDown = emptyFunc;
+		this.setup = emptyCallbackHandler;
+		this.tearDown = emptyCallbackHandler;
 		this.func = func;
 		this.id = ++testId;
 		this.parentId = parentId;
 		this.expectedError = undefined;
 		this.assertions = 0;
-		this.start = new Date().getTime();
+		this.start = null;
 		this.end = null;
 		this.duration = Infinity;
 		this.result = {
@@ -616,17 +620,21 @@
 			stackTrace: []
 		};
 
-		var assertionsAtStart = globalAssertionCount;
-		this.calculateAssertions = function() {
-			this.assertions = globalAssertionCount - assertionsAtStart;
+		this.startTest = function() {
+			this.start = new Date().getTime();
 		};
+		
+		var assertionsAtStart = globalAssertionCount;
+		this.endTest = function(error) {
+			this.end = new Date().getTime();
+			this.duration = this.end - this.start;
+			this.assertions = globalAssertionCount - assertionsAtStart;
 
-		this.setResult = function(error) {
 			this.result.status = error === undefined ? "pass" : error.type;
 			this.result.message = error === undefined ? "" : error.message;
 			this.result.stackTrace = error === undefined ? [] : error.stackTrace;
 		};
-		
+
 		if (typeof(func) !== "function") {
 			this.setup = func["setup"] || emptyFunc;
 			this.tearDown = func["tearDown"] || emptyFunc;
@@ -640,69 +648,67 @@
 		this.name = getFunctionName(this.func).replace(/_/g, " ");
 	}
 
-	function TestRunner(reporter, async) {
+	function TestRunner(reporter) {
 		this.reporter = reporter || jarvis.defaultReporter;
-		this.async = !!async;
 	}
 
 	TestRunner.prototype.run = function(testFunc, parentId) {
-		var currentTest = new Test(testFunc, parentId),
-			runLastTearDown = true,
-			error;
+		this.runTest(this.createAndInitTest(testFunc, parentId));
+	};
+
+	TestRunner.prototype.createAndInitTest = function(testFunc, parentId) {
+		var test = new Test(testFunc, parentId);
 
 		if (!this.reporter) {
 			throw new Error("No reporter given");
 		}
 
-		//reporter.startTest() is never asynchronous (although it probably should be...)
-		this.reporter.startTest(currentTest);
+		test.startTest();
+		this.reporter.startTest(test);
+		return test;
+	};
 
-		//need to branch so that we can do things callback-style for asynchronous tests
-		//trying to not branch the code just makes things way too difficult
-		if (!this.async) {
-			try {
-				currentTest.setup();
+	TestRunner.prototype.runTest = function(test) {
+		var runLastTearDown = true,
+			error;
+		
+		try {
+			test.setup();
 
-				var childTests = currentTest.func();
-				currentTest.expectedError = globalExpectedError;
+			var childTests = test.func();
+			test.expectedError = globalExpectedError;
 
-				if (typeof(childTests) === "object") {
-					if (isArray(childTests)) {
-						//test suite
-						runLastTearDown = false;
-						currentTest.tearDown();
+			if (typeof(childTests) === "object") {
+				if (isArray(childTests)) {
+					//test suite
+					runLastTearDown = false;
+					test.tearDown();
 
-						for (var i = 0; i < childTests.length; i++) {
-							currentTest.setup();
-							this.run(childTests[i], currentTest.id /* parentId */);
-							currentTest.tearDown();
-						}
-					} else {
-						this.run(childTests, currentTest.id /* parentId */);
+					for (var i = 0; i < childTests.length; i++) {
+						test.setup();
+						this.run(childTests[i], test.id /* parentId */);
+						test.tearDown();
 					}
+				} else {
+					this.run(childTests, test.id /* parentId */);
 				}
-
-				if (!error && globalExpectedError) {
-					throw new JarvisError("Expected error to be thrown: " + globalExpectedError, "fail");
-				}
-			} catch (e) {
-				error = this.handleError(e, currentTest);
 			}
 
-			if (runLastTearDown) {
-				currentTest.tearDown();
+			if (globalExpectedError) {
+				throw new JarvisError("Expected error to be thrown: " + globalExpectedError, "fail");
 			}
-
-			//reset global error
-			globalExpectedError = undefined;
-			currentTest.setResult(error);
-			currentTest.calculateAssertions();
-			currentTest.end = new Date().getTime();
-			currentTest.duration = currentTest.end - currentTest.start;
-			this.reporter.endTest(currentTest);
-		} else {
-			//asynchronous-ish test running
+		} catch (e) {
+			error = this.handleError(e, test);
 		}
+
+		if (runLastTearDown) {
+			test.tearDown();
+		}
+
+		//reset global error
+		globalExpectedError = undefined;
+		test.endTest(error);
+		this.reporter.endTest(test);
 	};
 
 	TestRunner.prototype.handleError = function(error, test) {
@@ -733,8 +739,73 @@
 		return error;
 	};
 
+	function AsyncTestRunner(reporter) {
+		this.reporter = reporter || jarvis.defaultReporter;
+	}
+
+	AsyncTestRunner.prototype = new TestRunner();
+	AsyncTestRunner.prototype.run = function(testFunc, parentId, testCompleteCallback) {
+		this.runTest(this.createAndInitTest(testFunc, parentId), testCompleteCallback);
+	};
+	AsyncTestRunner.prototype.runTest = function(test, testCompleteCallback) {
+		var self = this;
+
+		function testIsComplete() {
+			var error;
+			test.expectedError = globalExpectedError;
+			if (globalExpectedError !== undefined) {
+				error = self.handleError(new JarvisError("Expected error to be thrown: " + globalExpectedError, "fail"));
+			}
+
+			test.tearDown(function() {
+				globalExpectedError = undefined;
+				test.endTest();
+				self.reporter.endTest(test);
+				testCompleteCallback();
+			});
+		}
+
+		function runTestSuite(parentTest, tests, suiteCompleteCallback) {
+			if (!tests.length) {
+				suiteCompleteCallback();
+				return;
+			}
+
+			var runLastTearDown = false,
+				self = this;
+			
+			parentTest.tearDown(function() {
+				parentTest.setup(function() {
+					self.run(tests.shift(), parentTest.id /* parentId */, function() {
+						parentTest.tearDown(function() {
+							runTestSuite.call(self, parentTest, tests, suiteCompleteCallback);
+						});
+					});
+				});
+			});
+		}
+
+		test.setup(function() {
+			var runLastTearDown = true;
+			var childTests = test.func(testIsComplete /* this won't be executed if childTests !== undefined */);
+			if (typeof(childTests) === "object") {
+				if (isArray(childTests)) {
+					runTestSuite.call(self, test, childTests, testIsComplete);
+				} else {
+					self.run(childTests, test.id /* parentId */, testIsComplete);
+				}
+			}
+
+			//anything else is undefined behavior
+		});
+	};
+
 	exports.run = function(test, reporter) {
 		new TestRunner(reporter).run(test);
+	};
+
+	exports.runAsync = function(test, reporter, callback) {
+		new AsyncTestRunner(reporter).run(test, null, callback);
 	};
 
 
