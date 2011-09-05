@@ -170,7 +170,7 @@
 			container.appendChild(summary);
 		},
 		
-		this.startTest = function(name, id, parentId) {
+		this.startTest = function(testObj) {
 			var element = doc.createElement("div"),
 				title = doc.createElement("p"),
 				icon = doc.createElement("img"),
@@ -183,7 +183,7 @@
 					element: element,
 					icon: icon,
 					title: title,
-					parentId: parentId,
+					parentId: testObj.parentId,
 					childContainer: null,
 					childResults: {
 						fail: 0,
@@ -196,7 +196,7 @@
 			
 			element.className = "jarvis-test jarvis-test-result-running";
 			title.className = "clearfix";
-			title.appendChild(doc.createTextNode(name));
+			title.appendChild(doc.createTextNode(testObj.name));
 			
 			icon.className = "jarvis-icon";
 			icon.src = imageSource.running;
@@ -204,26 +204,26 @@
 			element.appendChild(icon);
 			element.appendChild(title);
 			
-			if (tests[parentId]) {
-				if (!tests[parentId].childContainer) {
+			if (tests[testObj.parentId]) {
+				if (!tests[testObj.parentId].childContainer) {
 					childContainer = doc.createElement("div");
 					childContainer.className = "jarvis-child-test-container";
 					childContainer.style.display = collapsedByDefault ? "none" : "block";
-					tests[parentId].element.appendChild(childContainer);
-					tests[parentId].childContainer = childContainer;
+					tests[testObj.parentId].element.appendChild(childContainer);
+					tests[testObj.parentId].childContainer = childContainer;
 				}
 				
-				parent = tests[parentId].childContainer;
+				parent = tests[testObj.parentId].childContainer;
 			} else {
 				parent = container;
 			}
 			
 			parent.appendChild(test.element);
-			tests[id] = test;
+			tests[testObj.id] = test;
 		};
 		
-		this.endTest = function(result, id) {
-			var test = tests[id],
+		this.endTest = function(testObj) {
+			var test = tests[testObj.id],
 				parent,
 				actualStatus,
 				info = "",
@@ -233,8 +233,8 @@
 				item,
 				i;
 				
-			test.endTime = new Date().getTime();
-			test.assertions = result.assertions;
+			test.endTime = testObj.finish;
+			test.assertions = testObj.result.assertions;
 			
 			actualStatus = "pass";
 			if (test.childResults.ignore === test.childResults.total) {
@@ -244,7 +244,7 @@
 			}
 			
 			if (test.childResults.total === 0) {
-				actualStatus = result.status;
+				actualStatus = testObj.result.status;
 			}
 			
 			if (test.parentId) {
@@ -280,25 +280,25 @@
 			infoContainer.appendChild(doc.createTextNode(info));
 			test.title.appendChild(infoContainer);
 			
-			if (result.message || result.stackTrace.length > 0) {
+			if (testObj.result.message || testObj.result.stackTrace.length > 0) {
 				messageContainer = doc.createElement("pre");
 				
-				if (result.message) {
-					if (result.message[0] && typeof(result.message[0].nodeType) !== "undefined") {
-						for (i = 0; i < result.message.length; i++) {
-							messageContainer.appendChild(result.message[i]);
+				if (testObj.result.message) {
+					if (testObj.result.message[0] && typeof(testObj.result.message[0].nodeType) !== "undefined") {
+						for (i = 0; i < testObj.result.message.length; i++) {
+							messageContainer.appendChild(testObj.result.message[i]);
 						}
 					} else {
-						messageContainer.appendChild(doc.createTextNode(result.message.replace(/\n/g, EOL)));
+						messageContainer.appendChild(doc.createTextNode(testObj.result.message.replace(/\n/g, EOL)));
 					}
 				}
 				
-				if (result.stackTrace.length > 0) {
+				if (testObj.result.stackTrace.length > 0) {
 					list = doc.createElement("ol");
 					list.className = "jarvis-stack-trace";
-					for (i = 0; i < result.stackTrace.length; i++) {
+					for (i = 0; i < testObj.result.stackTrace.length; i++) {
 						item = doc.createElement("li");
-						item.appendChild(doc.createTextNode(result.stackTrace[i]));
+						item.appendChild(doc.createTextNode(testObj.result.stackTrace[i]));
 						list.appendChild(item);
 					}
 					
@@ -309,7 +309,7 @@
 				test.element.appendChild(messageContainer);
 			}
 			
-			if (result.message || test.childResults.total > 0) {
+			if (testObj.result.message || test.childResults.total > 0) {
 				test.title.style.cursor = "pointer";
 				test.title.insertBefore(doc.createElement("img"), test.title.firstChild);
 				test.title.firstChild.src = collapsedByDefault ? imageSource.expand : imageSource.collapse;
@@ -318,7 +318,7 @@
 			}
 			
 			totals.elapsedTime += (test.endTime - test.startTime);
-			delete tests[id];
+			delete tests[testObj.id];
 		};
 		
 		function titleClick() {

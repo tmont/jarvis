@@ -11,6 +11,7 @@
 		globalAssertionCount = 0,
 		testId = 1,
 		globalExpectedError,
+		emptyFunc = function() {},
 		jarvis = exports;
 	
 	function isArray(o) {
@@ -504,10 +505,10 @@
 
 		var error = !thrownError || typeof(thrownError.stack) === "undefined" ? new Error() : thrownError;
 		if (typeof(error.stack) !== "undefined") {
-			//nodejs and browsers that support it
+			//node and browsers that support it
 			this.stackTrace = error.stack
 				.split("\n")
-				.slice(2)
+				//.slice(2) //only applicable to node
 				.filter(function(frame) { return !/\(module\.js:\d+:\d+\)$/.test(frame) && !/^\s*$/.test(frame); })
 				.map(function(frame) { return frame.replace(/^\s*at\s*/, ""); });
 		} else if (shouldShowStackTraceInBrowser()) {
@@ -520,6 +521,14 @@
 			exports.showStackTraces &&
 			typeof(window.getStackTrace) !== "undefined" &&
 			typeof(window.opera) === "undefined";
+	}
+
+	function identity(x) {
+		return x;
+	}
+
+	function negatedIdentity(x) {
+		return new constraints.Not(x);
 	}
 
 	exports.Framework = {
@@ -561,13 +570,13 @@
 		AssertionInterface: AssertionInterface,
 		CollectionAssertionInterface: CollectionAssertionInterface,
 		Is: function() {
-			var is = new AssertionInterface(function(constraint) { return constraint; });
-			is.not = new AssertionInterface(function(constraint) { return new constraints.Not(constraint); });
+			var is = new AssertionInterface(identity);
+			is.not = new AssertionInterface(negatedIdentity);
 			return is;
 		}(),
 		Has: function() {
-			var has = new CollectionAssertionInterface(function(constraint) { return constraint; });
-			has.no = new CollectionAssertionInterface(function(constraint) { return new constraints.Not(constraint); });
+			var has = new CollectionAssertionInterface(identity);
+			has.no = new CollectionAssertionInterface(negatedIdentity);
 			has.no.property = undefined; //doesn't really make sense to make this kind of negative assertion
 			return has;
 		}()
@@ -590,117 +599,143 @@
 		reporter.summary(globalAssertionCount);
 	};
 
-    function runTest(test, reporter, parentId) {
-        var id = (testId++),
-			caughtError,
-			assertionCountAtStart = globalAssertionCount,
-			i,
-			name,
-			result,
-			expectedError,
-			childTests,
-			setup,
-			tearDown,
-			runLastTearDown = true,
-			equalTo;
+	function Test(func, parentId) {
+		this.setup = emptyFunc;
+		this.tearDown = emptyFunc;
+		this.func = func;
+		this.id = ++testId;
+		this.parentId = parentId;
+		this.expectedError = undefined;
+		this.assertions = 0;
+		this.start = new Date().getTime();
+		this.end = null;
+		this.duration = Infinity;
+		this.result = {
+			status: "pass",
+			message: "",
+			stackTrace: []
+		};
 
-		if (typeof(test) !== "function") {
-			setup = test.setup;
-			tearDown = test.tearDown;
-			test = test.test;
-			if (typeof(test) !== "function") {
-				throw "No test detected or is not a function";
-			}
+		var assertionsAtStart = globalAssertionCount;
+		this.calculateAssertions = function() {
+			this.assertions = globalAssertionCount - assertionsAtStart;
+		};
+
+		this.setResult = function(error) {
+			this.result.status = error === undefined ? "pass" : error.type;
+			this.result.message = error === undefined ? "" : error.message;
+			this.result.stackTrace = error === undefined ? [] : error.stackTrace;
+		};
+		
+		if (typeof(func) !== "function") {
+			this.setup = func["setup"] || emptyFunc;
+			this.tearDown = func["tearDown"] || emptyFunc;
+			this.func = func["test"];
 		}
 
-		name = getFunctionName(test).replace(/_/g, " ");
-		reporter = reporter || jarvis.defaultReporter;
-		if (!reporter) {
+		if (typeof(this.func) !== "function") {
+			throw new Error("No test detected or given test is not a function");
+		}
+
+		this.name = getFunctionName(this.func).replace(/_/g, " ");
+	}
+
+	function TestRunner(reporter, async) {
+		this.reporter = reporter || jarvis.defaultReporter;
+		this.async = !!async;
+	}
+
+	TestRunner.prototype.run = function(testFunc, parentId) {
+		var currentTest = new Test(testFunc, parentId),
+			runLastTearDown = true,
+			error;
+
+		if (!this.reporter) {
 			throw new Error("No reporter given");
 		}
 
-		reporter.startTest(name, id, parentId);
-		try {
-			setup && setup();
-			childTests = test();
-			expectedError = globalExpectedError;
-			if (typeof(childTests) === "object") {
-				if (isArray(childTests)) {
-					//if the value is an array, then it's a suite of tests
-					//if setup and tearDown were given, we should run them before and after each child test
+		//reporter.startTest() is never asynchronous (although it probably should be...)
+		this.reporter.startTest(currentTest);
 
-					//we need to tear down because we setup before calling the test function
-					//we'll call setup again before the first child test runs, so we need to reset the state
-					runLastTearDown = false;
-					tearDown && tearDown();
+		//need to branch so that we can do things callback-style for asynchronous tests
+		//trying to not branch the code just makes things way too difficult
+		if (!this.async) {
+			try {
+				currentTest.setup();
 
-					for (i = 0; i < childTests.length; i++) {
-						setup && setup();
-						runTest(childTests[i], reporter, id);
-						tearDown && tearDown();
-					}
-				} else {
-					runTest(childTests, reporter, id);
-				}
-			}
+				var childTests = currentTest.func();
+				currentTest.expectedError = globalExpectedError;
 
-			if (expectedError !== undefined) {
-				throw new JarvisError("Expected " + toString(expectedError) + " to be thrown", "fail");
-			}
-		} catch (error) {
-			if (!(error instanceof JarvisError)) {
-				//not a jarvis error
-				if (!expectedError) {
-					expectedError = globalExpectedError;
-				}
+				if (typeof(childTests) === "object") {
+					if (isArray(childTests)) {
+						//test suite
+						runLastTearDown = false;
+						currentTest.tearDown();
 
-				//verify that it wasn't expected
-				if (expectedError !== undefined) {
-					//expectedError was set, so check to see if the thrown error matches what was expected
-					equalTo = new constraints.EqualTo(expectedError);
-					if (expectedError !== true && !equalTo.isValidFor(error)) {
-						error = new JarvisError(
-							"Expected error, " + toString(expectedError) + ", did not match actual error, " + toString(error),
-							"fail",
-							error
-						);
+						for (var i = 0; i < childTests.length; i++) {
+							currentTest.setup();
+							this.run(childTests[i], currentTest.id /* parentId */);
+							currentTest.tearDown();
+						}
 					} else {
-						error = undefined;
-						globalAssertionCount++; //count Assert.willThrow() successes as an assertion
+						this.run(childTests, currentTest.id /* parentId */);
 					}
-				} else {
-					error = new JarvisError("An error occurred while running the test: " + (error.toString ? error.toString() : error), "error", error);
 				}
+
+				if (!error && globalExpectedError) {
+					throw new JarvisError("Expected error to be thrown: " + globalExpectedError, "fail");
+				}
+			} catch (e) {
+				error = this.handleError(e, currentTest);
 			}
 
-			caughtError = error;
+			if (runLastTearDown) {
+				currentTest.tearDown();
+			}
+
+			//reset global error
+			globalExpectedError = undefined;
+			currentTest.setResult(error);
+			currentTest.calculateAssertions();
+			currentTest.end = new Date().getTime();
+			currentTest.duration = currentTest.end - currentTest.start;
+			this.reporter.endTest(currentTest);
+		} else {
+			//asynchronous-ish test running
+		}
+	};
+
+	TestRunner.prototype.handleError = function(error, test) {
+		if (!(error instanceof JarvisError)) {
+			//not a jarvis error
+			if (!test.expectedError) {
+				test.expectedError = globalExpectedError;
+			}
+
+			//verify that it wasn't expected
+			if (test.expectedError !== undefined) {
+				//expectedError was set, so check to see if the thrown error matches what was expected
+				if (test.expectedError !== true && !new constraints.EqualTo(test.expectedError).isValidFor(error)) {
+					error = new JarvisError(
+						"Expected error, " + toString(test.expectedError) + ", did not match actual error, " + toString(error),
+						"fail",
+						error
+					);
+				} else {
+					error = undefined;
+					globalAssertionCount++; //count Assert.willThrow() successes as an assertion
+				}
+			} else {
+				error = new JarvisError("An error occurred while running the test: " + (error.toString ? error.toString() : error), "error", error);
+			}
 		}
 
-		if (runLastTearDown) {
-			tearDown && tearDown();
-		}
-
-		result = {
-			name: name,
-			status: caughtError === undefined ? "pass" : caughtError.type,
-			message: caughtError === undefined ? "" : caughtError.message,
-			stackTrace: caughtError === undefined ? [] : caughtError.stackTrace,
-			assertions: globalAssertionCount - assertionCountAtStart
-		};
-
-		reporter.endTest(result, id, parentId);
-		globalExpectedError = undefined;
-	}
-
-
+		return error;
+	};
 
 	exports.run = function(test, reporter) {
-		runTest(test, reporter);
+		new TestRunner(reporter).run(test);
 	};
 
-	exports.runAsync = function(test, reporter) {
-		runTestAsync(test, reporter);
-	};
-	
 
 }(typeof(exports) === "undefined" ? (this["Jarvis"] = {}) : exports, typeof(document) !== "undefined" ? document : null));

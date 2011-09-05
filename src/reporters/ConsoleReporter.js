@@ -9,43 +9,41 @@
 		var tests = {};
 
 		this.htmlDiffs = false;
-
 		this.summary = function() {};
-		
-		this.startTest = function(name, id) {
+		this.startTest = function(testObj) {
 			var test = { 
-				name: name,
+				name: testObj.name,
 				startTime: new Date().getTime()
 			};
 			
-			tests[id] = test;
+			tests[testObj.id] = test;
 			
 			console.group(test.name);
 		};
 		
-		this.endTest = function(result, id) {
+		this.endTest = function(testObj) {
 			var endTime = new Date().getTime(),
-				test = tests[id];
+				test = tests[testObj.id];
 			
-			switch (result.status) {
+			switch (testObj.result.status) {
 				case "fail":
 				case "error":
-					console.error(result.message || "");
+					console.error(testObj.result.message || "");
 					break;
 				case "ignore":
-					console.warn(result.message || "");
+					console.warn(testObj.result.message || "");
 					break;
 			}
 			
-			console.log("  " + (endTime - test.startTime) + "ms " + result.assertions + " assertion" + (result.assertions !== 1 ? "s" : ""));
+			console.log("  " + (endTime - test.startTime) + "ms " + testObj.assertions + " assertion" + (testObj.assertions !== 1 ? "s" : ""));
 			console.groupEnd();
-			tests[id] = undefined;
+			tests[testObj.id] = undefined;
 		};
 	}
 
 	if (typeof(exports) === "undefined") {
 		if (typeof(Jarvis) === "undefined") {
-			throw "Jarvis must be defined before defining a reporter";
+			throw new Error("Jarvis must be defined before defining a reporter");
 		}
 
 		Jarvis.Framework.Reporters.ConsoleReporter = ConsoleReporter;
