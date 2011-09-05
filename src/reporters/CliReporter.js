@@ -32,7 +32,7 @@ module.exports = function(verbose) {
 			for (var i = 0; i < failures.length; i++) {
 				console.log("--------------------------------------------");
 				console.log(failures[i].name);
-				printErrorOrFailure(failures[i]);
+				printErrorOrFailure(failures[i].result);
 				console.log();
 			}
 		}
@@ -48,7 +48,7 @@ module.exports = function(verbose) {
 		console.log();
 	};
 
-	this.startTest = function(name, id, parentId) {
+	this.startTest = function(testObj) {
 		if (firstRun) {
 			console.log("Jarvis CLI");
 			console.log(" by Tommy Montgomery");
@@ -58,15 +58,15 @@ module.exports = function(verbose) {
 		}
 
 		var test = {
-			name: name,
+			name: testObj.name,
 			startTime: new Date().getTime(),
 			hasChildTests: false
 		};
 
-		tests[id] = test;
+		tests[testObj.id] = test;
 
-		if (tests[parentId]) {
-			tests[parentId].hasChildTests = true;
+		if (tests[testObj.parentId]) {
+			tests[testObj.parentId].hasChildTests = true;
 		}
 		
 		if (verbose) {
@@ -88,35 +88,35 @@ module.exports = function(verbose) {
 		}
 	}
 
-	this.endTest = function(result, id, parentId) {
+	this.endTest = function(testObj) {
 		var endTime = new Date().getTime(),
-			test = tests[id],
+			test = tests[testObj.id],
 			i;
 
 		if (!test.hasChildTests) {
-			switch (result.status) {
+			switch (testObj.result.status) {
 				case "fail":
 					if (verbose) {
-						printErrorOrFailure(result);
+						printErrorOrFailure(testObj.result);
 					} else {
 						process.stdout.write("F");
-						failures.push(result);
+						failures.push(testObj);
 					}
 					break;
 				case "error":
 					if (verbose) {
-						printErrorOrFailure(result);
+						printErrorOrFailure(testObj.result);
 					} else {
 						process.stdout.write("E");
-						failures.push(result);
+						failures.push(testObj);
 					}
 					break;
 				case "ignore":
 					if (verbose) {
-						console.error(new Array(depth).join(" ") + (result.message || ""));
+						console.error(new Array(depth).join(" ") + (testObj.result.message || ""));
 					} else {
 						process.stdout.write("I");
-						failures.push(result);
+						failures.push(testObj);
 					}
 					break;
 				case "pass":
@@ -126,10 +126,10 @@ module.exports = function(verbose) {
 					break;
 			}
 
-			stats[result.status]++;
+			stats[testObj.result.status]++;
 			stats.total++;
 			lineStats.total++;
-			lineStats[result.status]++;
+			lineStats[testObj.result.status]++;
 			if (!verbose) {
 				currentColumn++;
 				if (currentColumn > maxLineLength) {
@@ -143,10 +143,10 @@ module.exports = function(verbose) {
 		if (verbose) {
 			console.log();
 			depth--;
-			console.log(Array(depth).join(" ") + (endTime - test.startTime) + "ms " + result.assertions + " assertion" + (result.assertions !== 1 ? "s" : ""));
+			console.log(Array(depth).join(" ") + (endTime - test.startTime) + "ms " + testObj.assertions + " assertion" + (testObj.assertions !== 1 ? "s" : ""));
 			console.log(Array(depth).join(" ") + "-----------------------------------");
 		}
 
-		tests[id] = undefined;
+		tests[testObj.id] = undefined;
 	};
 };
