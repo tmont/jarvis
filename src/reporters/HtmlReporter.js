@@ -233,8 +233,8 @@
 				item,
 				i;
 				
-			test.endTime = testObj.finish;
-			test.assertions = testObj.result.assertions;
+			test.endTime = testObj.end;
+			test.assertions = testObj.assertions;
 			
 			actualStatus = "pass";
 			if (test.childResults.ignore === test.childResults.total) {
