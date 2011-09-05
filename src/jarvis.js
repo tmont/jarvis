@@ -19,7 +19,7 @@
 	}
 	
 	function getFunctionName(func) {
-		var match = /^\s*function\s([\w$]+)\(\)\s\{/.exec(func.toString());
+		var match = /^\s*function\s([\w\$]+)\([^\)]*\)\s*\{/.exec(func.toString());
 		return match ? match[1] : "<anonymous>";
 	}
 	
@@ -754,12 +754,12 @@
 			var error;
 			test.expectedError = globalExpectedError;
 			if (globalExpectedError !== undefined) {
-				error = self.handleError(new JarvisError("Expected error to be thrown: " + globalExpectedError, "fail"));
+				test.error = self.handleError(new JarvisError("Expected error to be thrown: " + globalExpectedError, "fail"));
 			}
 
 			test.tearDown(function() {
 				globalExpectedError = undefined;
-				test.endTest();
+				test.endTest(test.error);
 				self.reporter.endTest(test);
 				testCompleteCallback();
 			});
@@ -771,8 +771,7 @@
 				return;
 			}
 
-			var runLastTearDown = false,
-				self = this;
+			var self = this;
 			
 			parentTest.tearDown(function() {
 				parentTest.setup(function() {
@@ -786,14 +785,18 @@
 		}
 
 		test.setup(function() {
-			var runLastTearDown = true;
-			var childTests = test.func(testIsComplete /* this won't be executed if childTests !== undefined */);
-			if (typeof(childTests) === "object") {
-				if (isArray(childTests)) {
-					runTestSuite.call(self, test, childTests, testIsComplete);
-				} else {
-					self.run(childTests, test.id /* parentId */, testIsComplete);
+			try {
+				var childTests = test.func(testIsComplete /* this won't be executed if childTests !== undefined */);
+				if (typeof(childTests) === "object") {
+					if (isArray(childTests)) {
+						runTestSuite.call(self, test, childTests, testIsComplete);
+					} else {
+						self.run(childTests, test.id /* parentId */, testIsComplete);
+					}
 				}
+			} catch (e) {
+				test.error = self.handleError(e, test);
+				testIsComplete();
 			}
 
 			//anything else is undefined behavior

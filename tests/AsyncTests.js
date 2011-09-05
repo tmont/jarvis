@@ -12,7 +12,7 @@ module.exports = function Asynchronous_tests() {
 			tearDownComplete();
 		},
 
-		test: function() {
+		test: function Teh_tests() {
 			return [
 				function Async_test1(testComplete) {
 					Assert.that("foo", Is.equalTo("foo"));
@@ -20,7 +20,7 @@ module.exports = function Asynchronous_tests() {
 				},
 
 				function Async_test2(testComplete) {
-					//Assert.that("foo", Is.equalTo("bar"));
+					Assert.that("foo", Is.equalTo("bar"));
 					testComplete(); //should never be executed
 				},
 

@@ -38,11 +38,12 @@
 		console.log("  --verbose, -v             Display more verbose output (not applicable with --reporter)");
 		console.log("  --no-global               Don't make the Jarvis, Assert, Is and Has variables available globally");
 		console.log("  --no-summary              Don't print a summary when all test are complete");
+		console.log("  --async                   Run tests pseudo-asynchronously");
 		console.log("  --reporter, -r [reporter] Use the specified reporter. \"reporter\" is require()'d verbatim, so make sure the file/module exists");
 	}
 
 	function usage(exitCode) {
-		console.log(processName + " [--help|-h] [--usage] [--verbose|-v] [--reporter|-r reporter] [--no-global] [--no-summary] file1 [file2 [...]]");
+		console.log(processName + " [--help|-h] [--usage] [--verbose|-v] [--reporter|-r reporter] [--no-global] [--no-summary] [--async] file1 [file2 [...]]");
 		process.exit(exitCode || 0);
 	}
 
