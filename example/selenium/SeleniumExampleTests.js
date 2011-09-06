@@ -7,7 +7,6 @@
  */
 
 var soda = require("soda");
-var jarvis = require("/usr/local/lib/node_modules/jarvis");
 
 module.exports = function() {
 	var selenium;
@@ -45,7 +44,7 @@ module.exports = function() {
 							});
 
 							if (err) {
-								throw new jarvis.Error("An error occurred", "error", err);
+								throw err;
 							}
 
 							testComplete();
@@ -68,7 +67,7 @@ module.exports = function() {
 							});
 
 							if (err) {
-								throw new jarvis.Error("An error occurred", "error", err);
+								throw err;
 							}
 
 							testComplete();
