@@ -52,7 +52,7 @@ module.exports = function() {
 						});
 				},
 
-				function Search_google_for_jarvis(testComplete) {
+				function Search_github_for_jarvis(testComplete) {
 					selenium
 						.open("https://github.com/")
 						.waitForPageToLoad(5000)
