@@ -144,20 +144,24 @@
 		for (var i = 0; i < args.files.length; i++) {
 			jarvis.run(require(process.cwd() + "/" + args.files[i]));
 		}
+
+		console.log();
+
+		if (args.options.showSummary) {
+			jarvis.summary();
+		}
 	} else {
 		(function runNext() {
 			if (!args.files.length) {
+				console.log();
+
+				if (args.options.showSummary) {
+					jarvis.summary();
+				}
 				return;
 			}
 
 			jarvis.runAsync(require(process.cwd() + "/" + args.files.shift()), null, runNext);
 		}());
 	}
-
-	console.log();
-
-	if (args.options.showSummary) {
-		jarvis.summary();
-	}
-
 }());
