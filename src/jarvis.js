@@ -8,7 +8,6 @@
  */
 (function(exports, doc, undefined){
 	var constraints,
-		globalAssertionCount = 0,
 		testId = 1,
 		globalExpectedError,
 		emptyFunc = function() {},
@@ -470,15 +469,15 @@
 		},
 
 		property: function(property) {
-			var iface = new AssertionInterface(function(constraint) {
+			var assertionInterface = new AssertionInterface(function(constraint) {
 				return new constraints.ObjectPropertyValue(property, constraint);
 			});
 
-			iface.not = new AssertionInterface(function(constraint) {
+			assertionInterface.not = new AssertionInterface(function(constraint) {
 				return new constraints.Not(new constraints.ObjectPropertyValue(property, constraint));
 			});
 
-			return iface;
+			return assertionInterface;
 		}
 	};
 
@@ -531,10 +530,43 @@
 		return new constraints.Not(x);
 	}
 
+	var TestRunner = {
+		run: function() {},
+		reporter: null,
+		handleError: function(error, test) {
+			if (!(error instanceof JarvisError)) {
+				//not a jarvis error
+				if (!test.expectedError) {
+					test.expectedError = globalExpectedError;
+				}
+
+				//verify that it wasn't expected
+				if (test.expectedError !== undefined) {
+					//expectedError was set, so check to see if the thrown error matches what was expected
+					if (test.expectedError !== true && !new constraints.EqualTo(test.expectedError).isValidFor(error)) {
+						error = new JarvisError(
+							"Expected error, " + toString(test.expectedError) + ", did not match actual error, " + toString(error),
+							"fail",
+							error
+						);
+					} else {
+						error = undefined;
+					}
+				} else {
+					error = new JarvisError("An error occurred while running the test: " + (error.toString ? error.toString() : error), "error", error);
+				}
+			}
+
+			return error;
+		}
+	};
+
 	exports.Framework = {
 		Reporters: {}, //only relevant for browser context
 		Error: JarvisError,
 		Constraints: constraints,
+		Test: Test,
+		TestRunner: TestRunner,
 		Assert: {
 			that: function(actual, constraint, message) {
 				if (!constraint.isValidFor(actual)) {
@@ -547,8 +579,6 @@
 
 					throw new JarvisError(constraintMessage, "fail");
 				}
-
-				globalAssertionCount++;
 			},
 
 			willThrow: function(expectedError) {
@@ -586,17 +616,13 @@
 	exports.htmlDiffs = false;
 	exports.showStackTraces = false;
 
-	exports.reset = function() {
-		globalAssertionCount = 0;
-	};
-
 	exports.summary = function(reporter) {
 		reporter = reporter || this.defaultReporter;
 		if (!reporter) {
 			throw new Error("No reporter given");
 		}
 
-		reporter.summary(globalAssertionCount);
+		reporter.summary();
 	};
 
 	function emptyCallbackHandler(callback) {
@@ -624,11 +650,9 @@
 			this.start = new Date().getTime();
 		};
 		
-		var assertionsAtStart = globalAssertionCount;
 		this.endTest = function(error) {
 			this.end = new Date().getTime();
 			this.duration = this.end - this.start;
-			this.assertions = globalAssertionCount - assertionsAtStart;
 
 			this.result.status = error === undefined ? "pass" : error.type;
 			this.result.message = error === undefined ? "" : error.message;
@@ -648,30 +672,14 @@
 		this.name = getFunctionName(this.func).replace(/_/g, " ");
 	}
 
-	function TestRunner(reporter) {
-		this.reporter = reporter || jarvis.defaultReporter;
+	function SynchronousTestRunner(reporter) {
+		this.reporter = reporter;
 	}
 
-	TestRunner.prototype.run = function(testFunc, parentId) {
-		this.runTest(this.createAndInitTest(testFunc, parentId));
-	};
-
-	TestRunner.prototype.createAndInitTest = function(testFunc, parentId) {
-		var test = new Test(testFunc, parentId);
-
-		if (!this.reporter) {
-			throw new Error("No reporter given");
-		}
-
-		test.startTest();
-		this.reporter.startTest(test);
-		return test;
-	};
-
-	TestRunner.prototype.runTest = function(test) {
+	function runTest(test) {
 		var runLastTearDown = true,
 			error;
-		
+
 		try {
 			test.setup();
 
@@ -709,106 +717,24 @@
 		globalExpectedError = undefined;
 		test.endTest(error);
 		this.reporter.endTest(test);
-	};
-
-	TestRunner.prototype.handleError = function(error, test) {
-		if (!(error instanceof JarvisError)) {
-			//not a jarvis error
-			if (!test.expectedError) {
-				test.expectedError = globalExpectedError;
-			}
-
-			//verify that it wasn't expected
-			if (test.expectedError !== undefined) {
-				//expectedError was set, so check to see if the thrown error matches what was expected
-				if (test.expectedError !== true && !new constraints.EqualTo(test.expectedError).isValidFor(error)) {
-					error = new JarvisError(
-						"Expected error, " + toString(test.expectedError) + ", did not match actual error, " + toString(error),
-						"fail",
-						error
-					);
-				} else {
-					error = undefined;
-					globalAssertionCount++; //count Assert.willThrow() successes as an assertion
-				}
-			} else {
-				error = new JarvisError("An error occurred while running the test: " + (error.toString ? error.toString() : error), "error", error);
-			}
-		}
-
-		return error;
-	};
-
-	function AsyncTestRunner(reporter) {
-		this.reporter = reporter || jarvis.defaultReporter;
 	}
 
-	AsyncTestRunner.prototype = new TestRunner();
-	AsyncTestRunner.prototype.run = function(testFunc, parentId, testCompleteCallback) {
-		this.runTest(this.createAndInitTest(testFunc, parentId), testCompleteCallback);
-	};
-	AsyncTestRunner.prototype.runTest = function(test, testCompleteCallback) {
-		var self = this;
+	SynchronousTestRunner.prototype = TestRunner;
 
-		function testIsComplete() {
-			var error;
-			test.expectedError = globalExpectedError;
-			if (globalExpectedError !== undefined) {
-				test.error = self.handleError(new JarvisError("Expected error to be thrown: " + globalExpectedError, "fail"));
-			}
-
-			test.tearDown(function() {
-				globalExpectedError = undefined;
-				test.endTest(test.error);
-				self.reporter.endTest(test);
-				testCompleteCallback();
-			});
+	SynchronousTestRunner.prototype.run = function(testFunc, parentId) {
+		if (!this.reporter) {
+			throw new Error("No reporter given");
 		}
 
-		function runTestSuite(parentTest, tests, suiteCompleteCallback) {
-			if (!tests.length) {
-				suiteCompleteCallback();
-				return;
-			}
+		var test = new Test(testFunc, parentId);
 
-			var self = this;
-			
-			parentTest.tearDown(function() {
-				parentTest.setup(function() {
-					self.run(tests.shift(), parentTest.id /* parentId */, function() {
-						parentTest.tearDown(function() {
-							runTestSuite.call(self, parentTest, tests, suiteCompleteCallback);
-						});
-					});
-				});
-			});
-		}
-
-		test.setup(function() {
-			try {
-				var childTests = test.func(testIsComplete /* this won't be executed if childTests !== undefined */);
-				if (typeof(childTests) === "object") {
-					if (isArray(childTests)) {
-						runTestSuite.call(self, test, childTests, testIsComplete);
-					} else {
-						self.run(childTests, test.id /* parentId */, testIsComplete);
-					}
-				}
-			} catch (e) {
-				test.error = self.handleError(e, test);
-				testIsComplete();
-			}
-
-			//anything else is undefined behavior
-		});
+		test.startTest();
+		this.reporter.startTest(test);
+		runTest.call(this, test);
 	};
 
 	exports.run = function(test, reporter) {
-		new TestRunner(reporter).run(test);
-	};
-
-	exports.runAsync = function(test, reporter, callback) {
-		new AsyncTestRunner(reporter).run(test, null, callback);
+		new SynchronousTestRunner(reporter || jarvis.defaultReporter).run(test);
 	};
 
 
