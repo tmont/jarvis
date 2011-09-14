@@ -43,9 +43,8 @@
 		console.log("                            sure the file/module exists");
 	}
 
-	function usage(exitCode) {
+	function usage() {
 		console.log(processName + " [--help|-h] [--usage] [--verbose|-v] [--reporter|-r reporter] [--no-global] [--no-summary] [--async] file1 [file2 [...]]");
-		process.exit(exitCode || 0);
 	}
 
 	function parseAndValidateArgs(args) {
@@ -113,7 +112,8 @@
 	} catch (err) {
 		console.error(err);
 		console.log();
-		usage(1);
+		usage();
+		process.exit(1);
 	}
 
 	if (args.options.help) {
@@ -123,6 +123,7 @@
 
 	if (args.options.usage) {
 		usage();
+		process.exit(0);
 	}
 
 	var jarvis = require("../jarvis");
