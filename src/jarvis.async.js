@@ -3,6 +3,7 @@ var jarvis = require('./jarvis');
 function AsyncTestRunner(reporter) {
 	this.reporter = reporter || jarvis.defaultReporter;
 }
+
 AsyncTestRunner.prototype = jarvis.Framework.TestRunner;
 
 AsyncTestRunner.prototype.run = function(testFunc, parentId, testCompleteCallback) {
@@ -104,9 +105,7 @@ function runTest(test, testCompleteCallback) {
 	});
 }
 
-exports.maxRunningTests = 10;
-
-exports.runAsync = function(test, reporter, callback) {
+exports.run = function(test, reporter, callback) {
 	new AsyncTestRunner(reporter).run(test, null, callback);
 };
 

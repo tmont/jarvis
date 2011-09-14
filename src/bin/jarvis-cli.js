@@ -167,7 +167,7 @@
 				return;
 			}
 
-			jarvisAsync.runAsync(require(process.cwd() + "/" + args.files.shift()), null, runNext);
+			jarvisAsync.run(require(process.cwd() + "/" + args.files.shift()), null, runNext);
 		}());
 	}
 }());
