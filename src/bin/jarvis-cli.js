@@ -55,7 +55,9 @@
 			global: true,
 			showSummary: true,
 			help: false,
-			async: false
+			async: false,
+			whitelist: null,
+			blacklist: null
 		};
 
 		var files = [];
@@ -65,7 +67,7 @@
 				case "--reporter":
 				case "-r":
 					if (i >= args.length - 1) {
-						throw "Reporter not given";
+						throw new Error("Reporter not given");
 					}
 
 					options.reporter = args[++i];
@@ -89,6 +91,14 @@
 					break;
 				case "--async":
 					options.async = true;
+					break;
+				case '--whitelist':
+				case '--blacklist':
+					if (i >= args.length - 1) {
+						throw new Error("Expected argument for " + args[i].substring(2));
+					}
+
+					options[args[i].substring(2)] = new RegExp(args[++i]);
 					break;
 				default:
 					files.push(args[i]);
@@ -142,9 +152,66 @@
 		jarvis.defaultReporter = new CliReporter(args.options.verbose);
 	}
 
+	function recursiveDirWalk(dir) {
+		var files = [];
+
+		try {
+			if (fs.lstatSync(dir).isDirectory()) {
+				var subFiles = fs.readdirSync(dir);
+				for (var i = 0; i < subFiles.length; i++) {
+					var fullName = dir + '/' + subFiles[i];
+					if (subFiles[i] === '.' || subFiles[i] === '..') {
+						continue;
+					}
+
+					if (fs.lstatSync(fullName).isDirectory()) {
+						files = files.concat(recursiveDirWalk(fullName));
+					} else if (fileIsValid(fullName)) {
+						files.push(fullName);
+					}
+				}
+			}
+		} catch (e) {
+			//not a file
+		}
+
+		return files;
+	}
+
+	function fileIsValid(fileName) {
+		if (args.options.whitelist) {
+			return args.options.whitelist.test(fileName);
+		} else if (args.options.blacklist) {
+			return !args.options.blacklist.test(fileName);
+		}
+
+		return true;
+	}
+
+	var testFiles = [];
+	for (var i = 0; i < args.files.length; i++) {
+		var realFile = fs.realpathSync(args.files[i]);
+		try {
+			if (fs.lstatSync(realFile).isDirectory()) {
+				testFiles = testFiles.concat(recursiveDirWalk(realFile));
+			} else if (fileIsValid(realFile)) {
+				testFiles.push(realFile);
+			}
+		} catch (e) {
+			//do nothing, file doesn't exist
+		}
+	}
+
+	if (!testFiles.length) {
+		console.error('No tests given');
+		process.exit(1);
+	}
+
+	//console.dir(testFiles);
+
 	if (!args.options.async) {
-		for (var i = 0; i < args.files.length; i++) {
-			jarvis.run(require(process.cwd() + "/" + args.files[i]));
+		for (i = 0; i < testFiles.length; i++) {
+			jarvis.run(require(testFiles[i]));
 		}
 
 		console.log();
@@ -159,7 +226,7 @@
 		}
 
 		(function runNext() {
-			if (!args.files.length) {
+			if (!testFiles.length) {
 				console.log();
 
 				if (args.options.showSummary) {
@@ -168,7 +235,7 @@
 				return;
 			}
 
-			jarvisAsync.run(require(process.cwd() + "/" + args.files.shift()), null, runNext);
+			jarvisAsync.run(require(testFiles.shift()), null, runNext);
 		}());
 	}
 }());
