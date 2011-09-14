@@ -20,9 +20,9 @@ AsyncTestRunner.prototype.runTest = function(test, testCompleteCallback) {
 
 	function testIsComplete(err) {
 		if (err) {
-			test.error = self.handleError(err, test);
+			test.error = new jarvis.Framework.Error(err, "fail");
 		}
-		test.expectedError = jarvis.globalExpectedError;
+
 		if (jarvis.globalExpectedError !== undefined) {
 			test.error = new jarvis.Framework.Error("Expected error to be thrown: " + jarvis.globalExpectedError, "fail");
 		}
