@@ -13,9 +13,10 @@ AsyncTestRunner.prototype.run = function(testFunc, parentId, testCompleteCallbac
 	var test = new jarvis.Framework.Test(testFunc, parentId);
 
 	this.startTest(test);
-	this.runTest(test, testCompleteCallback);
+	runTest.call(this, test, testCompleteCallback);
 };
-AsyncTestRunner.prototype.runTest = function(test, testCompleteCallback) {
+
+function runTest(test, testCompleteCallback) {
 	var self = this;
 
 	function testIsComplete(err) {
@@ -101,7 +102,7 @@ AsyncTestRunner.prototype.runTest = function(test, testCompleteCallback) {
 
 		//anything else is undefined behavior
 	});
-};
+}
 
 exports.maxRunningTests = 10;
 
