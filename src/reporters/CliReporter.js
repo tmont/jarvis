@@ -5,7 +5,7 @@
  */
 
 if (typeof(module) === "undefined") {
-	throw "CliReporter only supported for Node";
+	throw new Error("CliReporter only supported for Node");
 }
 
 module.exports = function(verbose) {
@@ -23,7 +23,7 @@ module.exports = function(verbose) {
 
 	this.htmlDiffs = false;
 
-	this.summary = function(totalAssertions) {
+	this.summary = function() {
 		var passPercent = stats.total === 0 ? 0 : Math.round(10000 * stats.pass / stats.total) / 100;
 
 		console.log();
@@ -40,7 +40,7 @@ module.exports = function(verbose) {
 		var totalTime = new Date().getTime() - start;
 
 		console.log();
-		console.log(stats.pass + "/" + stats.total + " - " + passPercent + "% - " + totalAssertions + " assertion" + (totalAssertions === 1 ? "" : "s") + " - " + totalTime + "ms");
+		console.log(stats.pass + "/" + stats.total + " - " + passPercent + "% - " + totalTime + "ms");
 		console.log("  passed:  " + stats.pass);
 		console.log("  failed:  " + stats.fail);
 		console.log("  erred:   " + stats.error);
@@ -92,6 +92,10 @@ module.exports = function(verbose) {
 		var endTime = new Date().getTime(),
 			test = tests[testObj.id],
 			i;
+
+		if (test === undefined) {
+			console.dir(tests);
+		}
 
 		if (!test.hasChildTests) {
 			switch (testObj.result.status) {

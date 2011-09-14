@@ -125,7 +125,7 @@
 		usage();
 	}
 
-	var jarvis = require("../jarvis.js");
+	var jarvis = require("../jarvis");
 	if (args.options.global) {
 		global.Jarvis = jarvis;
 		global.Assert = jarvis.Framework.Assert;
@@ -152,6 +152,11 @@
 			jarvis.summary();
 		}
 	} else {
+		var jarvisAsync = require('../jarvis.async');
+		if (args.options.global) {
+			global.Assert = jarvisAsync.Assert;
+		}
+
 		(function runNext() {
 			if (!args.files.length) {
 				console.log();
@@ -162,7 +167,7 @@
 				return;
 			}
 
-			jarvis.runAsync(require(process.cwd() + "/" + args.files.shift()), null, runNext);
+			jarvisAsync.runAsync(require(process.cwd() + "/" + args.files.shift()), null, runNext);
 		}());
 	}
 }());

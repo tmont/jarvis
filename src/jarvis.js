@@ -8,8 +8,7 @@
  */
 (function(exports, doc, undefined){
 	var constraints,
-		testId = 1,
-		globalExpectedError,
+		testId = 0,
 		emptyFunc = function() {},
 		jarvis = exports;
 	
@@ -507,8 +506,7 @@
 			//node and browsers that support it
 			this.stackTrace = error.stack
 				.split("\n")
-				//.slice(2) //only applicable to node
-				.filter(function(frame) { return !/\(module\.js:\d+:\d+\)$/.test(frame) && !/^\s*$/.test(frame); })
+				.filter(function(frame) { return !/^\s*$/.test(frame); }) //get rid of empty frames
 				.map(function(frame) { return frame.replace(/^\s*at\s*/, ""); });
 		} else if (shouldShowStackTraceInBrowser()) {
 			this.stackTrace = cleanStackTrace(window.getStackTrace({ e: thrownError }));
@@ -533,6 +531,16 @@
 	var TestRunner = {
 		run: function() {},
 		reporter: null,
+		startTest: function(test) {
+			test.startTest();
+			this.reporter.startTest(test);
+		},
+		endTest: function(test) {
+			//reset global error
+			jarvis.globalExpectedError = undefined;
+			test.endTest(test.error);
+			this.reporter.endTest(test);
+		},
 		handleError: function(error, test) {
 			if (!(error instanceof JarvisError)) {
 				//not a jarvis error
@@ -615,6 +623,7 @@
 	exports.defaultReporter = null;
 	exports.htmlDiffs = false;
 	exports.showStackTraces = false;
+	exports.globalExpectedError = undefined;
 
 	exports.summary = function(reporter) {
 		reporter = reporter || this.defaultReporter;
@@ -712,11 +721,6 @@
 		if (runLastTearDown) {
 			test.tearDown();
 		}
-
-		//reset global error
-		globalExpectedError = undefined;
-		test.endTest(error);
-		this.reporter.endTest(test);
 	}
 
 	SynchronousTestRunner.prototype = TestRunner;
@@ -728,14 +732,15 @@
 
 		var test = new Test(testFunc, parentId);
 
-		test.startTest();
-		this.reporter.startTest(test);
+		this.startTest(test);
 		runTest.call(this, test);
 	};
 
 	exports.run = function(test, reporter) {
 		new SynchronousTestRunner(reporter || jarvis.defaultReporter).run(test);
 	};
+
+	exports.isArray = isArray;
 
 
 }(typeof(exports) === "undefined" ? (this["Jarvis"] = {}) : exports, typeof(document) !== "undefined" ? document : null));
