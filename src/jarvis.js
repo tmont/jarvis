@@ -536,7 +536,6 @@
 			this.reporter.startTest(test);
 		},
 		endTest: function(test) {
-			//reset global error
 			jarvis.globalExpectedError = undefined;
 			test.endTest(test.error);
 			this.reporter.endTest(test);
@@ -669,8 +668,8 @@
 		};
 
 		if (typeof(func) !== "function") {
-			this.setup = func["setup"] || emptyFunc;
-			this.tearDown = func["tearDown"] || emptyFunc;
+			this.setup = func["setup"] || emptyCallbackHandler;
+			this.tearDown = func["tearDown"] || emptyCallbackHandler;
 			this.func = func["test"];
 		}
 

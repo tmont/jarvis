@@ -30,10 +30,6 @@ module.exports = function() {
 			setupComplete();
 		},
 
-		tearDown: function(tearDownComplete) {
-			tearDownComplete();
-		},
-
 		test: function Selenium_tests() {
 			return [
 				function Search_duckduckgo_for_jarvis(testComplete) {
