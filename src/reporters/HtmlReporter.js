@@ -148,7 +148,7 @@
 		
 		container = container || doc.body;
 		
-		this.summary = function(totalAssertions) {
+		this.summary = function() {
 			var summary = doc.createElement("div"),
 				title = doc.createElement("p"),
 				infoContainer = doc.createElement("span")
@@ -160,7 +160,7 @@
 			title.appendChild(doc.createTextNode("Summary"));
 			
 			infoContainer.className = "jarvis-test-info";
-			infoContainer.appendChild(doc.createTextNode(totals.pass + "/" + totals.total + " " + percent + "% (" + totals.elapsedTime + "ms, " + totalAssertions + " assertion" + (totalAssertions !== 1 ? "s" : "") + ")"));
+			infoContainer.appendChild(doc.createTextNode(totals.pass + "/" + totals.total + " " + percent + "% (" + totals.elapsedTime + "ms)"));
 			
 			summary.appendChild(title);
 			title.appendChild(infoContainer);
@@ -234,8 +234,7 @@
 				i;
 				
 			test.endTime = testObj.end;
-			test.assertions = testObj.assertions;
-			
+
 			actualStatus = "pass";
 			if (test.childResults.ignore === test.childResults.total) {
 				actualStatus = "ignore";
@@ -274,7 +273,7 @@
 				addGradient(test.childResults, test.element);
 			}
 			
-			info += "(" + (test.endTime - test.startTime) + "ms, " + test.assertions + " assertion" + (test.assertions !== 1 ? "s" : "") + ")";
+			info += "(" + (test.endTime - test.startTime) + "ms)";
 			infoContainer = doc.createElement("span");
 			infoContainer.className = "jarvis-test-info";
 			infoContainer.appendChild(doc.createTextNode(info));

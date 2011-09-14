@@ -11,6 +11,14 @@ var soda = require("soda");
 module.exports = function() {
 	var selenium;
 
+	var seleniumEnd = function(testComplete) {
+		return function(err) {
+			this.command("testComplete", [], function(completeErr) {
+				testComplete(completeErr || err);
+			});
+		};
+	};
+
 	return {
 		setup: function(setupComplete) {
 			selenium = soda.createClient({
@@ -36,19 +44,7 @@ module.exports = function() {
 						.click("id=hfbh")
 						.waitForPageToLoad(2000)
 						.assertTextPresent("Jarvis: JavaScript unit testing framework")
-						.end(function(err) {
-							this.command("testComplete", [], function(completeErr) {
-								if (completeErr) {
-									throw new Error("Unable to issue testComplete command to selenium: \"" + completeErr + "\"");
-								}
-							});
-
-							if (err) {
-								throw err;
-							}
-
-							testComplete();
-						});
+						.end(seleniumEnd(testComplete));
 				},
 
 				function Search_github_for_jarvis(testComplete) {
@@ -59,19 +55,15 @@ module.exports = function() {
 						.keyPress("name=q", 13)
 						.waitForPageToLoad(5000)
 						.assertElementPresent("css=h2.title > a[href='/tmont/jarvis']")
-						.end(function(err) {
-							this.command("testComplete", [], function(completeErr) {
-								if (completeErr) {
-									throw new Error("Unable to issue testComplete command to selenium: \"" + completeErr + "\"");
-								}
-							});
+						.end(seleniumEnd(testComplete));
+				},
 
-							if (err) {
-								throw err;
-							}
-
-							testComplete();
-						});
+				function Test_that_totally_fails(testComplete) {
+					selenium
+						.open('http://www.google.com/')
+						.waitForPageToLoad(5000)
+						.assertTextPresent('foobiefoobie')
+						.end(seleniumEnd(testComplete));
 				}
 			];
 		}

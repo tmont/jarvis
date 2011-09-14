@@ -545,7 +545,7 @@
 			if (!(error instanceof JarvisError)) {
 				//not a jarvis error
 				if (!test.expectedError) {
-					test.expectedError = globalExpectedError;
+					test.expectedError = jarvis.globalExpectedError;
 				}
 
 				//verify that it wasn't expected
@@ -594,7 +594,7 @@
 					throw new JarvisError("Cannot set expected error to true", "error");
 				}
 
-				globalExpectedError = expectedError !== undefined ? expectedError : true;
+				 jarvis.globalExpectedError = expectedError !== undefined ? expectedError : true;
 			},
 
 			fail: function(message) {
@@ -693,7 +693,7 @@
 			test.setup();
 
 			var childTests = test.func();
-			test.expectedError = globalExpectedError;
+			test.expectedError = jarvis.globalExpectedError;
 
 			if (typeof(childTests) === "object") {
 				if (isArray(childTests)) {
@@ -711,11 +711,11 @@
 				}
 			}
 
-			if (globalExpectedError) {
-				throw new JarvisError("Expected error to be thrown: " + globalExpectedError, "fail");
+			if (jarvis.globalExpectedError) {
+				throw new JarvisError("Expected error to be thrown: " + jarvis.globalExpectedError, "fail");
 			}
 		} catch (e) {
-			error = this.handleError(e, test);
+			test.error = this.handleError(e, test);
 		}
 
 		if (runLastTearDown) {
@@ -734,6 +734,7 @@
 
 		this.startTest(test);
 		runTest.call(this, test);
+		this.endTest(test);
 	};
 
 	exports.run = function(test, reporter) {
