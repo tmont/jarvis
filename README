@@ -33,36 +33,12 @@ Node Installation [npm] (recommended):
 $ npm install jarvis
 
 //test.js
-var jarvis = require('jarvis'),
-	Assert = jarvis.Framework.Assert,
-	Is = jarvis.Framework.Is,
-	Has = jarvis.Framework.Has;
-
 module.exports = function My_test() {
 	Assert.that(2 + 2, Is.equalTo(4));
 	Assert.that(2 + 2, Is.not.equalTo(4)); //should fail
 }
 
 $ jarvis test.js
-
-Node Installation [manual]:
-//test.js
-var jarvis = require('/path/to/jarvis/jarvis.js');
-var CliReporter = require('/path/to/jarvis/CliReporter.js');
-jarvis.defaultReporter = new CliReporter();
-var Assert = jarvis.Framework.Assert,
-	Is = jarvis.Framework.Is,
-	Has = jarvis.Framework.Has;
-
-function Node_test() {
-	Assert.that(2 + 2, Is.equalTo(4));
-	Assert.that(2 + 2, Is.not.equalTo(4)); //should fail
-}
-
-jarvis.run(Node_test);
-jarvis.summary();
-
-$ node test.js
 
 Authors
 -------

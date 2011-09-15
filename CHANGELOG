@@ -1,13 +1,17 @@
-2.0.0 2011-08-xx
+2.0.0 2011-09-xx
 ----------------
 - Enhancements
 	- Node support
+	- Support for running tests that interact with objects asynchronously
 	- Enabled installation via npm
 	- Separated DOM-related stuff
 	- the global Jarvis object now exposes a Framework property for extending the framework
 	- used prototype for AssertionInterface and CollectionAssertionInterface so that it can be extended
 	- parentId is now passed to Reporter.endTest()
 	- added CliReporter (part of Node support)
+- Bugfixes
+	- Comparing objects that have keys with values that are undefined no longer report as never
+	  being equal (e.g. you no longer get an "undefined is not equal to undefined" error)
 - Breaking changes
 	- DOM stuff has been moved into jarvis.dom.js
 	- added jarvis.browser.js; this MUST be included when running Jarvis in the browser
