@@ -32,6 +32,10 @@
 		console.log("    Run a test using a custom reporter");
 		console.log();
 
+		console.log("  jarvis --whitelist Tests?\\\\.js$ /path/to/tests");
+		console.log("    Run all tests (recursively) in /path/to/tests whose filename ends with Tests.js or Test.js");
+		console.log();
+
 		console.log("Options");
 		console.log("  --help, -h                Show this help");
 		console.log("  --usage                   Show terse usage details");
@@ -39,8 +43,13 @@
 		console.log("  --no-global               Don't make the Jarvis, Assert, Is and Has variables available globally");
 		console.log("  --no-summary              Don't print a summary when all tests are complete");
 		console.log("  --async                   Run tests pseudo-asynchronously");
+		console.log("  --whitelist [regex]       If a directory is given, filter files using regex as a white list; ");
+		console.log("                            this will override any blacklist given");
+		console.log("  --blacklist [regex]       If a directory is given, filter files using regex as a black list");
 		console.log("  --reporter, -r [reporter] Use the specified reporter. \"reporter\" is require()'d verbatim, so make");
 		console.log("                            sure the file/module exists");
+
+		console.log();
 	}
 
 	function usage() {
