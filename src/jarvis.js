@@ -742,5 +742,4 @@
 
 	exports.isArray = isArray;
 
-
 }(typeof(exports) === "undefined" ? (this["Jarvis"] = {}) : exports, typeof(document) !== "undefined" ? document : null));

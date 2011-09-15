@@ -207,8 +207,6 @@
 		process.exit(1);
 	}
 
-	//console.dir(testFiles);
-
 	if (!args.options.async) {
 		for (i = 0; i < testFiles.length; i++) {
 			jarvis.run(require(testFiles[i]));
