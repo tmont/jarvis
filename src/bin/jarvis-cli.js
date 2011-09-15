@@ -5,7 +5,7 @@
 	var processName = path.basename(process.argv[1]);
 
 	function help() {
-		console.log("Jarvis");
+		console.log("Jarvis 2.0.0");
 		console.log("  Unit testing framework by Tommy Montgomery");
 		console.log("  http://jarvis.tmont.com/");
 		console.log();
@@ -53,7 +53,7 @@
 	}
 
 	function usage() {
-		console.log(processName + " [--help|-h] [--usage] [--verbose|-v] [--reporter|-r reporter] [--no-global] [--no-summary] [--async] file1 [file2 [...]]");
+		console.log(processName + " [--help] [--usage] [-v] [-r reporter] [--no-global] [--no-summary] [--async] [--whitelist|--blacklist] file1 [file2 [...]]");
 	}
 
 	function parseAndValidateArgs(args) {
