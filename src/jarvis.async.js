@@ -22,10 +22,8 @@ function runTest(test, testCompleteCallback) {
 
 	function testIsComplete(err) {
 		if (err) {
-			test.error = new jarvis.Framework.Error(err, "fail");
-		}
-
-		if (jarvis.globalExpectedError !== undefined) {
+			test.error = self.handleError(err, test);
+		} else if (jarvis.globalExpectedError !== undefined) {
 			test.error = new jarvis.Framework.Error("Expected error to be thrown: " + jarvis.globalExpectedError, "fail");
 		}
 
@@ -110,6 +108,10 @@ exports.run = function(test, reporter, callback) {
 };
 
 exports.Assert = {
+	willThrow: function(error) {
+		jarvis.Framework.Assert.willThrow(error);
+	},
+
 	begin: function() {
 		var queue = [], assertionError;
 		return {

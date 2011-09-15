@@ -30,6 +30,10 @@ function Constraint_tests() {
 					Assert.that(undefined, Is.equalTo(undefined));
 					Assert.that(this["foo"], Is.equalTo(undefined));
 				},
+
+				function Undefined_is_equal_to_undefined_for_object_properties() {
+					Assert.that({ foo: undefined }, Is.equalTo({ foo: undefined }));
+				},
 				
 				function Null_is_equal_to_null() {
 					Assert.that(null, Is.equalTo(null));

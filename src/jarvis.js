@@ -150,8 +150,9 @@
 		throw "getType() returned an invalid value";
 	}
 	
-	function compareIterables(left, right) {
+	function compareIterables(left, right, messageObject) {
 		var key,
+			equalTo,
 			errorInScope = typeof(Error) !== "undefined",
 			rightIsError = errorInScope && right instanceof Error,
 			leftIsError = errorInScope && left instanceof Error;
@@ -162,7 +163,12 @@
 				continue;
 			}
 
-			if (typeof(left[key]) === "undefined" || !new constraints.EqualTo(right[key]).isValidFor(left[key])) {
+			equalTo = new constraints.EqualTo(right[key]);
+
+			if ((left[key] === undefined && right[key] !== undefined) || !equalTo.isValidFor(left[key])) {
+				if (messageObject) {
+					messageObject.message = equalTo.getFailureMessage(left[key]);
+				}
 				return false;
 			}
 		}
@@ -171,8 +177,13 @@
 			if (key === "stack" && leftIsError) {
 				continue;
 			}
+			
+			equalTo = new constraints.EqualTo(left[key]);
 
-			if (typeof(right[key]) === "undefined" || !new constraints.EqualTo(left[key]).isValidFor(right[key])) {
+			if ((right[key] === undefined && left[key] !== undefined) || !equalTo.isValidFor(right[key])) {
+				if (messageObject) {
+					messageObject.message = equalTo.getFailureMessage(right[key]);
+				}
 				return false;
 			}
 		}
@@ -206,7 +217,7 @@
 		},
 
 		EqualTo: function(expected) {
-			this.isValidFor = function(actual) {
+			this.isValidFor = function(actual, messageObject) {
 				if (expected === actual) {
 					//short circuit for reference equality
 					return true;
@@ -222,20 +233,20 @@
 					return actual !== null &&
 						typeof(actual) === "object" &&
 						getFunctionName(actual.constructor) === getFunctionName(expected.constructor) &&
-						compareIterables(actual, expected);
+						compareIterables(actual, expected, messageObject);
 				}
 
 				return actual == expected;
 			};
 
-			this.getFailureMessage = function(actual, negate) {
+			this.getFailureMessage = function(actual, negate, messageObject) {
 				var message;
 				if (shouldUseHtmlDiff(expected, actual)) {
 					return getDiffNodes(expected, actual);
 				}
 
 				message = "Failed asserting that two " + getType(expected) + "s are " + (negate ? "not " : "") + "equal" + "\n\n";
-				return message + getBinaryFailureMessage(toString(expected), toString(actual));
+				return message + getBinaryFailureMessage(toString(expected), toString(actual)) + (messageObject ? "\n\n" + messageObject.message : "");
 			};
 		},
 
@@ -424,7 +435,7 @@
 		},
 		
 		equalTo: function(expected) {
-			return this.factory(new  constraints.EqualTo(expected));
+			return this.factory(new  constraints.EqualTo(expected), {});
 		},
 		
 		lessThan: function(expected) {
@@ -550,9 +561,12 @@
 				//verify that it wasn't expected
 				if (test.expectedError !== undefined) {
 					//expectedError was set, so check to see if the thrown error matches what was expected
-					if (test.expectedError !== true && !new constraints.EqualTo(test.expectedError).isValidFor(error)) {
+					var messageObject = {};
+					if (test.expectedError !== true && !new constraints.EqualTo(test.expectedError).isValidFor(error, messageObject)) {
+						console.dir(test.expectedError);
+						console.dir(error);
 						error = new JarvisError(
-							"Expected error, " + toString(test.expectedError) + ", did not match actual error, " + toString(error),
+							"Expected error, " + toString(test.expectedError) + ", did not match actual error, " + toString(error) + "\n\n" + messageObject.message,
 							"fail",
 							error
 						);
