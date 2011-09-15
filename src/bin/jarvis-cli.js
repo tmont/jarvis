@@ -40,6 +40,7 @@
 		console.log("  --help, -h                Show this help");
 		console.log("  --usage                   Show terse usage details");
 		console.log("  --verbose, -v             Display more verbose output (not applicable with --reporter)");
+		console.log("  --no-prologue             Don't show the product information prologue");
 		console.log("  --no-global               Don't make the Jarvis, Assert, Is and Has variables available globally");
 		console.log("  --no-summary              Don't print a summary when all tests are complete");
 		console.log("  --async                   Run tests pseudo-asynchronously");
@@ -66,7 +67,8 @@
 			help: false,
 			async: false,
 			whitelist: null,
-			blacklist: null
+			blacklist: null,
+			showPrologue: true
 		};
 
 		var files = [];
@@ -97,6 +99,9 @@
 					break;
 				case "--no-summary":
 					options.showSummary = false;
+					break;
+				case "--no-prologue":
+					options.showPrologue = false;
 					break;
 				case "--async":
 					options.async = true;
@@ -214,6 +219,12 @@
 	if (!testFiles.length) {
 		console.error('No tests given');
 		process.exit(1);
+	}
+
+	if (args.options.showPrologue) {
+		console.log("Jarvis CLI");
+		console.log(" by Tommy Montgomery");
+		console.log();
 	}
 
 	if (!args.options.async) {

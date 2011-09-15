@@ -50,13 +50,9 @@ module.exports = function(verbose) {
 
 	this.startTest = function(testObj) {
 		if (firstRun) {
-			console.log("Jarvis CLI");
-			console.log(" by Tommy Montgomery");
-			console.log();
-			firstRun = false;
 			start = new Date().getTime();
 		}
-
+		
 		var test = {
 			name: testObj.name,
 			startTime: new Date().getTime(),
