@@ -55,5 +55,4 @@ module.exports = function Sample_async_tests() {
 		}
 	];
 
-
 };
