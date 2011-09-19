@@ -1,5 +1,5 @@
 Jarvis <http://jarvis.tmont.com/>
-Version 2.0.0 (see CHANGELOG for details)
+Version 2.0.1 (see CHANGELOG for details)
 	by Tommy Montgomery <http://tommymontgomery.com/>
 
 Jarvis is a unit testing framework similar to [N|J|S]Unit. But mostly similar to NUnit.
@@ -30,7 +30,7 @@ Browser Installation:
 	- Open up the HTML file in a browser
 
 Node Installation [npm] (recommended):
-$ npm install jarvis
+$ npm install jarvis-test
 
 //test.js
 module.exports = function My_test() {

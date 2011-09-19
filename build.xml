@@ -4,7 +4,7 @@
 	
 	<property name="product.name" value="Jarvis"/>
 	<property name="product.shortname" value="jarvis"/>
-	<property name="product.version" value="2.0.0"/>
+	<property name="product.version" value="2.0.1"/>
 	
 	<property name="build.dir" value="${basedir}/build"/>
 	<property name="build.dist" value="${build.dir}/dist"/>
