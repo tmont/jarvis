@@ -30,7 +30,7 @@ Browser Installation:
 	- Open up the HTML file in a browser
 
 Node Installation [npm] (recommended):
-$ npm install jarvis-test
+$ npm install --global jarvis-test
 
 //test.js
 module.exports = function My_test() {
