@@ -38,6 +38,7 @@
 
 		console.log("Options");
 		console.log("  --help, -h                Show this help");
+		console.log("  --version                 Print the version number");
 		console.log("  --usage                   Show terse usage details");
 		console.log("  --verbose, -v             Display more verbose output (not applicable with --reporter)");
 		console.log("  --no-prologue             Don't show the product information prologue");
@@ -54,7 +55,9 @@
 	}
 
 	function usage() {
-		console.log(processName + " [--help] [--usage] [-v] [-r reporter] [--no-global] [--no-summary] [--async] [--whitelist|--blacklist] file1 [file2 [...]]");
+		console.log(processName + " [options] file1 [file2 [...]]");
+		console.log();
+		console.log("Run \"" + processName + " --help\" for details");
 	}
 
 	function parseAndValidateArgs(args) {
@@ -68,6 +71,7 @@
 			async: false,
 			whitelist: null,
 			blacklist: null,
+			showVersion: false,
 			showPrologue: true
 		};
 
@@ -89,6 +93,9 @@
 					break;
 				case "--usage":
 					options.usage = true;
+					break;
+				case "--version":
+					options.showVersion = true;
 					break;
 				case "--verbose":
 				case "-v":
@@ -120,7 +127,7 @@
 			}
 		}
 
-		if (!files.length && !options.help && !options.usage) {
+		if (!files.length && !options.help && !options.usage && !options.showVersion) {
 			throw "No test specified";
 		}
 
@@ -147,6 +154,11 @@
 
 	if (args.options.usage) {
 		usage();
+		process.exit(0);
+	}
+
+	if (args.options.showVersion) {
+		console.log("2.0.2");
 		process.exit(0);
 	}
 
