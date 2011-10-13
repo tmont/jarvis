@@ -1,7 +1,23 @@
 module.exports = function Sample_async_tests() {
 	var http = require('http');
 
+
+	var foo = function(testCompleteCallback) {
+		testCompleteCallback('foo');
+	};
+
+	foo.testName = 'My test!';
+
 	return [
+		foo,
+		
+		{
+			name: 'My test 2!',
+			test: function(testCompleteCallback) {
+				testCompleteCallback('foo')
+			}
+		},
+		
 		function Should_connect_to_google(testCompleteCallback) {
 			var options = {
 				host: 'www.google.com',

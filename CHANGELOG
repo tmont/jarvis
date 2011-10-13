@@ -2,6 +2,9 @@
 ----------------
 - Enhancements
 	- added support for ignoring/failing a test immediately when running async
+	- there are now two more ways to define a test name:
+		- func.testName = 'my test';
+		- { test: function() {}, name: 'my test' }
 
 2.0.1 2011-09-19
 ----------------

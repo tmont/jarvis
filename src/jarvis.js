@@ -9,7 +9,6 @@
 (function(exports, doc, undefined){
 	var constraints,
 		testId = 0,
-		emptyFunc = function() {},
 		jarvis = exports;
 	
 	function isArray(o) {
@@ -17,6 +16,10 @@
 	}
 	
 	function getFunctionName(func) {
+		if (typeof(func.testName) === 'string') {
+			return func.testName;
+		}
+
 		var match = /^\s*function\s([\w\$]+)\s*\([^\)]*\)\s*\{/.exec(func.toString());
 		return match ? match[1] : "<anonymous>";
 	}
@@ -679,17 +682,19 @@
 			this.result.stackTrace = error === undefined ? [] : error.stackTrace;
 		};
 
+		var name;
 		if (typeof(func) !== "function") {
 			this.setup = func["setup"] || emptyCallbackHandler;
 			this.tearDown = func["tearDown"] || emptyCallbackHandler;
 			this.func = func["test"];
+			name = func["name"];
 		}
 
 		if (typeof(this.func) !== "function") {
 			throw new Error("No test detected or given test is not a function");
 		}
 
-		this.name = getFunctionName(this.func).replace(/_/g, " ");
+		this.name = name || getFunctionName(this.func).replace(/_/g, " ");
 	}
 
 	function SynchronousTestRunner(reporter) {
