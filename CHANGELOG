@@ -1,5 +1,7 @@
 2.0.2 2011-xx-xx
 ----------------
+- Enhancements
+	- added support for ignoring/failing a test immediately when running async
 
 2.0.1 2011-09-19
 ----------------

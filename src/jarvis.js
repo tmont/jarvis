@@ -563,8 +563,6 @@
 					//expectedError was set, so check to see if the thrown error matches what was expected
 					var messageObject = {};
 					if (test.expectedError !== true && !new constraints.EqualTo(test.expectedError).isValidFor(error, messageObject)) {
-						console.dir(test.expectedError);
-						console.dir(error);
 						error = new JarvisError(
 							"Expected error, " + toString(test.expectedError) + ", did not match actual error, " + toString(error) + "\n\n" + messageObject.message,
 							"fail",

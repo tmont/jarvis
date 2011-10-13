@@ -22,7 +22,14 @@ function runTest(test, testCompleteCallback) {
 
 	function testIsComplete(err) {
 		if (err) {
-			test.error = self.handleError(err, test);
+			if (err.ignore) {
+				test.error = new jarvis.Framework.Error(err.message || '', 'ignore');
+			} else if (err.fail) {
+				test.error = new jarvis.Framework.Error(err.message || '', 'fail');
+			} else {
+				//setup failed, bail immediately
+				test.error = self.handleError(err, test);
+			}
 		} else if (jarvis.globalExpectedError !== undefined) {
 			test.error = new jarvis.Framework.Error("Expected error to be thrown: " + jarvis.globalExpectedError, "fail");
 		}

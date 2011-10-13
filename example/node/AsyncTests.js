@@ -52,6 +52,14 @@ module.exports = function Sample_async_tests() {
 		function Should_expect_error(testCompleteCallback) {
 			Assert.willThrow();
 			testCompleteCallback();
+		},
+
+		function Should_ignore_test(testCompleteCallback) {
+			testCompleteCallback({ ignore: 'Ignoring this test' });
+		},
+
+		function Should_fail_test(testCompleteCallback) {
+			testCompleteCallback({ fail: 'Failing this test' });
 		}
 	];
 
