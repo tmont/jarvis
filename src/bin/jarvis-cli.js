@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 (function(){
 
+	var VERSION = "2.0.3";
+
 	var path = require("path"), fs = require("fs");
 	var processName = path.basename(process.argv[1]);
 
 	function help() {
-		console.log("Jarvis 2.0.0");
+		console.log("Jarvis " + VERSION);
 		console.log("  Unit testing framework by Tommy Montgomery");
 		console.log("  http://jarvis.tmont.com/");
 		console.log();
@@ -158,7 +160,7 @@
 	}
 
 	if (args.options.showVersion) {
-		console.log("2.0.2");
+		console.log(VERSION);
 		process.exit(0);
 	}
 
