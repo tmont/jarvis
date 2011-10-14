@@ -51,6 +51,7 @@ module.exports = function(verbose) {
 	this.startTest = function(testObj) {
 		if (firstRun) {
 			start = new Date().getTime();
+			firstRun = false;
 		}
 		
 		var test = {

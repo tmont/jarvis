@@ -1,6 +1,7 @@
 2.0.3 2011-xx-xx
 ----------------
-
+- Bugfixes
+	- fixed elapsed time miscalculation in CliReporter
 
 2.0.2 2011-10-13
 ----------------
