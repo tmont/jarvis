@@ -8,7 +8,7 @@ if (typeof(module) === "undefined") {
 	throw new Error("CliReporter only supported for Node");
 }
 
-module.exports = function(verbose) {
+module.exports = function(verbose, useColor) {
 	var tests = {},
 		firstRun = true,
 		depth = 1,
@@ -17,6 +17,7 @@ module.exports = function(verbose) {
 		failures = [],
 		maxLineLength = 60,
 		currentColumn = 1,
+		formatter = useColor ? require('ansi-color').set : String,
 		start;
 
 	verbose = !!verbose;
@@ -30,8 +31,14 @@ module.exports = function(verbose) {
 
 		if (failures.length) {
 			for (var i = 0; i < failures.length; i++) {
-				console.log("--------------------------------------------");
-				console.log(failures[i].name);
+				console.log(formatter("---------------------------------------------------", "yellow"));
+				var color = 'red';
+				if (failures[i].result.status === 'ignore') {
+					color = 'blue';
+				} else if (failures[i].result.status === 'error') {
+					color = 'magenta';
+				}
+				console.log(formatter(failures[i].name, color));
 				printErrorOrFailure(failures[i].result);
 				console.log();
 			}
@@ -40,11 +47,11 @@ module.exports = function(verbose) {
 		var totalTime = new Date().getTime() - start;
 
 		console.log();
-		console.log(stats.pass + "/" + stats.total + " - " + passPercent + "% - " + totalTime + "ms");
-		console.log("  passed:  " + stats.pass);
-		console.log("  failed:  " + stats.fail);
-		console.log("  erred:   " + stats.error);
-		console.log("  ignored: " + stats.ignore);
+		console.log(formatter(stats.pass + "/" + stats.total + " - " + passPercent + "% - " + totalTime + "ms", "bold+underline"));
+		console.log(formatter("  passed:  ") + formatter(stats.pass, "bold"));
+		console.log(formatter("  failed:  ", "red") + formatter(stats.fail, "bold"));
+		console.log(formatter("  erred:   ", "magenta") + formatter(stats.error, "bold"));
+		console.log(formatter("  ignored: ", "blue") + formatter(stats.ignore, "bold"));
 		console.log();
 	};
 
@@ -98,7 +105,7 @@ module.exports = function(verbose) {
 					if (verbose) {
 						printErrorOrFailure(testObj.result);
 					} else {
-						process.stdout.write("F");
+						process.stdout.write(formatter("F", "red"));
 						failures.push(testObj);
 					}
 					break;
@@ -106,7 +113,7 @@ module.exports = function(verbose) {
 					if (verbose) {
 						printErrorOrFailure(testObj.result);
 					} else {
-						process.stdout.write("E");
+						process.stdout.write(formatter("E", "magenta"));
 						failures.push(testObj);
 					}
 					break;
@@ -114,13 +121,13 @@ module.exports = function(verbose) {
 					if (verbose) {
 						console.error(new Array(depth).join(" ") + (testObj.result.message || ""));
 					} else {
-						process.stdout.write("I");
+						process.stdout.write(formatter("I", "blue"));
 						failures.push(testObj);
 					}
 					break;
 				case "pass":
 					if (!verbose) {
-						process.stdout.write(".");
+						process.stdout.write(formatter("."));
 					}
 					break;
 			}

@@ -47,6 +47,7 @@
 		console.log("  --no-global               Don't make the Jarvis, Assert, Is and Has variables available globally");
 		console.log("  --no-summary              Don't print a summary when all tests are complete");
 		console.log("  --async                   Run tests pseudo-asynchronously");
+		console.log("  --colorize                Colorize console output using ANSI color codes");
 		console.log("  --whitelist [regex]       If a directory is given, filter files using regex as a white list; ");
 		console.log("                            this will override any blacklist given");
 		console.log("  --blacklist [regex]       If a directory is given, filter files using regex as a black list");
@@ -71,6 +72,7 @@
 			showSummary: true,
 			help: false,
 			async: false,
+			colorize: false,
 			whitelist: null,
 			blacklist: null,
 			showVersion: false,
@@ -122,6 +124,9 @@
 					}
 
 					options[args[i].substring(2)] = new RegExp(args[++i]);
+					break;
+				case '--colorize':
+					options.colorize = true;
 					break;
 				default:
 					files.push(args[i]);
@@ -177,7 +182,7 @@
 		jarvis.defaultReporter = new customReporter();
 	} else {
 		var CliReporter = require("../reporters/CliReporter.js");
-		jarvis.defaultReporter = new CliReporter(args.options.verbose);
+		jarvis.defaultReporter = new CliReporter(args.options.verbose, args.options.colorize);
 	}
 
 	function recursiveDirWalk(dir) {

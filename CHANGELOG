@@ -1,5 +1,7 @@
-2.0.3 2011-xx-xx
+2.0.3 2011-11-xx
 ----------------
+- Enhancements
+	- added --color option
 - Bugfixes
 	- fixed elapsed time miscalculation in CliReporter
 

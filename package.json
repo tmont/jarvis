@@ -25,6 +25,10 @@
 		"lib": "./src"
 	},
 
+	"dependencies": {
+		"ansi-color": ">=0.2.1"
+	},
+
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/tmont/jarvis.git"
