@@ -79,9 +79,11 @@ module.exports = function(verbose) {
 		}
 
 		console.log();
-		
-		for (var i = 0; i < result.stackTrace.length; i++) {
-			console.log(indent + (i + 1) + ". " + result.stackTrace[i]);
+
+		if (result.status !== 'ignore') {
+			for (var i = 0; i < result.stackTrace.length; i++) {
+				console.log(indent + (i + 1) + ". " + result.stackTrace[i]);
+			}
 		}
 	}
 
