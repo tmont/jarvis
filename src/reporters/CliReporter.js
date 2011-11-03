@@ -75,13 +75,13 @@ module.exports = function(verbose) {
 	function printErrorOrFailure(result) {
 		var indent = new Array(depth).join(" ");
 		if (result.message) {
-			console.error(indent + (result.message || ""));
+			console.log(indent + (result.message || ""));
 		}
 
 		console.log();
 		
 		for (var i = 0; i < result.stackTrace.length; i++) {
-			console.error(indent + (i + 1) + ". " + result.stackTrace[i]);
+			console.log(indent + (i + 1) + ". " + result.stackTrace[i]);
 		}
 	}
 
@@ -89,10 +89,6 @@ module.exports = function(verbose) {
 		var endTime = new Date().getTime(),
 			test = tests[testObj.id],
 			i;
-
-		if (test === undefined) {
-			console.dir(tests);
-		}
 
 		if (!test.hasChildTests) {
 			switch (testObj.result.status) {
@@ -144,8 +140,8 @@ module.exports = function(verbose) {
 		if (verbose) {
 			console.log();
 			depth--;
-			console.log(Array(depth).join(" ") + (endTime - test.startTime) + "ms " + testObj.assertions + " assertion" + (testObj.assertions !== 1 ? "s" : ""));
-			console.log(Array(depth).join(" ") + "-----------------------------------");
+			console.log(new Array(depth).join(" ") + (endTime - test.startTime) + "ms " + testObj.assertions + " assertion" + (testObj.assertions !== 1 ? "s" : ""));
+			console.log(new Array(depth).join(" ") + "-----------------------------------");
 		}
 
 		tests[testObj.id] = undefined;
