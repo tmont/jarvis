@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 (function(){
 
-	var VERSION = "2.0.3";
+	var VERSION = "3.0.0";
 
 	var path = require("path"), fs = require("fs");
 	var processName = path.basename(process.argv[1]);
