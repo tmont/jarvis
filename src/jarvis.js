@@ -638,6 +638,8 @@
 	exports.htmlDiffs = false;
 	exports.showStackTraces = false;
 	exports.globalExpectedError = undefined;
+	exports.test = function(name, lambda) { return new Test(name, lambda); };
+	exports.suite = function(name, definition) { return new TestSuite(name, definition); };
 
 	exports.summary = function(reporter) {
 		reporter = reporter || this.defaultReporter;
@@ -652,12 +654,9 @@
 		callback && callback();
 	}
 
-	function Test(func, parentId) {
-		this.setup = emptyCallbackHandler;
-		this.tearDown = emptyCallbackHandler;
-		this.func = func;
-		this.id = ++testId;
-		this.parentId = parentId;
+	function Test(name, lambda) {
+		this.name = name;
+		this.lambda = lambda;
 		this.expectedError = undefined;
 		this.assertions = 0;
 		this.start = null;
@@ -681,51 +680,49 @@
 			this.result.message = error === undefined ? "" : error.message;
 			this.result.stackTrace = error === undefined ? [] : error.stackTrace;
 		};
-
-		var name;
-		if (typeof(func) !== "function") {
-			this.setup = func["setup"] || emptyCallbackHandler;
-			this.tearDown = func["tearDown"] || emptyCallbackHandler;
-			this.func = func["test"];
-			name = func["name"];
-		}
-
-		if (typeof(this.func) !== "function") {
-			throw new Error("No test detected or given test is not a function");
-		}
-
-		this.name = name || getFunctionName(this.func).replace(/_/g, " ");
 	}
+
+	Test.prototype.constructor = Test;
+
+	function TestSuite(name, definition) {
+		this.name = name;
+		this.setup = definition.setup || emptyCallbackHandler;
+		this.tearDown = definition.tearDown || emptyCallbackHandler;
+		this.tests = definition.tests;
+		this.start = null;
+		this.end = null;
+		this.duration = Infinity;
+		this.result = {
+			status:"pass",
+			message:"",
+			stackTrace:[]
+		};
+
+		this.startTest = function() {
+			this.start = new Date().getTime();
+		};
+
+		this.endTest = function(error) {
+			this.end = new Date().getTime();
+			this.duration = this.end - this.start;
+			this.result.status = error === undefined ? "pass" : error.type;
+			this.result.message = error === undefined ? "" : error.message;
+			this.result.stackTrace = error === undefined ? [] : error.stackTrace;
+		}
+	}
+
+	TestSuite.prototype.constructor = TestSuite;
 
 	function SynchronousTestRunner(reporter) {
 		this.reporter = reporter;
 	}
 
 	function runTest(test) {
-		var runLastTearDown = true,
-			error;
+		this.startTest(test);
+		var error;
 
 		try {
-			test.setup();
-
-			var childTests = test.func();
-			test.expectedError = jarvis.globalExpectedError;
-
-			if (typeof(childTests) === "object") {
-				if (isArray(childTests)) {
-					//test suite
-					runLastTearDown = false;
-					test.tearDown();
-
-					for (var i = 0; i < childTests.length; i++) {
-						test.setup();
-						this.run(childTests[i], test.id /* parentId */);
-						test.tearDown();
-					}
-				} else {
-					this.run(childTests, test.id /* parentId */);
-				}
-			}
+			test.lambda();
 
 			if (jarvis.globalExpectedError) {
 				throw new JarvisError("Expected error to be thrown: " + jarvis.globalExpectedError, "fail");
@@ -733,24 +730,47 @@
 		} catch (e) {
 			test.error = this.handleError(e, test);
 		}
+		this.endTest(test);
+	}
 
-		if (runLastTearDown) {
-			test.tearDown();
+	function runSuite(suite) {
+		suite.startTest();
+		this.reporter.startTestSuite(suite);
+		try {
+			for (var i = 0, test; i < suite.tests.length; i++) {
+				test = suite.tests[i];
+				suite.setup();
+				if (test instanceof Test) {
+					runTest.call(this, suite.tests[i]);
+				} else if (test instanceof TestSuite) {
+					runSuite.call(this, suite.tests[i]);
+				} else {
+					runTest.call(this, new Test(getFunctionName(test), test));
+				}
+				suite.tearDown();
+			}
+		} catch (e) {
+			//setup or teardown failed, runTest shouldn't ever throw
+			suite.error = this.handleError(e, suite);
 		}
+		suite.endTest();
+		this.reporter.endTestSuite(suite);
 	}
 
 	SynchronousTestRunner.prototype = TestRunner;
 
-	SynchronousTestRunner.prototype.run = function(testFunc, parentId) {
+	SynchronousTestRunner.prototype.run = function(test) {
 		if (!this.reporter) {
 			throw new Error("No reporter given");
 		}
 
-		var test = new Test(testFunc, parentId);
-
-		this.startTest(test);
-		runTest.call(this, test);
-		this.endTest(test);
+		if (test instanceof Test) {
+			runTest.call(this, test);
+		} else if (test instanceof TestSuite) {
+			runSuite.call(this, test);
+		} else {
+			throw new Error("Invalid test object, must be an instance of Jarvis.Framework.Test or Jarvis.Framework.TestSuite");
+		}
 	};
 
 	exports.run = function(test, reporter) {
