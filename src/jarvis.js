@@ -685,10 +685,18 @@
 	Test.prototype.constructor = Test;
 
 	function TestSuite(name, definition) {
+		if (isArray(definition)) {
+			this.setup = emptyCallbackHandler;
+			this.tearDown =emptyCallbackHandler;
+			this.tests = definition;
+		} else {
+			this.setup = definition.setup || emptyCallbackHandler;
+			this.tearDown = definition.tearDown || emptyCallbackHandler;
+			this.tests = definition.tests;
+		}
+
 		this.name = name;
-		this.setup = definition.setup || emptyCallbackHandler;
-		this.tearDown = definition.tearDown || emptyCallbackHandler;
-		this.tests = definition.tests;
+
 		this.start = null;
 		this.end = null;
 		this.duration = Infinity;
