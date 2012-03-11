@@ -104,8 +104,6 @@ module.exports = function(verbose, useColor) {
 		var endTime = new Date().getTime(),
 			i;
 
-		//console.dir(testObj);
-
 		switch (testObj.result.status) {
 			case "fail":
 				if (verbose) {

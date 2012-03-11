@@ -1,5 +1,5 @@
 var suite = Jarvis.suite('Parent with all children ignored should have ignore status', {
-	tests:[
+	tests: [
 		function Ignore_test1() {
 			Assert.ignore();
 		},
@@ -14,4 +14,8 @@ var suite = Jarvis.suite('Parent with all children ignored should have ignore st
 	]
 });
 
-module.exports = suite;
+if (typeof(module) !== 'undefined') {
+	module.exports = suite;
+} else {
+	Jarvis.run(suite);
+}
