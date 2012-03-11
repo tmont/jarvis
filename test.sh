@@ -1,0 +1,1 @@
+jarvis --no-prologue --colorize --whitelist Tests\\.js$ tests

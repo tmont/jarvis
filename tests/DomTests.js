@@ -3,7 +3,6 @@ var suite = Jarvis.suite('DOM Tests', (function(){
 
 	return {
 		setup: function() {
-			console.log('running test');
 			if (typeof(module) !== 'undefined') {
 				//Assert.ignore('Not relevant for node');
 			}
