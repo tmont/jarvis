@@ -747,7 +747,13 @@
 		try {
 			for (var i = 0, test; i < suite.tests.length; i++) {
 				test = suite.tests[i];
-				suite.setup();
+				//try {
+					suite.setup();
+				//} catch (e) {
+					//TODO figure out how to surface suite errors
+				//	continue;
+				//}
+
 				if (test instanceof Test) {
 					runTest.call(this, suite.tests[i]);
 				} else if (test instanceof TestSuite) {
