@@ -545,15 +545,6 @@
 	var TestRunner = {
 		run: function() {},
 		reporter: null,
-		startTest: function(test) {
-			test.startTest();
-			this.reporter.startTest(test);
-		},
-		endTest: function(test) {
-			jarvis.globalExpectedError = undefined;
-			test.endTest(test.error);
-			this.reporter.endTest(test);
-		},
 		handleError: function(error, test) {
 			if (!(error instanceof JarvisError)) {
 				//not a jarvis error
@@ -672,13 +663,13 @@
 			this.start = new Date().getTime();
 		};
 		
-		this.endTest = function(error) {
+		this.endTest = function() {
 			this.end = new Date().getTime();
 			this.duration = this.end - this.start;
 
-			this.result.status = error === undefined ? "pass" : error.type;
-			this.result.message = error === undefined ? "" : error.message;
-			this.result.stackTrace = error === undefined ? [] : error.stackTrace;
+			this.result.status = this.error === undefined ? "pass" : this.error.type;
+			this.result.message = this.error === undefined ? "" : this.error.message;
+			this.result.stackTrace = this.error === undefined ? [] : this.error.stackTrace;
 		};
 	}
 
@@ -700,22 +691,41 @@
 		this.start = null;
 		this.end = null;
 		this.duration = Infinity;
-		this.result = {
-			status:"pass",
-			message:"",
-			stackTrace:[]
-		};
+		this.childResults = [];
 
 		this.startTest = function() {
 			this.start = new Date().getTime();
 		};
+		this.stats = {
+			pass: 0,
+			ignore: 0,
+			error: 0,
+			fail: 0,
+			elapsed: 0,
+			total: 0
+		};
+		this.result = {
+			status: 'pass'
+		};
 
-		this.endTest = function(error) {
+		this.endTest = function() {
 			this.end = new Date().getTime();
 			this.duration = this.end - this.start;
-			this.result.status = error === undefined ? "pass" : error.type;
-			this.result.message = error === undefined ? "" : error.message;
-			this.result.stackTrace = error === undefined ? [] : error.stackTrace;
+			for (var i = 0; i < this.childResults.length; i++) {
+				this.stats[this.childResults[i].status]++;
+				this.stats.elapsed += (this.childResults[i].end - this.childResults[i].start);
+			}
+
+			this.stats.total = this.childResults.length;
+			var status = 'pass';
+			if (this.stats.fail) {
+				status = 'fail';
+			} else if (this.stats.error) {
+				status = 'error';
+			} else if (this.stats.ignore === this.stats.total) {
+				status = 'ignore';
+			}
+			this.result.status = status;
 		}
 	}
 
@@ -726,7 +736,9 @@
 	}
 
 	function runTest(test) {
-		this.startTest(test);
+		test.startTest();
+		this.reporter.startTest(test);
+
 		var error;
 
 		try {
@@ -738,7 +750,10 @@
 		} catch (e) {
 			test.error = this.handleError(e, test);
 		}
-		this.endTest(test);
+		test.endTest();
+		jarvis.globalExpectedError = undefined;
+		this.reporter.endTest(test);
+		return test.result;
 	}
 
 	function runSuite(suite) {
@@ -755,11 +770,11 @@
 				//}
 
 				if (test instanceof Test) {
-					runTest.call(this, suite.tests[i]);
+					suite.childResults.push(runTest.call(this, suite.tests[i]));
 				} else if (test instanceof TestSuite) {
-					runSuite.call(this, suite.tests[i]);
+					Array.prototype.push.apply(suite.childResults, runSuite.call(this, suite.tests[i]));
 				} else {
-					runTest.call(this, new Test(getFunctionName(test), test));
+					suite.childResults.push(runTest.call(this, new Test(getFunctionName(test), test)));
 				}
 				suite.tearDown();
 			}
@@ -769,6 +784,7 @@
 		}
 		suite.endTest();
 		this.reporter.endTestSuite(suite);
+		return suite.childResults;
 	}
 
 	SynchronousTestRunner.prototype = TestRunner;

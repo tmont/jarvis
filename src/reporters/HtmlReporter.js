@@ -135,8 +135,7 @@
 	
 	jarvis.Framework.Reporters.HtmlReporter = function(container, options) {
 		options = options || { collapsedByDefault: true };
-		var tests = {}, 
-			totals = {
+		var totals = {
 				pass: 0,
 				fail: 0,
 				error: 0,
@@ -144,23 +143,30 @@
 				total: 0,
 				elapsedTime: 0
 			},
-			collapsedByDefault = !!options.collapsedByDefault;
+			collapsedByDefault = !!options.collapsedByDefault,
+			context;
 		
 		container = container || doc.body;
+		context = {
+			element: container,
+			title: null,
+			previous: null,
+			icon: null
+		}
 		
 		this.summary = function() {
-			var summary = doc.createElement("div"),
-				title = doc.createElement("p"),
-				infoContainer = doc.createElement("span")
+			var summary = doc.createElement('div'),
+				title = doc.createElement('p'),
+				infoContainer = doc.createElement('span'),
 				percent = totals.total === 0 ? 0 : Math.round(totals.pass * 10000 / totals.total) / 100;
-			
-			summary.className = "jarvis-test jarvis-summary";
-			
-			title.className = "clearfix";
-			title.appendChild(doc.createTextNode("Summary"));
-			
-			infoContainer.className = "jarvis-test-info";
-			infoContainer.appendChild(doc.createTextNode(totals.pass + "/" + totals.total + " " + percent + "% (" + totals.elapsedTime + "ms)"));
+
+			summary.className = 'jarvis-test jarvis-summary';
+
+			title.className = 'clearfix';
+			title.appendChild(doc.createTextNode('Summary'));
+
+			infoContainer.className = 'jarvis-test-info';
+			infoContainer.appendChild(doc.createTextNode(totals.pass + '/' + totals.total + ' ' + percent + '% (' + totals.elapsedTime + 'ms)'));
 			
 			summary.appendChild(title);
 			title.appendChild(infoContainer);
@@ -168,175 +174,153 @@
 			addGradient(totals, summary);
 			
 			container.appendChild(summary);
-		},
-		
-		this.startTest = function(testObj) {
-			var element = doc.createElement("div"),
-				title = doc.createElement("p"),
-				icon = doc.createElement("img"),
-				parent,
-				childContainer,
-				test = { 
-					name: name,
-					startTime: new Date().getTime(),
-					endTime: 0,
-					element: element,
-					icon: icon,
-					title: title,
-					parentId: testObj.parentId,
-					childContainer: null,
-					childResults: {
-						fail: 0,
-						pass: 0,
-						ignore: 0,
-						error: 0,
-						total: 0
-					}
-				};
-			
-			element.className = "jarvis-test jarvis-test-result-running";
-			title.className = "clearfix";
-			title.appendChild(doc.createTextNode(testObj.name));
-			
-			icon.className = "jarvis-icon";
+		};
+
+		function createTestContainer(name) {
+			var container = doc.createElement('div');
+			container.className = 'jarvis-test jarvis-test-result-running';
+
+			var icon = doc.createElement('img');
+			icon.className = 'jarvis-icon';
 			icon.src = imageSource.running;
-			
-			element.appendChild(icon);
-			element.appendChild(title);
-			
-			if (tests[testObj.parentId]) {
-				if (!tests[testObj.parentId].childContainer) {
-					childContainer = doc.createElement("div");
-					childContainer.className = "jarvis-child-test-container";
-					childContainer.style.display = collapsedByDefault ? "none" : "block";
-					tests[testObj.parentId].element.appendChild(childContainer);
-					tests[testObj.parentId].childContainer = childContainer;
-				}
-				
-				parent = tests[testObj.parentId].childContainer;
-			} else {
-				parent = container;
-			}
-			
-			parent.appendChild(test.element);
-			tests[testObj.id] = test;
+			container.appendChild(icon);
+
+			var title = doc.createElement('p');
+			title.className = 'clearfix';
+			title.appendChild(doc.createTextNode(name));
+			container.appendChild(title);
+
+			return {
+				element: container,
+				icon: icon,
+				title: title
+			};
+		}
+
+		this.startTestSuite = function(suite) {
+			var testContainer = createTestContainer(suite.name);
+			context.element.appendChild(testContainer.element);
+			var childContainer = doc.createElement('div');
+			childContainer.className = 'jarvis-child-test-container';
+			childContainer.style.display = collapsedByDefault ? 'none' : 'block';
+			testContainer.element.appendChild(childContainer);
+			context = {
+				element: childContainer,
+				title: testContainer.title,
+				previous: context,
+				icon: testContainer.icon
+			};
+			makeTitleClickable();
+		};
+
+		this.endTestSuite = function(suite) {
+			var totalTests = suite.childResults.length;
+
+			var info = suite.stats.pass + '/' + totalTests + ' ' +
+				(Math.round(suite.stats.pass * 10000 / totalTests) / 100) + '% ';
+
+			appendInfo(info, suite);
+			addGradient(suite.stats, context.element);
+
+			context.element.parentNode.className = 'jarvis-test jarvis-test-result-' + suite.result.status;
+			context.icon.src = imageSource[suite.result.status];
+			context = context.previous;
 		};
 		
-		this.endTest = function(testObj) {
-			var test = tests[testObj.id],
-				parent,
-				actualStatus,
-				info = "",
-				infoContainer,
-				messageContainer,
+		this.startTest = function(test) {
+			var testContainer = createTestContainer(test.name);
+			context.element.appendChild(testContainer.element);
+			context = {
+				element: testContainer.element,
+				previous: context,
+				title: testContainer.title,
+				icon: testContainer.icon
+			};
+		};
+		
+		this.endTest = function(test) {
+			var messageContainer,
 				list,
 				item,
 				i;
 				
-			test.endTime = testObj.end;
-
-			actualStatus = "pass";
-			if (test.childResults.ignore === test.childResults.total) {
-				actualStatus = "ignore";
-			} else if (test.childResults.fail > 0 || test.childResults.error > 0) {
-				actualStatus = "fail";
-			}
+			context.element.className = 'jarvis-test jarvis-test-result-' + test.result.status;
+			context.icon.src = imageSource[test.result.status];
 			
-			if (test.childResults.total === 0) {
-				actualStatus = testObj.result.status;
-			}
+			appendInfo('', test);
 			
-			if (test.parentId) {
-				//update parent
-				parent = tests[test.parentId];
-				if (test.childResults.total === 0) {
-					parent.childResults[actualStatus]++;
-					parent.childResults.total++;
-					totals.total++;
-					totals[actualStatus]++;
-				} else {
-					parent.childResults.pass += test.childResults.pass;
-					parent.childResults.error += test.childResults.error;
-					parent.childResults.fail += test.childResults.fail;
-					parent.childResults.ignore += test.childResults.ignore;
-					parent.childResults.total += test.childResults.total;
-				}
-			}
-			
-			test.element.className = "jarvis-test jarvis-test-result-" + actualStatus;
-			test.icon.src = imageSource[actualStatus];
-			
-			if (test.childResults.total > 0) {
-				info = 	test.childResults.pass + "/" + test.childResults.total + " " + 
-					(Math.round(test.childResults.pass * 10000 / test.childResults.total) / 100) + "% ";
+			if (test.result.message || test.result.stackTrace.length > 0) {
+				messageContainer = doc.createElement('pre');
 				
-				addGradient(test.childResults, test.element);
-			}
-			
-			info += "(" + (test.endTime - test.startTime) + "ms)";
-			infoContainer = doc.createElement("span");
-			infoContainer.className = "jarvis-test-info";
-			infoContainer.appendChild(doc.createTextNode(info));
-			test.title.appendChild(infoContainer);
-			
-			if (testObj.result.message || testObj.result.stackTrace.length > 0) {
-				messageContainer = doc.createElement("pre");
-				
-				if (testObj.result.message) {
-					if (testObj.result.message[0] && typeof(testObj.result.message[0].nodeType) !== "undefined") {
-						for (i = 0; i < testObj.result.message.length; i++) {
-							messageContainer.appendChild(testObj.result.message[i]);
+				if (test.result.message) {
+					if (test.result.message[0] && typeof(test.result.message[0].nodeType) !== 'undefined') {
+						for (i = 0; i < test.result.message.length; i++) {
+							messageContainer.appendChild(test.result.message[i]);
 						}
 					} else {
-						messageContainer.appendChild(doc.createTextNode(testObj.result.message.replace(/\n/g, EOL)));
+						messageContainer.appendChild(doc.createTextNode(test.result.message.replace(/\n/g, EOL)));
 					}
 				}
 				
-				if (testObj.result.stackTrace.length > 0) {
-					list = doc.createElement("ol");
-					list.className = "jarvis-stack-trace";
-					for (i = 0; i < testObj.result.stackTrace.length; i++) {
-						item = doc.createElement("li");
-						item.appendChild(doc.createTextNode(testObj.result.stackTrace[i]));
+				if (test.result.stackTrace.length > 0) {
+					list = doc.createElement('ol');
+					list.className = 'jarvis-stack-trace';
+					for (i = 0; i < test.result.stackTrace.length; i++) {
+						item = doc.createElement('li');
+						item.appendChild(doc.createTextNode(test.result.stackTrace[i]));
 						list.appendChild(item);
 					}
 					
 					messageContainer.appendChild(list);
 				}
 				
-				messageContainer.style.display = collapsedByDefault ? "none" : "block";
-				test.element.appendChild(messageContainer);
+				messageContainer.style.display = collapsedByDefault ? 'none' : 'block';
+				context.element.appendChild(messageContainer);
 			}
 			
-			if (testObj.result.message || test.childResults.total > 0) {
-				test.title.style.cursor = "pointer";
-				test.title.insertBefore(doc.createElement("img"), test.title.firstChild);
-				test.title.firstChild.src = collapsedByDefault ? imageSource.expand : imageSource.collapse;
-				test.title.firstChild.alt = collapsedByDefault ? "+" : "-";
-				test.title.onclick = titleClick;
+			if (test.result.message) {
+				makeTitleClickable();
 			}
-			
-			totals.elapsedTime += (test.endTime - test.startTime);
-			delete tests[testObj.id];
+
+			totals[test.result.status]++;
+			totals.total++;
+			totals.elapsedTime += (test.end - test.start);
+			context = context.previous;
 		};
-		
+
+		function appendInfo(info, test) {
+			info += '(' + (test.end - test.start) + 'ms)';
+			var infoContainer = doc.createElement('span');
+			infoContainer.className = 'jarvis-test-info';
+			infoContainer.appendChild(doc.createTextNode(info));
+			context.title.appendChild(infoContainer);
+		}
+
+		function makeTitleClickable() {
+			context.title.style.cursor = 'pointer';
+			context.title.insertBefore(doc.createElement('img'), context.title.firstChild);
+			context.title.firstChild.src = collapsedByDefault ? imageSource.expand : imageSource.collapse;
+			context.title.firstChild.alt = collapsedByDefault ? '+' : '-';
+			context.title.onclick = titleClick;
+		}
+
 		function titleClick() {
 			var display = this.nextSibling.style.display;
-			this.nextSibling.style.display = display === "none" ? "block" : "none";
-			this.firstChild.src = display === "none" ? imageSource.collapse : imageSource.expand;
-			this.firstChild.alt = display === "none" ? "-" : "+";
+			this.nextSibling.style.display = display === 'none' ? 'block' : 'none';
+			this.firstChild.src = display === 'none' ? imageSource.collapse : imageSource.expand;
+			this.firstChild.alt = display === 'none' ? '-' : '+';
 			return false;
 		}
 		
-		function addGradient(totals, element) {
+		function addGradient(stats, element) {
 			if (!/(Firefox|WebKit|Opera)/i.test(window.navigator.userAgent)) {
 				return;
 			}
 			
-			var failPercent = Math.round(totals.fail / totals.total * 100),
-				passPercent = Math.round(totals.pass / totals.total * 100),
-				errorPercent = Math.round(totals.error / totals.total * 100),
-				ignorePercent = Math.round(totals.ignore / totals.total * 100),
+			var failPercent = Math.round(stats.fail / stats.total * 100),
+				passPercent = Math.round(stats.pass / stats.total * 100),
+				errorPercent = Math.round(stats.error / stats.total * 100),
+				ignorePercent = Math.round(stats.ignore / stats.total * 100),
 				gradients = [];
 				
 			if (failPercent > 0) {
