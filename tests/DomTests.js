@@ -4,7 +4,7 @@ var suite = Jarvis.suite('DOM Tests', (function(){
 	return {
 		setup: function() {
 			if (typeof(module) !== 'undefined') {
-				//Assert.ignore('Not relevant for node');
+				Assert.ignore('Not relevant for node');
 			}
 
 			element = document.createElement('div');

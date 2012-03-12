@@ -659,17 +659,21 @@
 			stackTrace: []
 		};
 
-		this.startTest = function() {
+		this.startTest = function(reporter) {
 			this.start = new Date().getTime();
+			reporter.startTest(this);
 		};
 		
-		this.endTest = function() {
+		this.endTest = function(reporter) {
 			this.end = new Date().getTime();
 			this.duration = this.end - this.start;
 
 			this.result.status = this.error === undefined ? "pass" : this.error.type;
 			this.result.message = this.error === undefined ? "" : this.error.message;
 			this.result.stackTrace = this.error === undefined ? [] : this.error.stackTrace;
+
+			jarvis.globalExpectedError = undefined;
+			reporter.endTest(this);
 		};
 	}
 
@@ -693,8 +697,9 @@
 		this.duration = Infinity;
 		this.childResults = [];
 
-		this.startTest = function() {
+		this.startTest = function(reporter) {
 			this.start = new Date().getTime();
+			reporter.startTestSuite(this);
 		};
 		this.stats = {
 			pass: 0,
@@ -708,7 +713,7 @@
 			status: 'pass'
 		};
 
-		this.endTest = function() {
+		this.endTest = function(reporter) {
 			this.end = new Date().getTime();
 			this.duration = this.end - this.start;
 			for (var i = 0; i < this.childResults.length; i++) {
@@ -726,6 +731,8 @@
 				status = 'ignore';
 			}
 			this.result.status = status;
+
+			reporter.endTestSuite(this);
 		}
 	}
 
@@ -736,8 +743,7 @@
 	}
 
 	function runTest(test) {
-		test.startTest();
-		this.reporter.startTest(test);
+		test.startTest(this.reporter);
 
 		var error;
 
@@ -750,40 +756,50 @@
 		} catch (e) {
 			test.error = this.handleError(e, test);
 		}
-		test.endTest();
-		jarvis.globalExpectedError = undefined;
-		this.reporter.endTest(test);
+		test.endTest(this.reporter);
 		return test.result;
 	}
 
+	function trySetupOrTearDown(lambda, test, suite) {
+		try {
+			lambda();
+			return true;
+		} catch (e) {
+			test.startTest(this.reporter);
+			test.error = this.handleError(e, test);
+			test.endTest(this.reporter);
+			suite.childResults.push(test.result);
+			return false;
+		}
+	}
+
 	function runSuite(suite) {
-		suite.startTest();
-		this.reporter.startTestSuite(suite);
+		suite.startTest(this.reporter);
+
 		try {
 			for (var i = 0, test; i < suite.tests.length; i++) {
 				test = suite.tests[i];
-				//try {
-					suite.setup();
-				//} catch (e) {
-					//TODO figure out how to surface suite errors
-				//	continue;
-				//}
+				if (typeof(test) === 'function') {
+					test = new Test(getFunctionName(test).replace(/_/g, ' '), test);
+				}
+
+				if (!trySetupOrTearDown.call(this, suite.setup, test, suite)) {
+					continue;
+				}
 
 				if (test instanceof Test) {
-					suite.childResults.push(runTest.call(this, suite.tests[i]));
+					suite.childResults.push(runTest.call(this, test));
 				} else if (test instanceof TestSuite) {
-					Array.prototype.push.apply(suite.childResults, runSuite.call(this, suite.tests[i]));
-				} else {
-					suite.childResults.push(runTest.call(this, new Test(getFunctionName(test).replace(/_/g, " "), test)));
+					Array.prototype.push.apply(suite.childResults, runSuite.call(this, test));
 				}
-				suite.tearDown();
+
+				trySetupOrTearDown.call(this, suite.tearDown, test, suite);
 			}
 		} catch (e) {
 			//setup or teardown failed, runTest shouldn't ever throw
 			suite.error = this.handleError(e, suite);
 		}
-		suite.endTest();
-		this.reporter.endTestSuite(suite);
+		suite.endTest(this.reporter);
 		return suite.childResults;
 	}
 
