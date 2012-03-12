@@ -774,7 +774,7 @@
 				} else if (test instanceof TestSuite) {
 					Array.prototype.push.apply(suite.childResults, runSuite.call(this, suite.tests[i]));
 				} else {
-					suite.childResults.push(runTest.call(this, new Test(getFunctionName(test), test)));
+					suite.childResults.push(runTest.call(this, new Test(getFunctionName(test).replace(/_/g, " "), test)));
 				}
 				suite.tearDown();
 			}
